@@ -143,6 +143,14 @@ class PreviewPage {
 		$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		?>
+		<div class="cfi-help-panel">
+			<h3><?php esc_html_e( 'Quick guide', 'cloudflare-images-sync' ); ?></h3>
+			<ul>
+				<li><?php esc_html_e( 'Enter a Media Library attachment ID to preview Cloudflare variants.', 'cloudflare-images-sync' ); ?></li>
+				<li><?php esc_html_e( 'If it has not been uploaded, use “Upload for Preview” to create a temporary Cloudflare Images asset.', 'cloudflare-images-sync' ); ?></li>
+				<li><?php esc_html_e( 'Each preset below renders a variant. Edit presets under CF Images → Presets.', 'cloudflare-images-sync' ); ?></li>
+			</ul>
+		</div>
 		<form method="get">
 			<input type="hidden" name="page" value="cfi-preview" />
 			<input type="hidden" name="mode" value="attachment" />
@@ -190,6 +198,14 @@ class PreviewPage {
 		$all_mappings  = $mappings_repo->all();
 
 		?>
+		<div class="cfi-help-panel">
+			<h3><?php esc_html_e( 'Quick guide', 'cloudflare-images-sync' ); ?></h3>
+			<ul>
+				<li><?php esc_html_e( 'Pick a post ID and a mapping to resolve the source image and target field.', 'cloudflare-images-sync' ); ?></li>
+				<li><?php esc_html_e( 'The current delivery URL (if any) appears below the form.', 'cloudflare-images-sync' ); ?></li>
+				<li><?php esc_html_e( 'Use “Sync Now” to generate and store the Cloudflare delivery URL based on the mapping preset.', 'cloudflare-images-sync' ); ?></li>
+			</ul>
+		</div>
 		<form method="get">
 			<input type="hidden" name="page" value="cfi-preview" />
 			<input type="hidden" name="mode" value="post" />
