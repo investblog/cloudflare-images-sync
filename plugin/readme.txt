@@ -4,7 +4,7 @@ Tags: cloudflare, images, sync, cdn, optimization
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.1.10-beta
+Stable tag: 0.1.11-beta
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,13 @@ No. The plugin uploads a copy to Cloudflare Images and stores the delivery URL i
 Yes. The plugin supports ACF image fields (ID, array, and URL return formats) as source types.
 
 == Changelog ==
+
+= 0.1.11-beta =
+* Improved: Settings page redesigned with collapsible sections (Delivery, API Access, Advanced).
+* Improved: Connection Status box with visual indicators for API and Flexible Variants status.
+* Improved: Trimmed recommended presets from 12 to 6 core variants.
+* Fixed: Reserved WordPress meta keys (_wp_*, _thumbnail_id, etc.) filtered from autocomplete.
+* Fixed: Reserved meta key validation added to mapping form.
 
 = 0.1.10-beta =
 * New: Flexible Variants detection — automatically check if FV is enabled on your Cloudflare account.
