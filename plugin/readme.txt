@@ -4,7 +4,7 @@ Tags: cloudflare, images, sync, cdn, optimization
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.1.5-beta
+Stable tag: 0.1.6-beta
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,22 @@ No. The plugin uploads a copy to Cloudflare Images and stores the delivery URL i
 Yes. The plugin supports ACF image fields (ID, array, and URL return formats) as source types.
 
 == Changelog ==
+
+= 0.1.6-beta =
+* Smart ACF field suggestions: only image fields assigned to selected post type (via ACF location rules).
+* Recursive subfield traversal for repeater, group, and flexible_content ACF fields.
+* Custom autocomplete dropdown replacing native datalist — styled, filterable, keyboard-navigable.
+* Unified suggestion response format {name, label, type} for both ACF and meta key endpoints.
+* Meta key AJAX results cached via 5-minute transient.
+* Client-side suggestion cache by (action, post_type) to avoid redundant AJAX calls.
+
+= 0.1.5-beta =
+* Fix: safe re-upload skips CF image deletion when shared via attachment cache.
+* Fix: Settings page links to Cloudflare dashboard now clickable (wp_kses instead of esc_html__).
+* Fix: empty delivery URL no longer written to meta on build failure.
+* Attachment cache meta keys moved to OptionKeys constants.
+* BulkEnqueuer validates mapping ID format before processing.
+* Readme changelog corrected.
 
 = 0.1.4-beta =
 * Attachment-level CF image cache — avoids duplicate uploads across mappings.
