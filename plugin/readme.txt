@@ -4,7 +4,7 @@ Tags: cloudflare, images, sync, cdn, optimization
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.1.4-beta
+Stable tag: 0.1.5-beta
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,8 +49,17 @@ Yes. The plugin supports ACF image fields (ID, array, and URL return formats) as
 
 == Changelog ==
 
-= 1.0.0 =
-* Initial release.
+= 0.1.4-beta =
+* Attachment-level CF image cache — avoids duplicate uploads across mappings.
+* Safe re-upload: skip CF image deletion when shared by other mappings.
+* Mapping form UX: sections, descriptions, dynamic fields, client-side validation.
+* Settings page: clickable help links to Cloudflare dashboard.
+* AJAX meta key suggestions for mapping form.
+* Card-style mappings list, log count badge.
+* Fix: 500 error on mapping save (post_type field name conflict).
+
+= 0.1.0-beta =
+* Initial beta release.
 * Settings, Presets, Mappings CRUD.
 * Auto-sync via save_post and acf/save_post hooks.
 * Bulk sync via Action Scheduler.

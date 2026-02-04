@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use CFI\Api\CloudflareImagesClient;
 use CFI\Repos\LogsRepo;
+use CFI\Repos\OptionKeys;
 use CFI\Repos\PresetsRepo;
 use CFI\Repos\SettingsRepo;
 
@@ -54,8 +55,8 @@ class SyncEngine {
 		$attachment_id = $resolved->get_attachment_id();
 
 		// 3. Attachment-level cache — reuse CF image ID if same file was already uploaded.
-		$att_cf_id = $attachment_id > 0 ? (string) get_post_meta( $attachment_id, '_cfi_cf_image_id', true ) : '';
-		$att_sig   = $attachment_id > 0 ? (string) get_post_meta( $attachment_id, '_cfi_sig', true ) : '';
+		$att_cf_id = $attachment_id > 0 ? (string) get_post_meta( $attachment_id, OptionKeys::META_CF_IMAGE_ID, true ) : '';
+		$att_sig   = $attachment_id > 0 ? (string) get_post_meta( $attachment_id, OptionKeys::META_SIG, true ) : '';
 
 		if ( $att_cf_id !== '' && ! Signature::has_changed( $file_path, $att_sig ) ) {
 			// File unchanged and already on CF — skip upload, just store target meta.
@@ -102,9 +103,11 @@ class SyncEngine {
 			'mapping_id'       => $mapping['id'] ?? '',
 		);
 
-		// If re-uploading, delete old image first (only the per-post one).
-		if ( $stored_cfid !== '' ) {
+		// If re-uploading, only delete old CF image when it's NOT shared via attachment cache.
+		if ( $stored_cfid !== '' && $stored_cfid !== $att_cf_id ) {
 			$client->delete( $stored_cfid );
+		} elseif ( $stored_cfid !== '' ) {
+			$logs->push( 'debug', 'Skipped CF image deletion — shared via attachment cache.', $ctx );
 		}
 
 		$upload = $client->upload( $file_path, $metadata );
@@ -129,12 +132,17 @@ class SyncEngine {
 
 		// 7. Cache CF image ID on attachment for reuse by other mappings.
 		if ( $attachment_id > 0 ) {
-			update_post_meta( $attachment_id, '_cfi_cf_image_id', $cf_image_id );
-			update_post_meta( $attachment_id, '_cfi_sig', $new_sig );
+			update_post_meta( $attachment_id, OptionKeys::META_CF_IMAGE_ID, $cf_image_id );
+			update_post_meta( $attachment_id, OptionKeys::META_SIG, $new_sig );
 		}
 
 		// 8. Build delivery URL.
 		$url = $this->build_url( $cf_image_id, $mapping );
+
+		if ( $url === '' ) {
+			$logs->push( 'error', 'Could not build delivery URL (check account_hash setting).', $ctx );
+			return new \WP_Error( 'cfi_url_build_failed', 'Could not build delivery URL.' );
+		}
 
 		// 9. Store results on post.
 		$this->store_meta( $post_id, $target, $cf_image_id, $url, $new_sig );

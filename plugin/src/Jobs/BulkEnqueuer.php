@@ -16,6 +16,7 @@ use CFI\Core\Guard;
 use CFI\Core\SyncEngine;
 use CFI\Repos\LogsRepo;
 use CFI\Repos\MappingsRepo;
+use CFI\Support\Validators;
 
 /**
  * Process a chunk of posts for a mapping, then re-enqueue for the next chunk.
@@ -41,8 +42,13 @@ class BulkEnqueuer {
 	 */
 	public static function process( string $mapping_id, int $offset = 0, int $chunk_size = 20 ): void {
 		$logs = new LogsRepo();
-		$repo = new MappingsRepo();
 
+		if ( ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
+			$logs->push( 'error', 'Bulk sync: invalid mapping ID format.', array( 'mapping_id' => $mapping_id ) );
+			return;
+		}
+
+		$repo    = new MappingsRepo();
 		$mapping = $repo->find( $mapping_id );
 		if ( $mapping === null ) {
 			$logs->push( 'error', 'Bulk sync: mapping not found.', array( 'mapping_id' => $mapping_id ) );

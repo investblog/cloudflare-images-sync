@@ -27,4 +27,10 @@ final class OptionKeys {
 	 */
 	public const META_PREVIEW_IMAGE_ID = 'cfi_preview_image_id';
 	public const META_PREVIEW_SIG      = 'cfi_preview_sig';
+
+	/**
+	 * Attachment meta keys (sync engine cache).
+	 */
+	public const META_CF_IMAGE_ID = '_cfi_cf_image_id';
+	public const META_SIG         = '_cfi_sig';
 }
