@@ -56,12 +56,7 @@ final class Validators {
 			return new \WP_Error( 'cfi_invalid_preset', 'Preset name is required.' );
 		}
 
-		$name = self::sanitize_preset_name( $data['name'] );
-		if ( $name === '' ) {
-			return new \WP_Error( 'cfi_invalid_preset', 'Preset name is required.' );
-		}
-
-		if ( strlen( $name ) > 100 ) {
+		if ( strlen( $data['name'] ) > 100 ) {
 			return new \WP_Error( 'cfi_invalid_preset', 'Preset name must be 100 characters or less.' );
 		}
 
@@ -69,16 +64,11 @@ final class Validators {
 			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant string is required.' );
 		}
 
-		$variant = self::sanitize_variant( $data['variant'] );
-		if ( $variant === '' ) {
-			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant string is required.' );
-		}
-
-		if ( strlen( $variant ) > 255 ) {
+		if ( strlen( $data['variant'] ) > 255 ) {
 			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant must be 255 characters or less.' );
 		}
 
-		if ( ! preg_match( '/^[A-Za-z0-9=,_\\-.]+$/', $variant ) ) {
+		if ( ! preg_match( '/^[A-Za-z0-9=,_\\-.]+$/', $data['variant'] ) ) {
 			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant contains invalid characters.' );
 		}
 
@@ -179,7 +169,7 @@ final class Validators {
 	 * @return string
 	 */
 	public static function sanitize_preset_name( string $name ): string {
-		return trim( sanitize_text_field( $name ) );
+		return sanitize_text_field( $name );
 	}
 
 	/**
@@ -189,7 +179,7 @@ final class Validators {
 	 * @return string
 	 */
 	public static function sanitize_variant( string $variant ): string {
-		return trim( sanitize_text_field( $variant ) );
+		return sanitize_text_field( $variant );
 	}
 
 	/**
@@ -209,7 +199,7 @@ final class Validators {
 			return false;
 		}
 
-		return (bool) preg_match( '/^[A-Za-z0-9_\\-:]+$/', $key );
+		return (bool) preg_match( '/^[A-Za-z0-9_\\-:.]+$/', $key );
 	}
 
 	/**

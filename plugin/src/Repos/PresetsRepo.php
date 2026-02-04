@@ -71,8 +71,8 @@ class PresetsRepo {
 
 		$all[ $id ] = array(
 			'id'         => $id,
-			'name'       => sanitize_text_field( $data['name'] ),
-			'variant'    => sanitize_text_field( $data['variant'] ),
+			'name'       => $data['name'],
+			'variant'    => $data['variant'],
 			'updated_at' => time(),
 		);
 
