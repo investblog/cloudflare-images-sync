@@ -64,5 +64,7 @@
 				<element value="CFI"/>
 			</property>
 		</properties>
+		<!-- "cfi" is unique enough for this plugin -->
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed"/>
 	</rule>
 </ruleset>

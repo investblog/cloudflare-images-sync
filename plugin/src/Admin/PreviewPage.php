@@ -36,7 +36,7 @@ class PreviewPage {
 
 		wp_enqueue_media();
 
-		$mode    = sanitize_text_field( wp_unslash( $_GET['mode'] ?? 'attachment' ) );
+		$mode = isset( $_GET['mode'] ) ? sanitize_text_field( wp_unslash( $_GET['mode'] ) ) : 'attachment'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$message = '';
 
 		?>
@@ -65,7 +65,7 @@ class PreviewPage {
 	 * @return void
 	 */
 	private function render_attachment_mode(): void {
-		$attachment_id = (int) ( $_GET['attachment_id'] ?? 0 );
+		$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$message       = '';
 
 		// Handle upload-on-demand.
@@ -117,8 +117,10 @@ class PreviewPage {
 	 * @return void
 	 */
 	private function render_post_mode(): void {
-		$post_id    = (int) ( $_GET['post_id'] ?? 0 );
-		$mapping_id = sanitize_text_field( wp_unslash( $_GET['mapping_id'] ?? '' ) );
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only GET params for UI state.
+		$post_id    = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
+		$mapping_id = isset( $_GET['mapping_id'] ) ? sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		$message    = '';
 
 		// Handle sync now.
@@ -233,7 +235,13 @@ class PreviewPage {
 			$client->delete( $cf_id );
 		}
 
-		$result = $client->upload( $file_path, array( 'wp_attachment_id' => $attachment_id, 'purpose' => 'preview' ) );
+		$result = $client->upload(
+			$file_path,
+			array(
+				'wp_attachment_id' => $attachment_id,
+				'purpose'          => 'preview',
+			)
+		);
 
 		if ( is_wp_error( $result ) ) {
 			return $result->get_error_message();

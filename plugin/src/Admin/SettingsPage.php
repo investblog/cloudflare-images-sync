@@ -17,6 +17,8 @@ use CFI\Support\Mask;
 class SettingsPage {
 
 	/**
+	 * Settings repository instance.
+	 *
 	 * @var SettingsRepo
 	 */
 	private SettingsRepo $repo;
@@ -49,13 +51,13 @@ class SettingsPage {
 				'account_hash' => sanitize_text_field( wp_unslash( $_POST['account_hash'] ?? '' ) ),
 				'debug'        => ! empty( $_POST['debug'] ),
 				'use_queue'    => ! empty( $_POST['use_queue'] ),
-				'logs_max'     => (int) ( $_POST['logs_max'] ?? 200 ),
+				'logs_max'     => absint( wp_unslash( $_POST['logs_max'] ?? 200 ) ),
 			);
 
 			// Only update token if a new value was provided (not the masked placeholder).
-			$token_input = wp_unslash( $_POST['api_token'] ?? '' );
+			$token_input = sanitize_text_field( wp_unslash( $_POST['api_token'] ?? '' ) );
 			if ( $token_input !== '' && strpos( $token_input, '****' ) === false ) {
-				$patch['api_token'] = sanitize_text_field( $token_input );
+				$patch['api_token'] = $token_input;
 			}
 
 			$this->repo->update( $patch );

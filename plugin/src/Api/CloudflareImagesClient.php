@@ -18,11 +18,15 @@ class CloudflareImagesClient {
 	private const API_BASE = 'https://api.cloudflare.com/client/v4/accounts';
 
 	/**
+	 * Cloudflare account ID.
+	 *
 	 * @var string
 	 */
 	private string $account_id;
 
 	/**
+	 * Cloudflare API bearer token.
+	 *
 	 * @var string
 	 */
 	private string $api_token;

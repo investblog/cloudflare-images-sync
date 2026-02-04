@@ -17,11 +17,15 @@ use CFI\Repos\SettingsRepo;
 class Hooks {
 
 	/**
+	 * Mappings repository instance.
+	 *
 	 * @var MappingsRepo
 	 */
 	private MappingsRepo $mappings;
 
 	/**
+	 * Sync engine instance.
+	 *
 	 * @var SyncEngine
 	 */
 	private SyncEngine $engine;

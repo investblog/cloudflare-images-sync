@@ -17,11 +17,15 @@ use CFI\Repos\PresetsRepo;
 class MappingsPage {
 
 	/**
+	 * Mappings repository instance.
+	 *
 	 * @var MappingsRepo
 	 */
 	private MappingsRepo $repo;
 
 	/**
+	 * Presets repository instance.
+	 *
 	 * @var PresetsRepo
 	 */
 	private PresetsRepo $presets;
@@ -47,9 +51,10 @@ class MappingsPage {
 		$message = '';
 
 		// Handle delete.
-		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['mapping_id'] ) ) {
-			check_admin_referer( 'cfi_delete_mapping_' . $_GET['mapping_id'] );
-			$result = $this->repo->delete( sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) ) );
+		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['mapping_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked below.
+			$mapping_id_raw = sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) );
+			check_admin_referer( 'cfi_delete_mapping_' . $mapping_id_raw );
+			$result  = $this->repo->delete( $mapping_id_raw );
 			$message = is_wp_error( $result ) ? $result->get_error_message() : __( 'Mapping deleted.', 'cloudflare-images-sync' );
 		}
 
@@ -57,7 +62,7 @@ class MappingsPage {
 		if ( isset( $_POST['cfi_bulk_sync'] ) && ! empty( $_POST['bulk_mapping_id'] ) ) {
 			check_admin_referer( 'cfi_bulk_sync' );
 			$mapping_id = sanitize_text_field( wp_unslash( $_POST['bulk_mapping_id'] ) );
-			$message = $this->enqueue_bulk_sync( $mapping_id );
+			$message    = $this->enqueue_bulk_sync( $mapping_id );
 		}
 
 		// Handle create/update.
@@ -69,11 +74,13 @@ class MappingsPage {
 		$mappings = $this->repo->all();
 		$editing  = null;
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only GET params for UI state.
 		if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' && ! empty( $_GET['mapping_id'] ) ) {
 			$editing = $this->repo->find( sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) ) );
 		}
 
-		$show_form = isset( $_GET['action'] ) && in_array( $_GET['action'], array( 'new', 'edit' ), true );
+		$show_form = isset( $_GET['action'] ) && in_array( sanitize_text_field( wp_unslash( $_GET['action'] ) ), array( 'new', 'edit' ), true );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		?>
 		<div class="wrap">
@@ -98,13 +105,15 @@ class MappingsPage {
 	}
 
 	/**
-	 * Handle form save.
+	 * Handle form save. Nonce already verified in render().
 	 *
 	 * @return string Status message.
 	 */
 	private function handle_save(): string {
-		$edit_id = sanitize_text_field( wp_unslash( $_POST['mapping_id'] ?? '' ) );
+		// Nonce verified in render() before calling this method.
+		$edit_id = sanitize_text_field( wp_unslash( $_POST['mapping_id'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified in render().
 		$data = array(
 			'post_type' => sanitize_text_field( wp_unslash( $_POST['post_type'] ?? '' ) ),
 			'status'    => sanitize_text_field( wp_unslash( $_POST['status'] ?? 'any' ) ),
@@ -129,6 +138,7 @@ class MappingsPage {
 			),
 			'preset_id' => sanitize_text_field( wp_unslash( $_POST['preset_id'] ?? '' ) ),
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( $edit_id !== '' ) {
 			$result = $this->repo->update( $edit_id, $data );
@@ -180,11 +190,11 @@ class MappingsPage {
 	 * @return void
 	 */
 	private function render_form( ?array $mapping ): void {
-		$defaults       = Defaults::mapping();
-		$m              = $mapping ?: $defaults;
-		$source_types   = Defaults::source_types();
-		$presets        = $this->presets->all();
-		$post_types     = get_post_types( array( 'public' => true ), 'objects' );
+		$defaults     = Defaults::mapping();
+		$m            = $mapping ?: $defaults;
+		$source_types = Defaults::source_types();
+		$presets      = $this->presets->all();
+		$post_types   = get_post_types( array( 'public' => true ), 'objects' );
 
 		?>
 		<h2><?php echo $mapping ? esc_html__( 'Edit Mapping', 'cloudflare-images-sync' ) : esc_html__( 'New Mapping', 'cloudflare-images-sync' ); ?></h2>
@@ -307,7 +317,7 @@ class MappingsPage {
 					<?php
 					$preset_name = '(public)';
 					if ( ! empty( $map['preset_id'] ) ) {
-						$p = $this->presets->find( $map['preset_id'] );
+						$p           = $this->presets->find( $map['preset_id'] );
 						$preset_name = $p ? $p['name'] : '(deleted)';
 					}
 					$source_label = ( $map['source']['type'] ?? '' );

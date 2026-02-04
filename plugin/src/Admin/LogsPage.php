@@ -15,6 +15,8 @@ use CFI\Repos\LogsRepo;
 class LogsPage {
 
 	/**
+	 * Logs repository instance.
+	 *
 	 * @var LogsRepo
 	 */
 	private LogsRepo $repo;
@@ -56,7 +58,8 @@ class LogsPage {
 
 			<form method="post" style="margin-bottom:12px;">
 				<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
-				<span><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
+				<?php /* translators: %d: number of log entries */ ?>
+			<span><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
 				<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cloudflare-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cloudflare-images-sync' ); ?>');" />
 			</form>
 

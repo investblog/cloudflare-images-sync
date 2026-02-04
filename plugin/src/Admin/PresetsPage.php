@@ -15,6 +15,8 @@ use CFI\Repos\PresetsRepo;
 class PresetsPage {
 
 	/**
+	 * Presets repository instance.
+	 *
 	 * @var PresetsRepo
 	 */
 	private PresetsRepo $repo;
@@ -39,9 +41,10 @@ class PresetsPage {
 		$message = '';
 
 		// Handle delete.
-		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['preset_id'] ) ) {
-			check_admin_referer( 'cfi_delete_preset_' . $_GET['preset_id'] );
-			$result = $this->repo->delete( sanitize_text_field( wp_unslash( $_GET['preset_id'] ) ) );
+		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['preset_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked below.
+			$preset_id_raw = sanitize_text_field( wp_unslash( $_GET['preset_id'] ) );
+			check_admin_referer( 'cfi_delete_preset_' . $preset_id_raw );
+			$result  = $this->repo->delete( $preset_id_raw );
 			$message = is_wp_error( $result ) ? $result->get_error_message() : __( 'Preset deleted.', 'cloudflare-images-sync' );
 		}
 
