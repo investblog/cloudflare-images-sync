@@ -7,6 +7,11 @@
 
 namespace CFI\Core;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Build delivery URLs for Cloudflare Images.
  *

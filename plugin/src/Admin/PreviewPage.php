@@ -7,6 +7,11 @@
 
 namespace CFI\Admin;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Api\CloudflareImagesClient;
 use CFI\Core\Signature;
 use CFI\Core\SourceResolver;
@@ -24,6 +29,66 @@ use CFI\Repos\SettingsRepo;
  */
 class PreviewPage {
 
+	use AdminNotice;
+
+	/**
+	 * Handle actions before headers are sent (PRG pattern).
+	 *
+	 * @return void
+	 */
+	public function handle_actions(): void {
+		if ( ! current_user_can( 'manage_options' ) || ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			return;
+		}
+
+		// Handle attachment upload-on-demand.
+		if ( isset( $_POST['cfi_preview_upload'] ) ) {
+			check_admin_referer( 'cfi_preview_upload' );
+			$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( $attachment_id > 0 ) {
+				$message = $this->ensure_preview_uploaded( $attachment_id );
+				$type    = strpos( $message, 'error' ) !== false || strpos( $message, 'not found' ) !== false ? 'error' : 'success';
+				$this->redirect_with_notice(
+					admin_url( 'admin.php?page=cfi-preview&mode=attachment&attachment_id=' . $attachment_id ),
+					$message,
+					$type
+				);
+			}
+		}
+
+		// Handle sync now.
+		if ( isset( $_POST['cfi_sync_now'] ) ) {
+			check_admin_referer( 'cfi_sync_now' );
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- GET params for context.
+			$post_id    = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
+			$mapping_id = isset( $_GET['mapping_id'] ) ? sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) ) : '';
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			if ( $post_id > 0 && $mapping_id !== '' ) {
+				$mappings = new MappingsRepo();
+				$mapping  = $mappings->find( $mapping_id );
+
+				if ( $mapping ) {
+					$engine = new SyncEngine();
+					$result = $engine->sync( $post_id, $mapping );
+					$msg    = is_wp_error( $result ) ? $result->get_error_message() : __( 'Synced successfully.', 'cloudflare-images-sync' );
+					$type   = is_wp_error( $result ) ? 'error' : 'success';
+				} else {
+					$msg  = __( 'Mapping not found.', 'cloudflare-images-sync' );
+					$type = 'error';
+				}
+
+				$this->redirect_with_notice(
+					admin_url( 'admin.php?page=cfi-preview&mode=post&post_id=' . $post_id . '&mapping_id=' . $mapping_id ),
+					$msg,
+					$type
+				);
+			}
+		}
+	}
+
 	/**
 	 * Handle actions and render the page.
 	 *
@@ -37,16 +102,17 @@ class PreviewPage {
 		wp_enqueue_media();
 
 		$mode = isset( $_GET['mode'] ) ? sanitize_text_field( wp_unslash( $_GET['mode'] ) ) : 'attachment'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$message = '';
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Cloudflare Images — Preview / Variant Studio', 'cloudflare-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Preview / Variant Studio', 'cloudflare-images-sync' ); ?></h1>
 
 			<h2 class="nav-tab-wrapper">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=attachment' ) ); ?>" class="nav-tab <?php echo $mode === 'attachment' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Attachment Preview', 'cloudflare-images-sync' ); ?></a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=post' ) ); ?>" class="nav-tab <?php echo $mode === 'post' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Post + Mapping', 'cloudflare-images-sync' ); ?></a>
 			</h2>
+
+			<?php $this->render_notice(); ?>
 
 			<?php
 			if ( $mode === 'post' ) {
@@ -66,13 +132,6 @@ class PreviewPage {
 	 */
 	private function render_attachment_mode(): void {
 		$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$message       = '';
-
-		// Handle upload-on-demand.
-		if ( $attachment_id > 0 && isset( $_POST['cfi_preview_upload'] ) ) {
-			check_admin_referer( 'cfi_preview_upload' );
-			$message = $this->ensure_preview_uploaded( $attachment_id );
-		}
 
 		?>
 		<form method="get">
@@ -84,10 +143,6 @@ class PreviewPage {
 				<input type="submit" class="button" value="<?php esc_attr_e( 'Load', 'cloudflare-images-sync' ); ?>" />
 			</p>
 		</form>
-
-		<?php if ( $message ) : ?>
-			<div class="notice notice-info"><p><?php echo esc_html( $message ); ?></p></div>
-		<?php endif; ?>
 
 		<?php
 		if ( $attachment_id <= 0 ) {
@@ -121,22 +176,6 @@ class PreviewPage {
 		$post_id    = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
 		$mapping_id = isset( $_GET['mapping_id'] ) ? sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-		$message    = '';
-
-		// Handle sync now.
-		if ( $post_id > 0 && $mapping_id !== '' && isset( $_POST['cfi_sync_now'] ) ) {
-			check_admin_referer( 'cfi_sync_now' );
-			$mappings = new MappingsRepo();
-			$mapping  = $mappings->find( $mapping_id );
-
-			if ( $mapping ) {
-				$engine = new SyncEngine();
-				$result = $engine->sync( $post_id, $mapping );
-				$message = is_wp_error( $result ) ? $result->get_error_message() : __( 'Synced successfully.', 'cloudflare-images-sync' );
-			} else {
-				$message = __( 'Mapping not found.', 'cloudflare-images-sync' );
-			}
-		}
 
 		$mappings_repo = new MappingsRepo();
 		$all_mappings  = $mappings_repo->all();
@@ -161,10 +200,6 @@ class PreviewPage {
 			</p>
 		</form>
 
-		<?php if ( $message ) : ?>
-			<div class="notice notice-info"><p><?php echo esc_html( $message ); ?></p></div>
-		<?php endif; ?>
-
 		<?php
 		if ( $post_id <= 0 || $mapping_id === '' ) {
 			return;
@@ -185,7 +220,7 @@ class PreviewPage {
 		}
 
 		// Show current stored URL.
-		$url_meta  = $mapping['target']['url_meta'] ?? '';
+		$url_meta   = $mapping['target']['url_meta'] ?? '';
 		$stored_url = $url_meta ? (string) get_post_meta( $post_id, $url_meta, true ) : '';
 
 		if ( $stored_url !== '' ) {

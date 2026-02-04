@@ -7,6 +7,11 @@
 
 namespace CFI\Admin;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Repos\Defaults;
 use CFI\Repos\MappingsRepo;
 use CFI\Repos\PresetsRepo;
@@ -15,6 +20,8 @@ use CFI\Repos\PresetsRepo;
  * Mappings CRUD page with Bulk Sync trigger.
  */
 class MappingsPage {
+
+	use AdminNotice;
 
 	/**
 	 * Mappings repository instance.
@@ -39,23 +46,32 @@ class MappingsPage {
 	}
 
 	/**
-	 * Handle actions and render the page.
+	 * Handle actions before headers are sent (PRG pattern).
 	 *
 	 * @return void
 	 */
-	public function render(): void {
+	public function handle_actions(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
+			return;
 		}
 
-		$message = '';
+		$redirect_url = admin_url( 'admin.php?page=cfi-mappings' );
 
-		// Handle delete.
-		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['mapping_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked below.
-			$mapping_id_raw = sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) );
-			check_admin_referer( 'cfi_delete_mapping_' . $mapping_id_raw );
-			$result  = $this->repo->delete( $mapping_id_raw );
-			$message = is_wp_error( $result ) ? $result->get_error_message() : __( 'Mapping deleted.', 'cloudflare-images-sync' );
+		// Handle delete (GET with nonce).
+		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['mapping_id'] ) ) {
+			$mapping_id = sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) );
+			check_admin_referer( 'cfi_delete_mapping_' . $mapping_id );
+			$result = $this->repo->delete( $mapping_id );
+
+			if ( is_wp_error( $result ) ) {
+				$this->redirect_with_notice( $redirect_url, $result->get_error_message(), 'error' );
+			}
+
+			$this->redirect_with_notice( $redirect_url, __( 'Mapping deleted.', 'cloudflare-images-sync' ) );
+		}
+
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			return;
 		}
 
 		// Handle bulk sync.
@@ -63,12 +79,27 @@ class MappingsPage {
 			check_admin_referer( 'cfi_bulk_sync' );
 			$mapping_id = sanitize_text_field( wp_unslash( $_POST['bulk_mapping_id'] ) );
 			$message    = $this->enqueue_bulk_sync( $mapping_id );
+			$type       = strpos( $message, 'enqueued' ) !== false ? 'success' : 'error';
+			$this->redirect_with_notice( $redirect_url, $message, $type );
 		}
 
 		// Handle create/update.
 		if ( isset( $_POST['cfi_save_mapping'] ) ) {
 			check_admin_referer( 'cfi_mapping_save' );
 			$message = $this->handle_save();
+			$type    = strpos( $message, 'error' ) !== false || strpos( $message, 'Error' ) !== false ? 'error' : 'success';
+			$this->redirect_with_notice( $redirect_url, $message, $type );
+		}
+	}
+
+	/**
+	 * Render the mappings page (display only — actions handled in handle_actions).
+	 *
+	 * @return void
+	 */
+	public function render(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
 		}
 
 		$mappings = $this->repo->all();
@@ -85,15 +116,13 @@ class MappingsPage {
 		?>
 		<div class="wrap">
 			<h1>
-				<?php esc_html_e( 'Cloudflare Images — Mappings', 'cloudflare-images-sync' ); ?>
+				<?php esc_html_e( 'CF Images — Mappings', 'cloudflare-images-sync' ); ?>
 				<?php if ( ! $show_form ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-mappings&action=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add New', 'cloudflare-images-sync' ); ?></a>
 				<?php endif; ?>
 			</h1>
 
-			<?php if ( $message ) : ?>
-				<div class="notice notice-info is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
-			<?php endif; ?>
+			<?php $this->render_notice(); ?>
 
 			<?php if ( $show_form ) : ?>
 				<?php $this->render_form( $editing ); ?>
@@ -105,15 +134,14 @@ class MappingsPage {
 	}
 
 	/**
-	 * Handle form save. Nonce already verified in render().
+	 * Handle form save. Nonce already verified in handle_actions().
 	 *
 	 * @return string Status message.
 	 */
 	private function handle_save(): string {
-		// Nonce verified in render() before calling this method.
-		$edit_id = sanitize_text_field( wp_unslash( $_POST['mapping_id'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified in handle_actions().
+		$edit_id = sanitize_text_field( wp_unslash( $_POST['mapping_id'] ?? '' ) );
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified in render().
 		$data = array(
 			'post_type' => sanitize_text_field( wp_unslash( $_POST['post_type'] ?? '' ) ),
 			'status'    => sanitize_text_field( wp_unslash( $_POST['status'] ?? 'any' ) ),

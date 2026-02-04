@@ -7,6 +7,11 @@
 
 namespace CFI\Admin;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Register the admin menu and sub-pages.
  */
@@ -31,9 +36,13 @@ class AdminMenu {
 		$capability    = 'manage_options';
 		$icon          = 'dashicons-cloud';
 		$settings_page = new SettingsPage();
+		$presets_page  = new PresetsPage();
+		$mappings_page = new MappingsPage();
+		$preview_page  = new PreviewPage();
+		$logs_page     = new LogsPage();
 
-		add_menu_page(
-			__( 'Cloudflare Images', 'cloudflare-images-sync' ),
+		$hook = add_menu_page(
+			__( 'Images Sync for Cloudflare', 'cloudflare-images-sync' ),
 			__( 'CF Images', 'cloudflare-images-sync' ),
 			$capability,
 			'cfi-settings',
@@ -41,6 +50,7 @@ class AdminMenu {
 			$icon,
 			81
 		);
+		add_action( 'load-' . $hook, array( $settings_page, 'handle_actions' ) );
 
 		// Rename the auto-generated first submenu item from "CF Images" to "Settings".
 		add_submenu_page(
@@ -52,41 +62,45 @@ class AdminMenu {
 			array( $settings_page, 'render' )
 		);
 
-		add_submenu_page(
+		$hook = add_submenu_page(
 			'cfi-settings',
 			__( 'Presets', 'cloudflare-images-sync' ),
 			__( 'Presets', 'cloudflare-images-sync' ),
 			$capability,
 			'cfi-presets',
-			array( new PresetsPage(), 'render' )
+			array( $presets_page, 'render' )
 		);
+		add_action( 'load-' . $hook, array( $presets_page, 'handle_actions' ) );
 
-		add_submenu_page(
+		$hook = add_submenu_page(
 			'cfi-settings',
 			__( 'Mappings', 'cloudflare-images-sync' ),
 			__( 'Mappings', 'cloudflare-images-sync' ),
 			$capability,
 			'cfi-mappings',
-			array( new MappingsPage(), 'render' )
+			array( $mappings_page, 'render' )
 		);
+		add_action( 'load-' . $hook, array( $mappings_page, 'handle_actions' ) );
 
-		add_submenu_page(
+		$hook = add_submenu_page(
 			'cfi-settings',
 			__( 'Preview', 'cloudflare-images-sync' ),
 			__( 'Preview', 'cloudflare-images-sync' ),
 			$capability,
 			'cfi-preview',
-			array( new PreviewPage(), 'render' )
+			array( $preview_page, 'render' )
 		);
+		add_action( 'load-' . $hook, array( $preview_page, 'handle_actions' ) );
 
-		add_submenu_page(
+		$hook = add_submenu_page(
 			'cfi-settings',
 			__( 'Logs', 'cloudflare-images-sync' ),
 			__( 'Logs', 'cloudflare-images-sync' ),
 			$capability,
 			'cfi-logs',
-			array( new LogsPage(), 'render' )
+			array( $logs_page, 'render' )
 		);
+		add_action( 'load-' . $hook, array( $logs_page, 'handle_actions' ) );
 	}
 
 	/**

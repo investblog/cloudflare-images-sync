@@ -7,6 +7,11 @@
 
 namespace CFI\Core;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Repos\MappingsRepo;
 use CFI\Repos\SettingsRepo;
 

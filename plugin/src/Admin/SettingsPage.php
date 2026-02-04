@@ -7,6 +7,11 @@
 
 namespace CFI\Admin;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Api\CloudflareImagesClient;
 use CFI\Repos\SettingsRepo;
 use CFI\Support\Mask;
@@ -15,6 +20,8 @@ use CFI\Support\Mask;
  * Settings page: account_id, account_hash, api_token (masked), debug, use_queue, test connection.
  */
 class SettingsPage {
+
+	use AdminNotice;
 
 	/**
 	 * Settings repository instance.
@@ -31,16 +38,16 @@ class SettingsPage {
 	}
 
 	/**
-	 * Handle form submission and render the page.
+	 * Handle POST actions before headers are sent (PRG pattern).
 	 *
 	 * @return void
 	 */
-	public function render(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
+	public function handle_actions(): void {
+		if ( ! current_user_can( 'manage_options' ) || ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			return;
 		}
 
-		$message = '';
+		$redirect_url = admin_url( 'admin.php?page=cfi-settings' );
 
 		// Handle save.
 		if ( isset( $_POST['cfi_save_settings'] ) ) {
@@ -61,7 +68,7 @@ class SettingsPage {
 			}
 
 			$this->repo->update( $patch );
-			$message = __( 'Settings saved.', 'cloudflare-images-sync' );
+			$this->redirect_with_notice( $redirect_url, __( 'Settings saved.', 'cloudflare-images-sync' ) );
 		}
 
 		// Handle test connection.
@@ -71,15 +78,27 @@ class SettingsPage {
 			$client = CloudflareImagesClient::from_settings();
 
 			if ( is_wp_error( $client ) ) {
-				$message = '❌ ' . $client->get_error_message();
-			} else {
-				$result = $client->test_connection();
-				if ( is_wp_error( $result ) ) {
-					$message = '❌ ' . $result->get_error_message();
-				} else {
-					$message = '✅ ' . __( 'Connection successful!', 'cloudflare-images-sync' );
-				}
+				$this->redirect_with_notice( $redirect_url, $client->get_error_message(), 'error' );
 			}
+
+			$result = $client->test_connection();
+
+			if ( is_wp_error( $result ) ) {
+				$this->redirect_with_notice( $redirect_url, $result->get_error_message(), 'error' );
+			}
+
+			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cloudflare-images-sync' ) );
+		}
+	}
+
+	/**
+	 * Render the settings page.
+	 *
+	 * @return void
+	 */
+	public function render(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
 		}
 
 		$settings     = $this->repo->get();
@@ -87,11 +106,9 @@ class SettingsPage {
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Cloudflare Images — Settings', 'cloudflare-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Settings', 'cloudflare-images-sync' ); ?></h1>
 
-			<?php if ( $message ) : ?>
-				<div class="notice notice-info is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
-			<?php endif; ?>
+			<?php $this->render_notice(); ?>
 
 			<form method="post">
 				<?php wp_nonce_field( 'cfi_settings_save' ); ?>

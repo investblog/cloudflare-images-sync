@@ -7,6 +7,11 @@
 
 namespace CFI\Core;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Compute a file signature to detect changes.
  *

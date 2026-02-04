@@ -7,6 +7,11 @@
 
 namespace CFI\Repos;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Default schemas and values.
  */

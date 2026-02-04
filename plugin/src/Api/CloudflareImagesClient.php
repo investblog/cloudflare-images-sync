@@ -7,6 +7,11 @@
 
 namespace CFI\Api;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * HTTP client for Cloudflare Images API v1.
  *

@@ -7,6 +7,11 @@
 
 namespace CFI\Core;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Given a mapping source config and a post ID, resolve the attachment ID
  * and its local file path.

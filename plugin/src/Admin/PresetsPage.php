@@ -7,12 +7,19 @@
 
 namespace CFI\Admin;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Repos\PresetsRepo;
 
 /**
  * Presets CRUD page.
  */
 class PresetsPage {
+
+	use AdminNotice;
 
 	/**
 	 * Presets repository instance.
@@ -29,26 +36,31 @@ class PresetsPage {
 	}
 
 	/**
-	 * Handle actions and render the page.
+	 * Handle actions before headers are sent (PRG pattern).
 	 *
 	 * @return void
 	 */
-	public function render(): void {
+	public function handle_actions(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
+			return;
 		}
 
-		$message = '';
+		$redirect_url = admin_url( 'admin.php?page=cfi-presets' );
 
-		// Handle delete.
-		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['preset_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked below.
-			$preset_id_raw = sanitize_text_field( wp_unslash( $_GET['preset_id'] ) );
-			check_admin_referer( 'cfi_delete_preset_' . $preset_id_raw );
-			$result  = $this->repo->delete( $preset_id_raw );
-			$message = is_wp_error( $result ) ? $result->get_error_message() : __( 'Preset deleted.', 'cloudflare-images-sync' );
+		// Handle delete (GET with nonce).
+		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['preset_id'] ) ) {
+			$preset_id = sanitize_text_field( wp_unslash( $_GET['preset_id'] ) );
+			check_admin_referer( 'cfi_delete_preset_' . $preset_id );
+			$result = $this->repo->delete( $preset_id );
+
+			if ( is_wp_error( $result ) ) {
+				$this->redirect_with_notice( $redirect_url, $result->get_error_message(), 'error' );
+			}
+
+			$this->redirect_with_notice( $redirect_url, __( 'Preset deleted.', 'cloudflare-images-sync' ) );
 		}
 
-		// Handle create/update.
+		// Handle create/update (POST).
 		if ( isset( $_POST['cfi_save_preset'] ) ) {
 			check_admin_referer( 'cfi_preset_save' );
 
@@ -66,26 +78,41 @@ class PresetsPage {
 			}
 
 			if ( is_wp_error( $result ) ) {
-				$message = $result->get_error_message();
-			} else {
-				$message = $edit_id ? __( 'Preset updated.', 'cloudflare-images-sync' ) : __( 'Preset created.', 'cloudflare-images-sync' );
+				$this->redirect_with_notice( $redirect_url, $result->get_error_message(), 'error' );
 			}
+
+			$message = $edit_id
+				? __( 'Preset updated.', 'cloudflare-images-sync' )
+				: __( 'Preset created.', 'cloudflare-images-sync' );
+
+			$this->redirect_with_notice( $redirect_url, $message );
+		}
+	}
+
+	/**
+	 * Render the presets page.
+	 *
+	 * @return void
+	 */
+	public function render(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
 		}
 
-		$presets = $this->repo->all();
-		$editing = null;
+		$presets  = $this->repo->all();
+		$editing  = null;
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only GET params for UI state.
 		if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' && ! empty( $_GET['preset_id'] ) ) {
 			$editing = $this->repo->find( sanitize_text_field( wp_unslash( $_GET['preset_id'] ) ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Cloudflare Images — Presets', 'cloudflare-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Presets', 'cloudflare-images-sync' ); ?></h1>
 
-			<?php if ( $message ) : ?>
-				<div class="notice notice-info is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
-			<?php endif; ?>
+			<?php $this->render_notice(); ?>
 
 			<h2><?php echo $editing ? esc_html__( 'Edit Preset', 'cloudflare-images-sync' ) : esc_html__( 'Add Preset', 'cloudflare-images-sync' ); ?></h2>
 			<form method="post">

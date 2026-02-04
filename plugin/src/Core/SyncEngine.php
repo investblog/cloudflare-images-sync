@@ -7,6 +7,11 @@
 
 namespace CFI\Core;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Api\CloudflareImagesClient;
 use CFI\Repos\LogsRepo;
 use CFI\Repos\PresetsRepo;

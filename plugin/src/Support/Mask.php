@@ -7,6 +7,11 @@
 
 namespace CFI\Support;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Mask sensitive values for display.
  */

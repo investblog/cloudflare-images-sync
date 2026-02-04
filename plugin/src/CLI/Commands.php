@@ -7,6 +7,11 @@
 
 namespace CFI\CLI;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Api\CloudflareImagesClient;
 use CFI\Core\Guard;
 use CFI\Core\SyncEngine;

@@ -7,6 +7,11 @@
 
 namespace CFI\Support;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Repos\Defaults;
 
 /**

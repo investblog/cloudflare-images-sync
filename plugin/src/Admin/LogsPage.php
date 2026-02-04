@@ -7,12 +7,19 @@
 
 namespace CFI\Admin;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Repos\LogsRepo;
 
 /**
  * Display and clear sync logs (ring buffer).
  */
 class LogsPage {
+
+	use AdminNotice;
 
 	/**
 	 * Logs repository instance.
@@ -29,7 +36,27 @@ class LogsPage {
 	}
 
 	/**
-	 * Handle actions and render the page.
+	 * Handle actions before headers are sent (PRG pattern).
+	 *
+	 * @return void
+	 */
+	public function handle_actions(): void {
+		if ( ! current_user_can( 'manage_options' ) || ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			return;
+		}
+
+		if ( isset( $_POST['cfi_clear_logs'] ) ) {
+			check_admin_referer( 'cfi_clear_logs' );
+			$this->repo->clear();
+			$this->redirect_with_notice(
+				admin_url( 'admin.php?page=cfi-logs' ),
+				__( 'Logs cleared.', 'cloudflare-images-sync' )
+			);
+		}
+	}
+
+	/**
+	 * Render the logs page.
 	 *
 	 * @return void
 	 */
@@ -38,23 +65,13 @@ class LogsPage {
 			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
 		}
 
-		$message = '';
-
-		if ( isset( $_POST['cfi_clear_logs'] ) ) {
-			check_admin_referer( 'cfi_clear_logs' );
-			$this->repo->clear();
-			$message = __( 'Logs cleared.', 'cloudflare-images-sync' );
-		}
-
 		$items = $this->repo->all();
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Cloudflare Images — Logs', 'cloudflare-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Logs', 'cloudflare-images-sync' ); ?></h1>
 
-			<?php if ( $message ) : ?>
-				<div class="notice notice-info is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
-			<?php endif; ?>
+			<?php $this->render_notice(); ?>
 
 			<form method="post" style="margin-bottom:12px;">
 				<?php wp_nonce_field( 'cfi_clear_logs' ); ?>

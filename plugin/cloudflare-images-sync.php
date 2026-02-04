@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Cloudflare Images Sync
+ * Plugin Name:       Images Sync for Cloudflare
  * Description:       Sync WordPress images to Cloudflare Images with flexible mappings, presets, and variant delivery.
  * Version:           1.0.0
  * Requires at least: 6.0

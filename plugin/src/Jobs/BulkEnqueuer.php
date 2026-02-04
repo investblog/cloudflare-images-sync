@@ -7,6 +7,11 @@
 
 namespace CFI\Jobs;
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use CFI\Core\Guard;
 use CFI\Core\SyncEngine;
 use CFI\Repos\LogsRepo;
