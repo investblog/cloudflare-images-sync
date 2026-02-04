@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(git init:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm install)",
+      "Bash(composer install:*)",
+      "Bash(where:*)",
+      "Bash(cmd.exe /c \"where composer\")",
+      "Bash(cmd.exe /c \"where composer.bat\")",
+      "Bash(npm run env:start:*)",
+      "Bash(npm run wp:plugin:activate:*)",
+      "Bash(npx wp-env run cli wp plugin list:*)",
+      "Bash(npx wp-env run cli wp eval \"echo ''PHP OK: '' . PHP_VERSION;\")",
+      "Bash(npx wp-env run cli cat:*)",
+      "Bash(npx wp-env run cli:*)",
+      "Bash(docker exec:*)",
+      "Bash(MSYS_NO_PATHCONV=1 docker exec:*)",
+      "Bash(MSYS_NO_PATHCONV=1 npx wp-env run cli wp eval-file:*)",
+      "Bash(curl:*)",
+      "Bash(gh auth status:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

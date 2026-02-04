@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<ruleset name="Cloudflare Images Sync">
+	<description>PHP CodeSniffer configuration for Cloudflare Images Sync plugin.</description>
+
+	<file>./plugin</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*.min.js</exclude-pattern>
+	<exclude-pattern>*.min.css</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<config name="minimum_wp_version" value="6.0"/>
+	<config name="testVersion" value="8.0-"/>
+
+	<rule ref="WordPress">
+		<!-- File naming - we use PSR-4 -->
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+
+		<!-- Allow short ternary operators -->
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
+
+		<!-- Allow reserved keyword as parameter name -->
+		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames"/>
+
+		<!-- Alignment warnings are noisy -->
+		<exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+
+		<!-- Allow silenced errors for specific cases -->
+		<exclude name="WordPress.PHP.NoSilencedErrors.Discouraged"/>
+
+		<!-- Empty catch is sometimes intentional -->
+		<exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedCatch"/>
+
+		<!-- Unused parameters in interface implementations -->
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+
+		<!-- Yoda conditions are a stylistic preference -->
+		<exclude name="WordPress.PHP.YodaConditions"/>
+
+		<!-- Array alignment warnings are noisy -->
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment"/>
+
+		<!-- Comment spacing is stylistic -->
+		<exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType"/>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="cloudflare-images-sync"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="cfi"/>
+				<element value="CFI"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

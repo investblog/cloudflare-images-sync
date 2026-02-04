@@ -1,0 +1,36 @@
+/**
+ * Cloudflare Images Sync — Admin styles.
+ */
+
+.cfi-preset-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 20px;
+	margin-top: 12px;
+}
+
+.cfi-preset-card {
+	border: 1px solid #c3c4c7;
+	padding: 12px;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.cfi-preset-card h4 {
+	margin: 0 0 8px;
+}
+
+.cfi-preset-card img {
+	max-width: 100%;
+	height: auto;
+}
+
+.cfi-preset-card code {
+	font-size: 11px;
+	word-break: break-all;
+	cursor: pointer;
+}
+
+.cfi-copy-url.copied {
+	color: #00a32a;
+}
