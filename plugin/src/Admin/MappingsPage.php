@@ -428,7 +428,7 @@ class MappingsPage {
 									$acf_fields = get_posts(
 										array(
 											'post_type'      => 'acf-field',
-											'posts_per_page' => 200,
+											'posts_per_page' => 200, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- admin-only datalist.
 											'post_status'    => 'publish',
 										)
 									);
