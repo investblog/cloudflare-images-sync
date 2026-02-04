@@ -4,7 +4,7 @@ Tags: cloudflare, images, sync, cdn, optimization
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.1.6-beta
+Stable tag: 0.1.7-beta
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,11 @@ No. The plugin uploads a copy to Cloudflare Images and stores the delivery URL i
 Yes. The plugin supports ACF image fields (ID, array, and URL return formats) as source types.
 
 == Changelog ==
+
+= 0.1.7-beta =
+* Destination field autocomplete: meta key suggestions for Delivery URL, CF Image ID, and Change Signature fields.
+* Autocomplete constructor guard for empty jQuery selections.
+* Version bump to bust browser cache for JS/CSS assets.
 
 = 0.1.6-beta =
 * Smart ACF field suggestions: only image fields assigned to selected post type (via ACF location rules).

@@ -33,6 +33,11 @@
 		this.open = false;
 		this.activeIndex = -1;
 		this._debounceTimer = null;
+
+		if (!$input.length) {
+			return;
+		}
+
 		this._init();
 	}
 
@@ -256,11 +261,10 @@
 
 	// Autocomplete instances.
 	var sourceAutocomplete = new CfiAutocomplete($sourceKey);
-	var targetAutocompletes = [
-		new CfiAutocomplete($('#target_url_meta')),
-		new CfiAutocomplete($('#target_id_meta')),
-		new CfiAutocomplete($('#target_sig_meta'))
-	];
+	var targetAutocompletes = [];
+	$('#target_url_meta, #target_id_meta, #target_sig_meta').each(function () {
+		targetAutocompletes.push(new CfiAutocomplete($(this)));
+	});
 
 	// Client-side AJAX cache: key = "action:post_type", value = items array.
 	var suggestionsCache = {};
