@@ -249,8 +249,13 @@
 	var $sourceKeyLabel = $('#cfi-source-key-label');
 	var $postType = $('#cfi_post_type');
 
-	// Autocomplete instance for source key input.
-	var autocomplete = new CfiAutocomplete($sourceKey);
+	// Autocomplete instances.
+	var sourceAutocomplete = new CfiAutocomplete($sourceKey);
+	var targetAutocompletes = [
+		new CfiAutocomplete($('#target_url_meta')),
+		new CfiAutocomplete($('#target_id_meta')),
+		new CfiAutocomplete($('#target_sig_meta'))
+	];
 
 	// Client-side AJAX cache: key = "action:post_type", value = items array.
 	var suggestionsCache = {};
@@ -284,12 +289,51 @@
 		}
 	}
 
-	// Smart AJAX fetching: picks endpoint based on source type.
-	function fetchSuggestions() {
+	// Fetch cached items or make AJAX request, then call callback with items.
+	function fetchCached(action, postType, callback) {
+		var cacheKey = action + ':' + postType;
+		if (suggestionsCache[cacheKey]) {
+			callback(suggestionsCache[cacheKey]);
+			return;
+		}
+
+		$.get(ajax.ajaxUrl, {
+			action: action,
+			nonce: ajax.nonce,
+			post_type: postType
+		}).done(function (response) {
+			if (response.success && response.data) {
+				suggestionsCache[cacheKey] = response.data;
+				callback(response.data);
+			}
+		});
+	}
+
+	// Update destination autocompletes with meta keys for current post type.
+	function fetchTargetSuggestions() {
+		var postType = $postType.val();
+
+		for (var i = 0; i < targetAutocompletes.length; i++) {
+			targetAutocompletes[i].setItems([]);
+		}
+
+		if (!postType || !ajax.ajaxUrl) {
+			return;
+		}
+
+		fetchCached('cfi_meta_keys', postType, function (items) {
+			for (var i = 0; i < targetAutocompletes.length; i++) {
+				targetAutocompletes[i].setItems(items);
+			}
+		});
+	}
+
+	// Smart AJAX fetching for source key: picks endpoint based on source type.
+	function fetchSourceSuggestions() {
 		var postType = $postType.val();
 		var sourceType = $sourceType.val();
 
-		autocomplete.setItems([]);
+		sourceAutocomplete.setItems([]);
 
 		if (!postType || !ajax.ajaxUrl) {
 			return;
@@ -307,38 +351,26 @@
 			return; // No suggestions for featured_image, attachment_id.
 		}
 
-		var cacheKey = action + ':' + postType;
-		if (suggestionsCache[cacheKey]) {
-			autocomplete.setItems(suggestionsCache[cacheKey]);
-			return;
-		}
-
-		$.get(ajax.ajaxUrl, {
-			action: action,
-			nonce: ajax.nonce,
-			post_type: postType
-		}).done(function (response) {
-			if (response.success && response.data) {
-				suggestionsCache[cacheKey] = response.data;
-				autocomplete.setItems(response.data);
-			}
+		fetchCached(action, postType, function (items) {
+			sourceAutocomplete.setItems(items);
 		});
 	}
 
 	$sourceType.on('change', function () {
 		updateSourceKeyRow();
-		fetchSuggestions();
+		fetchSourceSuggestions();
 	});
 	$postType.on('change', function () {
-		// Invalidate cache for this post type on change.
 		suggestionsCache = {};
-		fetchSuggestions();
+		fetchSourceSuggestions();
+		fetchTargetSuggestions();
 	});
 
 	updateSourceKeyRow();
 	// Fetch on load if post type is pre-selected (edit mode).
 	if ($postType.val()) {
-		fetchSuggestions();
+		fetchSourceSuggestions();
+		fetchTargetSuggestions();
 	}
 
 	// ── Client-side validation ─────────────────────────────────────────
