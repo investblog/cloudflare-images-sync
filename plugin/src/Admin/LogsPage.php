@@ -79,10 +79,10 @@ class LogsPage {
 				<div class="cfi-tablenav">
 					<form method="post">
 						<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
-						<?php /* translators: %d: number of log entries */ ?>
-						<span><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
 						<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cloudflare-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cloudflare-images-sync' ); ?>');" />
 					</form>
+					<?php /* translators: %d: number of log entries */ ?>
+					<span class="cfi-count-badge"><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
 				</div>
 				<table class="widefat striped">
 					<thead>

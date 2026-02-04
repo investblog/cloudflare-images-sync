@@ -25,6 +25,10 @@ class AdminMenu {
 	public function init(): void {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+
+		// AJAX handlers.
+		$mappings_page = new MappingsPage();
+		add_action( 'wp_ajax_cfi_meta_keys', array( $mappings_page, 'ajax_meta_keys' ) );
 	}
 
 	/**
