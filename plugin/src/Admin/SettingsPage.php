@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use CFI\Api\CloudflareImagesClient;
+use CFI\Repos\LogsRepo;
 use CFI\Repos\SettingsRepo;
 use CFI\Support\Mask;
 
@@ -72,6 +73,17 @@ class SettingsPage {
 			if ( is_wp_error( $result ) ) {
 				$this->redirect_with_notice( $redirect_url, $result->get_error_message(), 'error' );
 			}
+
+			$settings = $this->repo->get();
+			$logs     = new LogsRepo();
+			$logs->push(
+				'info',
+				sprintf(
+					/* translators: %s: masked Cloudflare account ID */
+					__( 'Connection test passed for account %s.', 'cloudflare-images-sync' ),
+					Mask::token( $settings['account_id'] )
+				)
+			);
 
 			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cloudflare-images-sync' ) );
 		}

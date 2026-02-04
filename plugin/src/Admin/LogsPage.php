@@ -73,18 +73,17 @@ class LogsPage {
 
 			<?php $this->render_notice(); ?>
 
-			<div class="cfi-tablenav">
-				<form method="post">
-					<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
-					<?php /* translators: %d: number of log entries */ ?>
-					<span><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
-					<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cloudflare-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cloudflare-images-sync' ); ?>');" />
-				</form>
-			</div>
-
 			<?php if ( empty( $items ) ) : ?>
-				<p><?php esc_html_e( 'No log entries.', 'cloudflare-images-sync' ); ?></p>
+				<p><?php esc_html_e( 'No log entries yet. Events will appear here as the plugin runs.', 'cloudflare-images-sync' ); ?></p>
 			<?php else : ?>
+				<div class="cfi-tablenav">
+					<form method="post">
+						<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
+						<?php /* translators: %d: number of log entries */ ?>
+						<span><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
+						<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cloudflare-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cloudflare-images-sync' ); ?>');" />
+					</form>
+				</div>
 				<table class="widefat striped">
 					<thead>
 						<tr>
