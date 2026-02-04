@@ -538,7 +538,7 @@ class MappingsPage {
 			<div class="cfi-form-section">
 				<h3><?php esc_html_e( 'Destination', 'cloudflare-images-sync' ); ?></h3>
 				<p class="cfi-section-desc">
-					<?php esc_html_e( 'Define where the Cloudflare delivery URL and metadata will be stored on each post.', 'cloudflare-images-sync' ); ?>
+					<?php esc_html_e( 'Define where the Cloudflare delivery URL and metadata will be stored on each post. Meta keys are created automatically on first sync — no need to register them beforehand.', 'cloudflare-images-sync' ); ?>
 				</p>
 				<table class="form-table">
 					<tr>
@@ -548,7 +548,7 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="target_url_meta" name="target_url_meta" value="<?php echo esc_attr( $m['target']['url_meta'] ?? '' ); ?>" class="regular-text" required />
+							<input type="text" id="target_url_meta" name="target_url_meta" value="<?php echo esc_attr( $m['target']['url_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_delivery_url" required />
 							<p class="description">
 								<?php esc_html_e( 'The post meta key where the Cloudflare delivery URL will be stored. Use this key in your theme to display the optimized image.', 'cloudflare-images-sync' ); ?>
 							</p>
@@ -561,7 +561,7 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="target_id_meta" name="target_id_meta" value="<?php echo esc_attr( $m['target']['id_meta'] ?? '' ); ?>" class="regular-text" />
+							<input type="text" id="target_id_meta" name="target_id_meta" value="<?php echo esc_attr( $m['target']['id_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_image_id" />
 							<p class="description">
 								<?php esc_html_e( 'Optional. Stores the Cloudflare image ID for management purposes.', 'cloudflare-images-sync' ); ?>
 							</p>
@@ -574,7 +574,7 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="target_sig_meta" name="target_sig_meta" value="<?php echo esc_attr( $m['target']['sig_meta'] ?? '' ); ?>" class="regular-text" />
+							<input type="text" id="target_sig_meta" name="target_sig_meta" value="<?php echo esc_attr( $m['target']['sig_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_change_sig" />
 							<p class="description">
 								<?php esc_html_e( 'Optional. Stores a hash to detect image changes and avoid redundant uploads.', 'cloudflare-images-sync' ); ?>
 							</p>
@@ -716,16 +716,21 @@ class MappingsPage {
 						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Source', 'cloudflare-images-sync' ); ?></span>
 						<?php echo esc_html( $source_type_label ); ?>
 						<?php if ( ! empty( $map['source']['key'] ) ) : ?>
-							&rarr; <code><?php echo esc_html( $map['source']['key'] ); ?></code>
+							<code><?php echo esc_html( $map['source']['key'] ); ?></code>
 						<?php endif; ?>
 					</div>
+					<span class="cfi-mapping-card__arrow">&rarr;</span>
 					<div class="cfi-mapping-card__field">
 						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Target', 'cloudflare-images-sync' ); ?></span>
 						<code><?php echo esc_html( $map['target']['url_meta'] ?? '' ); ?></code>
 					</div>
 					<div class="cfi-mapping-card__field">
 						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Preset', 'cloudflare-images-sync' ); ?></span>
-						<?php echo esc_html( $preset_name ); ?>
+						<?php if ( ! empty( $map['preset_id'] ) && $p ) : ?>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-presets&action=edit&preset_id=' . $map['preset_id'] ) ); ?>"><?php echo esc_html( $preset_name ); ?></a>
+						<?php else : ?>
+							<?php echo esc_html( $preset_name ); ?>
+						<?php endif; ?>
 					</div>
 				</div>
 				<div class="cfi-mapping-card__actions">

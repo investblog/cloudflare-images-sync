@@ -130,8 +130,14 @@
 .cfi-mapping-card__body {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: center;
 	gap: 8px 24px;
 	margin-bottom: 12px;
+}
+
+.cfi-mapping-card__arrow {
+	color: #a7aaad;
+	font-size: 16px;
 }
 
 .cfi-mapping-card__field {

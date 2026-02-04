@@ -201,7 +201,18 @@ class SettingsPage {
 					</tr>
 					<tr>
 						<th><?php esc_html_e( 'Use queue', 'cloudflare-images-sync' ); ?></th>
-						<td><label><input type="checkbox" name="use_queue" value="1" <?php checked( $settings['use_queue'] ); ?> /> <?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'cloudflare-images-sync' ); ?></label></td>
+						<td>
+							<?php $has_as = function_exists( 'as_enqueue_async_action' ); ?>
+							<label>
+								<input type="checkbox" name="use_queue" value="1" <?php checked( $settings['use_queue'] ); ?> <?php disabled( ! $has_as ); ?> />
+								<?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'cloudflare-images-sync' ); ?>
+							</label>
+							<?php if ( ! $has_as ) : ?>
+								<p class="description" style="color: #d63638;">
+									<?php esc_html_e( 'Action Scheduler is not available. Install and activate a plugin that includes it (e.g. WooCommerce or Action Scheduler standalone) to enable background processing.', 'cloudflare-images-sync' ); ?>
+								</p>
+							<?php endif; ?>
+						</td>
 					</tr>
 					<tr>
 						<th><label for="logs_max"><?php esc_html_e( 'Max log entries', 'cloudflare-images-sync' ); ?></label></th>

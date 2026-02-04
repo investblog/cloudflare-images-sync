@@ -151,6 +151,9 @@ class PreviewPage {
 				<input type="number" id="attachment_id" name="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>" min="1" class="small-text" />
 				<input type="submit" class="button" value="<?php esc_attr_e( 'Load', 'cloudflare-images-sync' ); ?>" />
 			</p>
+			<p class="description">
+				<?php esc_html_e( 'Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand.', 'cloudflare-images-sync' ); ?>
+			</p>
 		</form>
 
 		<?php
@@ -206,6 +209,9 @@ class PreviewPage {
 				</select>
 
 				<input type="submit" class="button" value="<?php esc_attr_e( 'Preview', 'cloudflare-images-sync' ); ?>" />
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'Check the current delivery URL for a post or use "Sync Now" to manually trigger image sync for the selected mapping.', 'cloudflare-images-sync' ); ?>
 			</p>
 		</form>
 
