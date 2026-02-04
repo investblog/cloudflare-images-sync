@@ -4,7 +4,7 @@ Tags: cloudflare, images, sync, cdn, optimization
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.1.9-beta
+Stable tag: 0.1.10-beta
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,15 @@ No. The plugin uploads a copy to Cloudflare Images and stores the delivery URL i
 Yes. The plugin supports ACF image fields (ID, array, and URL return formats) as source types.
 
 == Changelog ==
+
+= 0.1.10-beta =
+* New: Flexible Variants detection — automatically check if FV is enabled on your Cloudflare account.
+* New: Enable Flexible Variants with one click from Settings, Presets, or Preview pages.
+* New: Smart status callout banners with Test/Enable buttons on Presets and Preview pages.
+* Improved: Badge logic on Presets page — "Flexible" (enabled), "Needs Flexible Variants" (disabled), "Flexible (status unknown)".
+* Improved: Install Recommended Presets shows confirm dialog when FV not enabled.
+* Improved: Preview page shows placeholder instead of broken images for flex presets.
+* Improved: Copy URL disabled for flex presets when FV not enabled.
 
 = 0.1.9-beta =
 * Mapping card: arrow between Source and Target, preset name links to edit page.
