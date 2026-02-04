@@ -132,7 +132,7 @@ class PresetsPage {
 					</tr>
 					<tr>
 						<th><label for="preset_variant"><?php esc_html_e( 'Variant', 'cloudflare-images-sync' ); ?></label></th>
-						<td><input type="text" id="preset_variant" name="preset_variant" value="<?php echo esc_attr( $editing['variant'] ?? '' ); ?>" class="large-text" required />
+						<td><input type="text" id="preset_variant" name="preset_variant" value="<?php echo esc_attr( $editing['variant'] ?? '' ); ?>" class="regular-text" required />
 						<p class="description"><?php esc_html_e( 'e.g. w=1200,height=630,fit=cover,quality=85,f=auto', 'cloudflare-images-sync' ); ?></p></td>
 					</tr>
 				</table>
