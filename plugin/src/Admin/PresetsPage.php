@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use CFI\Repos\PresetsRepo;
+use CFI\Support\Validators;
 
 /**
  * Presets CRUD page.
@@ -50,6 +51,9 @@ class PresetsPage {
 		// Handle delete (GET with nonce).
 		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['preset_id'] ) ) {
 			$preset_id = sanitize_text_field( wp_unslash( $_GET['preset_id'] ) );
+			if ( ! Validators::is_valid_id( $preset_id, 'preset' ) ) {
+				$this->redirect_with_notice( $redirect_url, __( 'Invalid preset ID.', 'cloudflare-images-sync' ), 'error' );
+			}
 			check_admin_referer( 'cfi_delete_preset_' . $preset_id );
 			$result = $this->repo->delete( $preset_id );
 
@@ -70,6 +74,9 @@ class PresetsPage {
 			);
 
 			$edit_id = sanitize_text_field( wp_unslash( $_POST['preset_id'] ?? '' ) );
+			if ( $edit_id !== '' && ! Validators::is_valid_id( $edit_id, 'preset' ) ) {
+				$this->redirect_with_notice( $redirect_url, __( 'Invalid preset ID.', 'cloudflare-images-sync' ), 'error' );
+			}
 
 			if ( $edit_id !== '' ) {
 				$result = $this->repo->update( $edit_id, $data );

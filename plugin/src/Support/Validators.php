@@ -56,8 +56,30 @@ final class Validators {
 			return new \WP_Error( 'cfi_invalid_preset', 'Preset name is required.' );
 		}
 
+		$name = self::sanitize_preset_name( $data['name'] );
+		if ( $name === '' ) {
+			return new \WP_Error( 'cfi_invalid_preset', 'Preset name is required.' );
+		}
+
+		if ( strlen( $name ) > 100 ) {
+			return new \WP_Error( 'cfi_invalid_preset', 'Preset name must be 100 characters or less.' );
+		}
+
 		if ( empty( $data['variant'] ) || ! is_string( $data['variant'] ) ) {
 			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant string is required.' );
+		}
+
+		$variant = self::sanitize_variant( $data['variant'] );
+		if ( $variant === '' ) {
+			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant string is required.' );
+		}
+
+		if ( strlen( $variant ) > 255 ) {
+			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant must be 255 characters or less.' );
+		}
+
+		if ( ! preg_match( '/^[A-Za-z0-9=,_\\-.]+$/', $variant ) ) {
+			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant contains invalid characters.' );
 		}
 
 		return true;
@@ -89,9 +111,27 @@ final class Validators {
 			}
 		}
 
+		if ( in_array( $data['source']['type'], array( 'post_meta_attachment_id', 'post_meta_url', 'acf_field' ), true ) ) {
+			if ( ! self::is_valid_key( (string) $data['source']['key'] ) ) {
+				return new \WP_Error( 'cfi_invalid_mapping', 'Source key contains invalid characters.' );
+			}
+		}
+
 		// Validate target — at least url_meta is required.
 		if ( empty( $data['target']['url_meta'] ) ) {
 			return new \WP_Error( 'cfi_invalid_mapping', 'Target url_meta is required.' );
+		}
+
+		if ( ! self::is_valid_key( (string) $data['target']['url_meta'] ) ) {
+			return new \WP_Error( 'cfi_invalid_mapping', 'Target url_meta contains invalid characters.' );
+		}
+
+		if ( ! empty( $data['target']['id_meta'] ) && ! self::is_valid_key( (string) $data['target']['id_meta'] ) ) {
+			return new \WP_Error( 'cfi_invalid_mapping', 'Target id_meta contains invalid characters.' );
+		}
+
+		if ( ! empty( $data['target']['sig_meta'] ) && ! self::is_valid_key( (string) $data['target']['sig_meta'] ) ) {
+			return new \WP_Error( 'cfi_invalid_mapping', 'Target sig_meta contains invalid characters.' );
 		}
 
 		return true;
@@ -130,6 +170,58 @@ final class Validators {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Sanitize a preset name.
+	 *
+	 * @param string $name Preset name.
+	 * @return string
+	 */
+	public static function sanitize_preset_name( string $name ): string {
+		return trim( sanitize_text_field( $name ) );
+	}
+
+	/**
+	 * Sanitize a variant string.
+	 *
+	 * @param string $variant Variant string.
+	 * @return string
+	 */
+	public static function sanitize_variant( string $variant ): string {
+		return trim( sanitize_text_field( $variant ) );
+	}
+
+	/**
+	 * Validate a user-supplied key (meta key, ACF field name).
+	 *
+	 * @param string $key Key value.
+	 * @return bool
+	 */
+	public static function is_valid_key( string $key ): bool {
+		$key = trim( $key );
+
+		if ( $key === '' ) {
+			return false;
+		}
+
+		if ( strlen( $key ) > 191 ) {
+			return false;
+		}
+
+		return (bool) preg_match( '/^[A-Za-z0-9_\\-:]+$/', $key );
+	}
+
+	/**
+	 * Validate an internal ID string.
+	 *
+	 * @param string $id     ID value.
+	 * @param string $prefix Expected prefix (e.g. "preset", "map").
+	 * @return bool
+	 */
+	public static function is_valid_id( string $id, string $prefix ): bool {
+		$pattern = '/^' . preg_quote( $prefix, '/' ) . '_[a-f0-9]{8}$/';
+		return (bool) preg_match( $pattern, $id );
 	}
 
 	/**

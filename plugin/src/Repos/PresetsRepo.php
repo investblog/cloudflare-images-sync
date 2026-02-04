@@ -53,6 +53,9 @@ class PresetsRepo {
 	 * @return string|\WP_Error Preset ID on success.
 	 */
 	public function create( array $data ) {
+		$data['name']    = isset( $data['name'] ) ? Validators::sanitize_preset_name( $data['name'] ) : '';
+		$data['variant'] = isset( $data['variant'] ) ? Validators::sanitize_variant( $data['variant'] ) : '';
+
 		$valid = Validators::validate_preset( $data );
 		if ( is_wp_error( $valid ) ) {
 			return $valid;
@@ -100,10 +103,10 @@ class PresetsRepo {
 		}
 
 		if ( isset( $data['name'] ) ) {
-			$all[ $id ]['name'] = sanitize_text_field( $data['name'] );
+			$all[ $id ]['name'] = Validators::sanitize_preset_name( $data['name'] );
 		}
 		if ( isset( $data['variant'] ) ) {
-			$all[ $id ]['variant'] = sanitize_text_field( $data['variant'] );
+			$all[ $id ]['variant'] = Validators::sanitize_variant( $data['variant'] );
 		}
 
 		$all[ $id ]['updated_at'] = time();

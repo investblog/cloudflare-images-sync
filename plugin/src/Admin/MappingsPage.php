@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use CFI\Repos\Defaults;
 use CFI\Repos\MappingsRepo;
 use CFI\Repos\PresetsRepo;
+use CFI\Support\Validators;
 
 /**
  * Mappings CRUD page with Bulk Sync trigger.
@@ -60,6 +61,9 @@ class MappingsPage {
 		// Handle delete (GET with nonce).
 		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['mapping_id'] ) ) {
 			$mapping_id = sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) );
+			if ( ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
+				$this->redirect_with_notice( $redirect_url, __( 'Invalid mapping ID.', 'cloudflare-images-sync' ), 'error' );
+			}
 			check_admin_referer( 'cfi_delete_mapping_' . $mapping_id );
 			$result = $this->repo->delete( $mapping_id );
 
@@ -78,6 +82,9 @@ class MappingsPage {
 		if ( isset( $_POST['cfi_bulk_sync'] ) && ! empty( $_POST['bulk_mapping_id'] ) ) {
 			check_admin_referer( 'cfi_bulk_sync' );
 			$mapping_id = sanitize_text_field( wp_unslash( $_POST['bulk_mapping_id'] ) );
+			if ( ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
+				$this->redirect_with_notice( $redirect_url, __( 'Invalid mapping ID.', 'cloudflare-images-sync' ), 'error' );
+			}
 			$message    = $this->enqueue_bulk_sync( $mapping_id );
 			$type       = strpos( $message, 'enqueued' ) !== false ? 'success' : 'error';
 			$this->redirect_with_notice( $redirect_url, $message, $type );
@@ -141,6 +148,9 @@ class MappingsPage {
 	private function handle_save(): string {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified in handle_actions().
 		$edit_id = sanitize_text_field( wp_unslash( $_POST['mapping_id'] ?? '' ) );
+		if ( $edit_id !== '' && ! Validators::is_valid_id( $edit_id, 'map' ) ) {
+			return __( 'Invalid mapping ID.', 'cloudflare-images-sync' );
+		}
 
 		$data = array(
 			'post_type' => sanitize_text_field( wp_unslash( $_POST['post_type'] ?? '' ) ),
@@ -167,6 +177,10 @@ class MappingsPage {
 			'preset_id' => sanitize_text_field( wp_unslash( $_POST['preset_id'] ?? '' ) ),
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		if ( $data['preset_id'] !== '' && ! Validators::is_valid_id( $data['preset_id'], 'preset' ) ) {
+			return __( 'Invalid preset ID.', 'cloudflare-images-sync' );
+		}
 
 		if ( $edit_id !== '' ) {
 			$result = $this->repo->update( $edit_id, $data );

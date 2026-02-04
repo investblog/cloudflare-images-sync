@@ -21,6 +21,7 @@ use CFI\Repos\MappingsRepo;
 use CFI\Repos\OptionKeys;
 use CFI\Repos\PresetsRepo;
 use CFI\Repos\SettingsRepo;
+use CFI\Support\Validators;
 
 /**
  * Preview page with two modes:
@@ -65,6 +66,14 @@ class PreviewPage {
 			$post_id    = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
 			$mapping_id = isset( $_GET['mapping_id'] ) ? sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) ) : '';
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			if ( $mapping_id !== '' && ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
+				$this->redirect_with_notice(
+					admin_url( 'admin.php?page=cfi-preview&mode=post' ),
+					__( 'Invalid mapping ID.', 'cloudflare-images-sync' ),
+					'error'
+				);
+			}
 
 			if ( $post_id > 0 && $mapping_id !== '' ) {
 				$mappings = new MappingsRepo();
