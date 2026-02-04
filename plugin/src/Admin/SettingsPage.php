@@ -192,10 +192,10 @@ class SettingsPage {
 									array(
 										'strong' => array(),
 										'a'      => array(
-										'href'   => array(),
-										'target' => array(),
-										'rel'    => array(),
-									),
+											'href'   => array(),
+											'target' => array(),
+											'rel'    => array(),
+										),
 									)
 								);
 								?>
