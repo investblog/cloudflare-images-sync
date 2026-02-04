@@ -48,23 +48,39 @@ class SyncEngine {
 			return $this->handle_empty_source( $post_id, $mapping, $logs, $ctx );
 		}
 
-		// 3. Check signature — skip upload if unchanged.
-		$behavior  = $mapping['behavior'] ?? array();
-		$target    = $mapping['target'] ?? array();
-		$sig_meta  = $target['sig_meta'] ?? '';
-		$file_path = $resolved->get_file_path();
+		$behavior      = $mapping['behavior'] ?? array();
+		$target        = $mapping['target'] ?? array();
+		$file_path     = $resolved->get_file_path();
+		$attachment_id = $resolved->get_attachment_id();
 
+		// 3. Attachment-level cache — reuse CF image ID if same file was already uploaded.
+		$att_cf_id = $attachment_id > 0 ? (string) get_post_meta( $attachment_id, '_cfi_cf_image_id', true ) : '';
+		$att_sig   = $attachment_id > 0 ? (string) get_post_meta( $attachment_id, '_cfi_sig', true ) : '';
+
+		if ( $att_cf_id !== '' && ! Signature::has_changed( $file_path, $att_sig ) ) {
+			// File unchanged and already on CF — skip upload, just store target meta.
+			$url = $this->build_url( $att_cf_id, $mapping );
+			$this->store_meta( $post_id, $target, $att_cf_id, $url, $att_sig );
+			$logs->push( 'info', 'Reused existing CF image from attachment cache.', $ctx );
+			return true;
+		}
+
+		// 4. Check per-post signature — skip upload if unchanged.
+		$sig_meta    = $target['sig_meta'] ?? '';
 		$stored_sig  = $sig_meta !== '' ? (string) get_post_meta( $post_id, $sig_meta, true ) : '';
 		$stored_cfid = ( $target['id_meta'] ?? '' ) !== '' ? (string) get_post_meta( $post_id, $target['id_meta'], true ) : '';
 
 		$needs_upload = false;
 
-		if ( $stored_cfid === '' && ! empty( $behavior['upload_if_missing'] ) ) {
+		if ( $stored_cfid === '' && $att_cf_id === '' && ! empty( $behavior['upload_if_missing'] ) ) {
 			$needs_upload = true;
 		} elseif ( $stored_cfid !== '' && ! empty( $behavior['reupload_if_changed'] ) ) {
 			if ( Signature::has_changed( $file_path, $stored_sig ) ) {
 				$needs_upload = true;
 			}
+		} elseif ( $att_cf_id !== '' ) {
+			// Attachment had a stale CF image (sig changed) — re-upload.
+			$needs_upload = true;
 		}
 
 		if ( ! $needs_upload ) {
@@ -73,7 +89,7 @@ class SyncEngine {
 			return true;
 		}
 
-		// 4. Upload.
+		// 5. Upload.
 		$client = CloudflareImagesClient::from_settings();
 		if ( is_wp_error( $client ) ) {
 			$logs->push( 'error', 'Cloudflare client not configured.', $ctx );
@@ -82,11 +98,11 @@ class SyncEngine {
 
 		$metadata = array(
 			'wp_post_id'       => $post_id,
-			'wp_attachment_id' => $resolved->get_attachment_id(),
+			'wp_attachment_id' => $attachment_id,
 			'mapping_id'       => $mapping['id'] ?? '',
 		);
 
-		// If re-uploading, delete old image first.
+		// If re-uploading, delete old image first (only the per-post one).
 		if ( $stored_cfid !== '' ) {
 			$client->delete( $stored_cfid );
 		}
@@ -105,24 +121,22 @@ class SyncEngine {
 			return new \WP_Error( 'cfi_no_image_id', 'Cloudflare returned no image ID.' );
 		}
 
-		// 5. Compute and store signature.
+		// 6. Compute and store signature.
 		$new_sig = Signature::compute( $file_path );
 		if ( is_wp_error( $new_sig ) ) {
 			$new_sig = '';
 		}
 
-		// 6. Build delivery URL.
-		$settings = ( new SettingsRepo() )->get();
-		$builder  = new UrlBuilder( $settings['account_hash'] );
-		$variant  = $this->resolve_variant( $mapping );
-		$url      = $builder->url( $cf_image_id, $variant );
-
-		if ( is_wp_error( $url ) ) {
-			$logs->push( 'warning', 'Could not build delivery URL: ' . $url->get_error_message(), $ctx );
-			$url = '';
+		// 7. Cache CF image ID on attachment for reuse by other mappings.
+		if ( $attachment_id > 0 ) {
+			update_post_meta( $attachment_id, '_cfi_cf_image_id', $cf_image_id );
+			update_post_meta( $attachment_id, '_cfi_sig', $new_sig );
 		}
 
-		// 7. Store results on post.
+		// 8. Build delivery URL.
+		$url = $this->build_url( $cf_image_id, $mapping );
+
+		// 9. Store results on post.
 		$this->store_meta( $post_id, $target, $cf_image_id, $url, $new_sig );
 
 		$logs->push( 'info', 'Synced successfully.', $ctx );
@@ -152,22 +166,15 @@ class SyncEngine {
 	}
 
 	/**
-	 * Update the delivery URL if CF image ID exists but URL might be stale.
+	 * Build a delivery URL for a CF image ID using the mapping's preset.
 	 *
-	 * @param int                  $post_id  Post ID.
-	 * @param string               $cf_id    Cloudflare image ID.
-	 * @param array<string, mixed> $mapping  Mapping record.
+	 * @param string               $cf_id   Cloudflare image ID.
+	 * @param array<string, mixed> $mapping Mapping record.
+	 * @return string Delivery URL or empty on error.
 	 */
-	private function maybe_update_url( int $post_id, string $cf_id, array $mapping ): void {
+	private function build_url( string $cf_id, array $mapping ): string {
 		if ( $cf_id === '' ) {
-			return;
-		}
-
-		$target   = $mapping['target'] ?? array();
-		$url_meta = $target['url_meta'] ?? '';
-
-		if ( $url_meta === '' ) {
-			return;
+			return '';
 		}
 
 		$settings = ( new SettingsRepo() )->get();
@@ -175,11 +182,28 @@ class SyncEngine {
 		$variant  = $this->resolve_variant( $mapping );
 		$url      = $builder->url( $cf_id, $variant );
 
-		if ( is_wp_error( $url ) ) {
+		return is_wp_error( $url ) ? '' : $url;
+	}
+
+	/**
+	 * Update the delivery URL if CF image ID exists but URL might be stale.
+	 *
+	 * @param int                  $post_id  Post ID.
+	 * @param string               $cf_id    Cloudflare image ID.
+	 * @param array<string, mixed> $mapping  Mapping record.
+	 */
+	private function maybe_update_url( int $post_id, string $cf_id, array $mapping ): void {
+		$url_meta = $mapping['target']['url_meta'] ?? '';
+
+		if ( $cf_id === '' || $url_meta === '' ) {
 			return;
 		}
 
-		update_post_meta( $post_id, $url_meta, $url );
+		$url = $this->build_url( $cf_id, $mapping );
+
+		if ( $url !== '' ) {
+			update_post_meta( $post_id, $url_meta, $url );
+		}
 	}
 
 	/**
