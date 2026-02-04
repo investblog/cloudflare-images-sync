@@ -52,28 +52,14 @@ class SettingsPage {
 		// Handle save.
 		if ( isset( $_POST['cfi_save_settings'] ) ) {
 			check_admin_referer( 'cfi_settings_save' );
-
-			$patch = array(
-				'account_id'   => sanitize_text_field( wp_unslash( $_POST['account_id'] ?? '' ) ),
-				'account_hash' => sanitize_text_field( wp_unslash( $_POST['account_hash'] ?? '' ) ),
-				'debug'        => ! empty( $_POST['debug'] ),
-				'use_queue'    => ! empty( $_POST['use_queue'] ),
-				'logs_max'     => absint( wp_unslash( $_POST['logs_max'] ?? 200 ) ),
-			);
-
-			// Only update token if a new value was provided (not the masked placeholder).
-			$token_input = sanitize_text_field( wp_unslash( $_POST['api_token'] ?? '' ) );
-			if ( $token_input !== '' && strpos( $token_input, '****' ) === false ) {
-				$patch['api_token'] = $token_input;
-			}
-
-			$this->repo->update( $patch );
+			$this->save_from_post();
 			$this->redirect_with_notice( $redirect_url, __( 'Settings saved.', 'cloudflare-images-sync' ) );
 		}
 
-		// Handle test connection.
+		// Handle test connection (save first, then test).
 		if ( isset( $_POST['cfi_test_connection'] ) ) {
 			check_admin_referer( 'cfi_settings_save' );
+			$this->save_from_post();
 
 			$client = CloudflareImagesClient::from_settings();
 
@@ -89,6 +75,29 @@ class SettingsPage {
 
 			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cloudflare-images-sync' ) );
 		}
+	}
+
+	/**
+	 * Save settings from the current POST data.
+	 *
+	 * @return void
+	 */
+	private function save_from_post(): void {
+		$patch = array(
+			'account_id'   => sanitize_text_field( wp_unslash( $_POST['account_id'] ?? '' ) ),
+			'account_hash' => sanitize_text_field( wp_unslash( $_POST['account_hash'] ?? '' ) ),
+			'debug'        => ! empty( $_POST['debug'] ),
+			'use_queue'    => ! empty( $_POST['use_queue'] ),
+			'logs_max'     => absint( wp_unslash( $_POST['logs_max'] ?? 200 ) ),
+		);
+
+		// Only update token if a new value was provided (not the masked placeholder).
+		$token_input = sanitize_text_field( wp_unslash( $_POST['api_token'] ?? '' ) );
+		if ( $token_input !== '' && strpos( $token_input, '****' ) === false ) {
+			$patch['api_token'] = $token_input;
+		}
+
+		$this->repo->update( $patch );
 	}
 
 	/**
@@ -116,16 +125,36 @@ class SettingsPage {
 				<table class="form-table">
 					<tr>
 						<th><label for="account_id"><?php esc_html_e( 'Account ID', 'cloudflare-images-sync' ); ?></label></th>
-						<td><input type="text" id="account_id" name="account_id" value="<?php echo esc_attr( $settings['account_id'] ); ?>" class="regular-text" /></td>
+						<td><input type="text" id="account_id" name="account_id" value="<?php echo esc_attr( $settings['account_id'] ); ?>" class="regular-text" />
+						<p class="description"><?php
+							printf(
+								/* translators: %s: link to Cloudflare Images dashboard */
+								esc_html__( 'Found on the %s page (right sidebar).', 'cloudflare-images-sync' ),
+								'<a href="https://dash.cloudflare.com/?to=/:account/images" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images', 'cloudflare-images-sync' ) . '</a>'
+							);
+						?></p></td>
 					</tr>
 					<tr>
 						<th><label for="account_hash"><?php esc_html_e( 'Account Hash', 'cloudflare-images-sync' ); ?></label></th>
 						<td><input type="text" id="account_hash" name="account_hash" value="<?php echo esc_attr( $settings['account_hash'] ); ?>" class="regular-text" />
-						<p class="description"><?php esc_html_e( 'Used for delivery URLs (imagedelivery.net).', 'cloudflare-images-sync' ); ?></p></td>
+						<p class="description"><?php
+							printf(
+								/* translators: %s: link to Cloudflare Images dashboard */
+								esc_html__( 'Found on the %s page (right sidebar). Used for delivery URLs.', 'cloudflare-images-sync' ),
+								'<a href="https://dash.cloudflare.com/?to=/:account/images" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images', 'cloudflare-images-sync' ) . '</a>'
+							);
+						?></p></td>
 					</tr>
 					<tr>
 						<th><label for="api_token"><?php esc_html_e( 'API Token', 'cloudflare-images-sync' ); ?></label></th>
 						<td><input type="password" id="api_token" name="api_token" value="" placeholder="<?php echo esc_attr( $masked_token ); ?>" class="regular-text" autocomplete="new-password" />
+						<p class="description"><?php
+							printf(
+								/* translators: %s: link to Cloudflare API Tokens page */
+								esc_html__( 'Create at %s with "Cloudflare Images: Edit" permission. Not the signature token from the Images Keys tab.', 'cloudflare-images-sync' ),
+								'<a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API Tokens', 'cloudflare-images-sync' ) . '</a>'
+							);
+						?></p>
 						<p class="description"><?php esc_html_e( 'Leave blank to keep the current token.', 'cloudflare-images-sync' ); ?></p></td>
 					</tr>
 					<tr>
