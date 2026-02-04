@@ -130,9 +130,9 @@
 		}, function (response) {
 			$spinner.removeClass('is-active');
 			if (response.success) {
-				updateFlexUI(response.data.status, response.data.message);
-				// Reload page on enable success to refresh UI state.
-				if (reloadOnSuccess && response.data.status === 'enabled') {
+				updateFlexUI(response.data.status, response.data.message, response.data.checked_at);
+				// Reload page on enable success to refresh UI state (non-settings pages).
+				if (reloadOnSuccess && response.data.status === 'enabled' && !$('#cfi-status-box').length) {
 					setTimeout(function () {
 						window.location.reload();
 					}, 1000);
@@ -146,7 +146,7 @@
 		});
 	}
 
-	function updateFlexUI(status, message) {
+	function updateFlexUI(status, message, checkedAt) {
 		var $badge = $('#cfi-flex-badge');
 		var $enable = $('#cfi-flex-enable');
 		var $result = $('#cfi-flex-result');
@@ -165,6 +165,37 @@
 			$badge.addClass('cfi-flex--unknown').text(labels.unknown || 'Unknown');
 			$enable.show();
 			$result.text(message).css('color', '#646970');
+		}
+
+		// Update status box if present (Settings page).
+		updateStatusBox(status, checkedAt);
+	}
+
+	function updateStatusBox(flexStatus, checkedAt) {
+		var $statusFlex = $('#cfi-status-flex');
+		var $timestamp = $('#cfi-status-timestamp');
+
+		if (!$statusFlex.length) {
+			return;
+		}
+
+		// Update FV status indicator.
+		var statusClass, statusText;
+		if (flexStatus === 'enabled') {
+			statusClass = 'cfi-status--ok';
+			statusText = 'Enabled';
+		} else if (flexStatus === 'disabled') {
+			statusClass = 'cfi-status--error';
+			statusText = 'Disabled';
+		} else {
+			statusClass = 'cfi-status--pending';
+			statusText = 'Unknown';
+		}
+		$statusFlex.html('<span class="cfi-status-indicator ' + statusClass + '">' + statusText + '</span>');
+
+		// Update timestamp.
+		if (checkedAt && $timestamp.length) {
+			$timestamp.attr('data-timestamp', checkedAt).text('Last checked: just now');
 		}
 	}
 
@@ -494,7 +525,7 @@
 	}
 
 	// WordPress internal meta prefixes — unsafe to overwrite.
-	var internalPrefixes = ['_wp_', '_edit_', '_oembed_', '_pingme', '_encloseme'];
+	var internalPrefixes = ['_wp_', '_edit_', '_oembed_', '_pingme', '_encloseme', '_thumbnail'];
 
 	function filterSafeTargetKeys(items) {
 		return items.filter(function (item) {

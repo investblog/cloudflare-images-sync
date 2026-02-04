@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use CFI\Repos\LogsRepo;
 use CFI\Repos\MappingsRepo;
 use CFI\Repos\SettingsRepo;
 
@@ -52,6 +53,7 @@ class Hooks {
 		$all_mappings = $this->mappings->all();
 
 		if ( empty( $all_mappings ) ) {
+			$this->debug_log( 'Hooks::init — no mappings found, skipping hook registration.' );
 			return;
 		}
 
@@ -69,6 +71,8 @@ class Hooks {
 			add_action( 'save_post_' . $pt, array( $this, 'on_save_post' ), 20, 2 );
 		}
 
+		$this->debug_log( 'Hooks::init — registered save_post hooks for: ' . implode( ', ', array_keys( $post_types ) ) );
+
 		// Register acf/save_post (fires for all post types).
 		if ( function_exists( 'acf_get_field' ) || has_action( 'acf/init' ) ) {
 			add_action( 'acf/save_post', array( $this, 'on_acf_save_post' ), 20 );
@@ -83,10 +87,14 @@ class Hooks {
 	 * @return void
 	 */
 	public function on_save_post( int $post_id, \WP_Post $post ): void {
+		$this->debug_log( "Hooks::on_save_post fired for post #{$post_id} ({$post->post_type})" );
+
 		if ( ! $this->should_process( $post_id, $post ) ) {
+			$this->debug_log( "Hooks::on_save_post — should_process returned false for post #{$post_id}" );
 			return;
 		}
 
+		$this->debug_log( "Hooks::on_save_post — running mappings for post #{$post_id}" );
 		$this->run_mappings( $post_id, $post->post_type, 'save_post' );
 	}
 
@@ -127,10 +135,19 @@ class Hooks {
 	private function run_mappings( int $post_id, string $post_type, string $trigger ): void {
 		$mappings = $this->mappings->for_post_type( $post_type );
 
+		$this->debug_log( "run_mappings — found " . count( $mappings ) . " mapping(s) for post_type '{$post_type}'" );
+
+		if ( empty( $mappings ) ) {
+			return;
+		}
+
 		foreach ( $mappings as $mapping ) {
+			$mapping_id = $mapping['id'] ?? '';
+
 			// Check if this trigger is enabled for the mapping.
 			$triggers = $mapping['triggers'] ?? array();
 			if ( empty( $triggers[ $trigger ] ) ) {
+				$this->debug_log( "run_mappings — mapping '{$mapping_id}' skipped: trigger '{$trigger}' not enabled" );
 				continue;
 			}
 
@@ -139,13 +156,14 @@ class Hooks {
 			if ( $status === 'publish' ) {
 				$post = get_post( $post_id );
 				if ( $post && $post->post_status !== 'publish' ) {
+					$this->debug_log( "run_mappings — mapping '{$mapping_id}' skipped: post status is '{$post->post_status}', not 'publish'" );
 					continue;
 				}
 			}
 
 			// Dedupe guard.
-			$mapping_id = $mapping['id'] ?? '';
 			if ( ! Guard::acquire( $post_id, $mapping_id ) ) {
+				$this->debug_log( "run_mappings — mapping '{$mapping_id}' skipped: Guard blocked (already processed)" );
 				continue;
 			}
 
@@ -153,6 +171,7 @@ class Hooks {
 			$settings = ( new SettingsRepo() )->get();
 
 			if ( ! empty( $settings['use_queue'] ) && $this->action_scheduler_available() ) {
+				$this->debug_log( "run_mappings — mapping '{$mapping_id}' queued via Action Scheduler" );
 				as_enqueue_async_action(
 					'cfi_sync_single',
 					array(
@@ -162,6 +181,7 @@ class Hooks {
 					'cfi'
 				);
 			} else {
+				$this->debug_log( "run_mappings — mapping '{$mapping_id}' syncing directly" );
 				Guard::lock();
 				$this->engine->sync( $post_id, $mapping );
 				Guard::unlock();
@@ -207,5 +227,21 @@ class Hooks {
 	 */
 	private function action_scheduler_available(): bool {
 		return function_exists( 'as_enqueue_async_action' );
+	}
+
+	/**
+	 * Log debug message if debug mode is enabled.
+	 *
+	 * @param string $message Log message.
+	 * @return void
+	 */
+	private function debug_log( string $message ): void {
+		$settings = ( new SettingsRepo() )->get();
+		if ( empty( $settings['debug'] ) ) {
+			return;
+		}
+
+		$logs = new LogsRepo();
+		$logs->push( 'debug', $message );
 	}
 }

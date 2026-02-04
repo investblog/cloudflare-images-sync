@@ -32,6 +32,7 @@ final class Defaults {
 			'logs_max'        => 200,
 			'flex_status'     => 'unknown',
 			'flex_checked_at' => 0,
+			'api_tested_at'   => 0,
 		);
 	}
 
@@ -41,76 +42,40 @@ final class Defaults {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function presets(): array {
-		return array(
-			'social_1200x630' => array(
-				'name'    => 'social_1200x630',
-				'variant' => 'w=1200,height=630,fit=cover,quality=85,f=auto',
-			),
-			'square_800'      => array(
-				'name'    => 'square_800',
-				'variant' => 'w=800,height=800,fit=cover,quality=85,f=auto',
-			),
-			'thumb_400x300'   => array(
-				'name'    => 'thumb_400x300',
-				'variant' => 'w=400,height=300,fit=cover,quality=80,f=auto',
-			),
-		);
+		// Same as recommended — just the core set.
+		return self::recommended_presets();
 	}
 
 	/**
-	 * Recommended presets v2 — full set available on-demand.
+	 * Recommended presets — core set for 80% of use cases.
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function recommended_presets(): array {
 		return array(
-			'og_1200x630'           => array(
+			'og_1200x630'      => array(
 				'name'    => 'og_1200x630',
 				'variant' => 'w=1200,h=630,fit=cover,quality=85,f=auto',
 			),
-			'og_1200x630_smartcrop' => array(
-				'name'    => 'og_1200x630_smartcrop',
-				'variant' => 'w=1200,h=630,fit=cover,gravity=auto,quality=85,f=auto',
-			),
-			'square_800'            => array(
+			'square_800'       => array(
 				'name'    => 'square_800',
 				'variant' => 'w=800,h=800,fit=cover,quality=85,f=auto',
 			),
-			'square_800_smartcrop'  => array(
-				'name'    => 'square_800_smartcrop',
-				'variant' => 'w=800,h=800,fit=cover,gravity=auto,quality=85,f=auto',
-			),
-			'hero_1600x900'         => array(
-				'name'    => 'hero_1600x900',
-				'variant' => 'w=1600,h=900,fit=cover,quality=85,f=auto',
-			),
-			'thumb_400x300'         => array(
+			'thumb_400x300'    => array(
 				'name'    => 'thumb_400x300',
 				'variant' => 'w=400,h=300,fit=cover,quality=80,f=auto',
 			),
-			'thumb_400x300_sharp'   => array(
-				'name'    => 'thumb_400x300_sharp',
-				'variant' => 'w=400,h=300,fit=cover,quality=80,sharpen=2,f=auto',
+			'hero_1600x900'    => array(
+				'name'    => 'hero_1600x900',
+				'variant' => 'w=1600,h=900,fit=cover,quality=85,f=auto',
 			),
-			'retina_600w_dpr2'      => array(
-				'name'    => 'retina_600w_dpr2',
+			'mobile_600w_2x'   => array(
+				'name'    => 'mobile_600w_2x',
 				'variant' => 'w=600,dpr=2,quality=85,f=auto',
 			),
-			'mobile_slow'           => array(
-				'name'    => 'mobile_slow',
-				'variant' => 'w=900,quality=85,slow-connection-quality=60,f=auto',
-			),
-			'placeholder_blur'      => array(
-				'name'    => 'placeholder_blur',
-				'variant' => 'w=80,blur=20,quality=50,f=auto',
-			),
-			'trim_transparent'      => array(
-				'name'    => 'trim_transparent',
-				'variant' => 'trim=auto,w=512,quality=90,f=auto',
-			),
-			'no_metadata'           => array(
-				'name'    => 'no_metadata',
-				'variant' => 'w=1200,quality=85,metadata=none,f=auto',
+			'square_smartcrop' => array(
+				'name'    => 'square_smartcrop',
+				'variant' => 'w=800,h=800,fit=cover,gravity=auto,quality=85,f=auto',
 			),
 		);
 	}

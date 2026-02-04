@@ -46,6 +46,7 @@ final class Validators {
 			? $result['flex_status']
 			: 'unknown';
 		$result['flex_checked_at'] = (int) $result['flex_checked_at'];
+		$result['api_tested_at']   = (int) $result['api_tested_at'];
 
 		return $result;
 	}
@@ -121,12 +122,24 @@ final class Validators {
 			return new \WP_Error( 'cfi_invalid_mapping', 'Target url_meta contains invalid characters.' );
 		}
 
+		if ( self::is_reserved_key( (string) $data['target']['url_meta'] ) ) {
+			return new \WP_Error( 'cfi_invalid_mapping', 'Target url_meta uses a reserved WordPress key.' );
+		}
+
 		if ( ! empty( $data['target']['id_meta'] ) && ! self::is_valid_key( (string) $data['target']['id_meta'] ) ) {
 			return new \WP_Error( 'cfi_invalid_mapping', 'Target id_meta contains invalid characters.' );
 		}
 
+		if ( ! empty( $data['target']['id_meta'] ) && self::is_reserved_key( (string) $data['target']['id_meta'] ) ) {
+			return new \WP_Error( 'cfi_invalid_mapping', 'Target id_meta uses a reserved WordPress key.' );
+		}
+
 		if ( ! empty( $data['target']['sig_meta'] ) && ! self::is_valid_key( (string) $data['target']['sig_meta'] ) ) {
 			return new \WP_Error( 'cfi_invalid_mapping', 'Target sig_meta contains invalid characters.' );
+		}
+
+		if ( ! empty( $data['target']['sig_meta'] ) && self::is_reserved_key( (string) $data['target']['sig_meta'] ) ) {
+			return new \WP_Error( 'cfi_invalid_mapping', 'Target sig_meta uses a reserved WordPress key.' );
 		}
 
 		return true;
@@ -205,6 +218,24 @@ final class Validators {
 		}
 
 		return (bool) preg_match( '/^[A-Za-z0-9_\\-:.]+$/', $key );
+	}
+
+	/**
+	 * Check if a meta key is reserved by WordPress and unsafe to overwrite.
+	 *
+	 * @param string $key Meta key.
+	 * @return bool
+	 */
+	public static function is_reserved_key( string $key ): bool {
+		$reserved_prefixes = array( '_wp_', '_edit_', '_oembed_', '_pingme', '_encloseme', '_thumbnail' );
+
+		foreach ( $reserved_prefixes as $prefix ) {
+			if ( strpos( $key, $prefix ) === 0 ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
