@@ -135,7 +135,7 @@ class Hooks {
 	private function run_mappings( int $post_id, string $post_type, string $trigger ): void {
 		$mappings = $this->mappings->for_post_type( $post_type );
 
-		$this->debug_log( "run_mappings — found " . count( $mappings ) . " mapping(s) for post_type '{$post_type}'" );
+		$this->debug_log( 'run_mappings — found ' . count( $mappings ) . " mapping(s) for post_type '{$post_type}'" );
 
 		if ( empty( $mappings ) ) {
 			return;
