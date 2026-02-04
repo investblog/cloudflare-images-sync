@@ -142,7 +142,13 @@ class SettingsPage {
 						<td><input type="text" id="account_id" name="account_id" value="<?php echo esc_attr( $settings['account_id'] ); ?>" class="regular-text" />
 						<p class="description">
 							<?php
-							$allowed_link = array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) );
+							$allowed_link = array(
+								'a' => array(
+									'href'   => array(),
+									'target' => array(),
+									'rel'    => array(),
+								),
+							);
 							$images_link  = '<a href="https://dash.cloudflare.com/?to=/:account/images" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images', 'cloudflare-images-sync' ) . '</a>';
 							echo wp_kses(
 								sprintf(
