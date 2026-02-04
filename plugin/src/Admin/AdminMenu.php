@@ -28,26 +28,28 @@ class AdminMenu {
 	 * @return void
 	 */
 	public function register_menu(): void {
-		$capability = 'manage_options';
-		$icon       = 'dashicons-cloud';
+		$capability    = 'manage_options';
+		$icon          = 'dashicons-cloud';
+		$settings_page = new SettingsPage();
 
 		add_menu_page(
 			__( 'Cloudflare Images', 'cloudflare-images-sync' ),
 			__( 'CF Images', 'cloudflare-images-sync' ),
 			$capability,
 			'cfi-settings',
-			array( new SettingsPage(), 'render' ),
+			array( $settings_page, 'render' ),
 			$icon,
 			81
 		);
 
+		// Rename the auto-generated first submenu item from "CF Images" to "Settings".
 		add_submenu_page(
 			'cfi-settings',
 			__( 'Settings', 'cloudflare-images-sync' ),
 			__( 'Settings', 'cloudflare-images-sync' ),
 			$capability,
 			'cfi-settings',
-			array( new SettingsPage(), 'render' )
+			array( $settings_page, 'render' )
 		);
 
 		add_submenu_page(
