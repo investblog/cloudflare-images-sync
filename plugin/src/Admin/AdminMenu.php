@@ -29,6 +29,7 @@ class AdminMenu {
 		// AJAX handlers.
 		$mappings_page = new MappingsPage();
 		add_action( 'wp_ajax_cfi_meta_keys', array( $mappings_page, 'ajax_meta_keys' ) );
+		add_action( 'wp_ajax_cfi_acf_fields', array( $mappings_page, 'ajax_acf_fields' ) );
 	}
 
 	/**

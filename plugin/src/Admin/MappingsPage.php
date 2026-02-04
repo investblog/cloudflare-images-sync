@@ -243,6 +243,9 @@ class MappingsPage {
 	/**
 	 * AJAX handler: return meta keys for a given post type.
 	 *
+	 * Returns items in unified suggestion format: [{name, label, type}].
+	 * Caches results in a transient for 5 minutes.
+	 *
 	 * @return void
 	 */
 	public function ajax_meta_keys(): void {
@@ -253,15 +256,22 @@ class MappingsPage {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked via check_ajax_referer above.
-		$post_type = sanitize_text_field( wp_unslash( $_GET['post_type'] ?? '' ) );
+		$post_type = sanitize_key( wp_unslash( $_GET['post_type'] ?? '' ) );
 
 		if ( $post_type === '' || ! post_type_exists( $post_type ) ) {
 			wp_send_json_success( array() );
 		}
 
+		$transient_key = 'cfi_meta_keys_' . $post_type;
+		$cached        = get_transient( $transient_key );
+
+		if ( is_array( $cached ) ) {
+			wp_send_json_success( $cached );
+		}
+
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off admin AJAX lookup.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- admin AJAX lookup, cached via transient.
 		$keys = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT DISTINCT pm.meta_key
@@ -269,12 +279,106 @@ class MappingsPage {
 				INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 				WHERE p.post_type = %s
 				ORDER BY pm.meta_key
-				LIMIT 100",
+				LIMIT 200",
 				$post_type
 			)
 		);
 
-		wp_send_json_success( $keys ?: array() );
+		$items = array();
+		foreach ( ( $keys ?: array() ) as $key ) {
+			$items[] = array(
+				'name'  => $key,
+				'label' => $key,
+				'type'  => 'meta',
+			);
+		}
+
+		set_transient( $transient_key, $items, 300 );
+
+		wp_send_json_success( $items );
+	}
+
+	/**
+	 * AJAX handler: return ACF image fields for a given post type.
+	 *
+	 * Uses ACF's location rules to return only image fields assigned to the post type.
+	 * Recursively traverses subfields (repeater, group, flexible_content).
+	 *
+	 * @return void
+	 */
+	public function ajax_acf_fields(): void {
+		check_ajax_referer( 'cfi_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized', 403 );
+		}
+
+		if ( ! function_exists( 'acf_get_field_groups' ) ) {
+			wp_send_json_success( array() );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce checked via check_ajax_referer above.
+		$post_type = sanitize_key( wp_unslash( $_GET['post_type'] ?? '' ) );
+
+		if ( $post_type === '' || ! post_type_exists( $post_type ) ) {
+			wp_send_json_success( array() );
+		}
+
+		$groups = acf_get_field_groups( array( 'post_type' => $post_type ) );
+		$result = array();
+
+		foreach ( $groups as $group ) {
+			$fields = acf_get_fields( $group['key'] );
+			if ( ! is_array( $fields ) ) {
+				continue;
+			}
+			$group_title = $group['title'] ?? '';
+			$this->collect_image_fields( $fields, $group_title, $result );
+		}
+
+		wp_send_json_success( $result );
+	}
+
+	/**
+	 * Recursively collect image fields from ACF field array.
+	 *
+	 * Supports subfields in repeater/group and layouts in flexible_content.
+	 *
+	 * @param array<int, array<string, mixed>> $fields      ACF fields array.
+	 * @param string                           $group_title Field group title for context.
+	 * @param array<int, array<string, mixed>> $result      Result accumulator (passed by reference).
+	 * @return void
+	 */
+	private function collect_image_fields( array $fields, string $group_title, array &$result ): void {
+		foreach ( $fields as $field ) {
+			$name = $field['name'] ?? '';
+			if ( $name === '' ) {
+				continue;
+			}
+
+			if ( ( $field['type'] ?? '' ) === 'image' ) {
+				$result[] = array(
+					'name'  => $name,
+					'label' => ( $field['label'] ?? '' ) !== '' ? $field['label'] : $name,
+					'type'  => 'acf_image',
+					'group' => $group_title,
+				);
+			}
+
+			// Recurse into repeater / group subfields.
+			if ( ! empty( $field['sub_fields'] ) && is_array( $field['sub_fields'] ) ) {
+				$this->collect_image_fields( $field['sub_fields'], $group_title, $result );
+			}
+
+			// Recurse into flexible_content layouts.
+			if ( ( $field['type'] ?? '' ) === 'flexible_content' && ! empty( $field['layouts'] ) && is_array( $field['layouts'] ) ) {
+				foreach ( $field['layouts'] as $layout ) {
+					if ( ! empty( $layout['sub_fields'] ) && is_array( $layout['sub_fields'] ) ) {
+						$this->collect_image_fields( $layout['sub_fields'], $group_title, $result );
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -297,6 +401,7 @@ class MappingsPage {
 			'cfi-admin',
 			'cfiMapping',
 			array(
+				'hasAcf'          => $has_acf,
 				'sourceKeyConfig' => array(
 					'acf_field'               => array(
 						'label'       => __( 'ACF Field Name', 'cloudflare-images-sync' ),
@@ -420,28 +525,7 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="source_key" name="source_key" value="<?php echo esc_attr( $m['source']['key'] ?? '' ); ?>" class="regular-text" list="cfi-meta-keys" />
-							<datalist id="cfi-meta-keys"></datalist>
-							<?php if ( $has_acf ) : ?>
-								<datalist id="cfi-acf-fields">
-									<?php
-									$acf_fields = get_posts(
-										array(
-											'post_type'      => 'acf-field',
-											'posts_per_page' => 200, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- admin-only datalist.
-											'post_status'    => 'publish',
-										)
-									);
-									foreach ( $acf_fields as $field ) :
-										$field_config = maybe_unserialize( $field->post_content );
-										$field_type   = $field_config['type'] ?? '';
-										?>
-										<option value="<?php echo esc_attr( $field->post_excerpt ); ?>">
-											<?php echo esc_html( $field->post_title . ' (' . $field_type . ')' ); ?>
-										</option>
-									<?php endforeach; ?>
-								</datalist>
-							<?php endif; ?>
+							<input type="text" id="source_key" name="source_key" value="<?php echo esc_attr( $m['source']['key'] ?? '' ); ?>" class="regular-text" autocomplete="off" />
 							<p class="description" id="cfi-source-key-desc">
 								<?php esc_html_e( 'The field name or meta key that holds the image. Not needed for Featured Image or Attachment source types.', 'cloudflare-images-sync' ); ?>
 							</p>
@@ -464,7 +548,7 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="target_url_meta" name="target_url_meta" value="<?php echo esc_attr( $m['target']['url_meta'] ?? '' ); ?>" class="regular-text" list="cfi-meta-keys" required />
+							<input type="text" id="target_url_meta" name="target_url_meta" value="<?php echo esc_attr( $m['target']['url_meta'] ?? '' ); ?>" class="regular-text" required />
 							<p class="description">
 								<?php esc_html_e( 'The post meta key where the Cloudflare delivery URL will be stored. Use this key in your theme to display the optimized image.', 'cloudflare-images-sync' ); ?>
 							</p>
