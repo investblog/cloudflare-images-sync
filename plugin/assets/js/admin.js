@@ -319,11 +319,13 @@
 	}
 
 	// Update destination autocompletes with meta keys for current post type.
-	function fetchTargetSuggestions() {
+	function fetchTargetSuggestions(reset) {
 		var postType = $postType.val();
 
-		for (var i = 0; i < targetAutocompletes.length; i++) {
-			targetAutocompletes[i].setItems([]);
+		if (reset) {
+			for (var i = 0; i < targetAutocompletes.length; i++) {
+				targetAutocompletes[i].setItems([]);
+			}
 		}
 
 		if (!postType || !ajax.ajaxUrl) {
@@ -336,6 +338,13 @@
 			}
 		});
 	}
+
+	// Lazy-fetch: when a destination input is focused and has no items yet, fetch them.
+	$('#target_url_meta, #target_id_meta, #target_sig_meta').on('focus', function () {
+		if ($postType.val() && targetAutocompletes.length > 0 && targetAutocompletes[0].items.length === 0) {
+			fetchTargetSuggestions(false);
+		}
+	});
 
 	// Smart AJAX fetching for source key: picks endpoint based on source type.
 	function fetchSourceSuggestions() {
@@ -372,14 +381,14 @@
 	$postType.on('change', function () {
 		suggestionsCache = {};
 		fetchSourceSuggestions();
-		fetchTargetSuggestions();
+		fetchTargetSuggestions(true);
 	});
 
 	updateSourceKeyRow();
 	// Fetch on load if post type is pre-selected (edit mode).
 	if ($postType.val()) {
 		fetchSourceSuggestions();
-		fetchTargetSuggestions();
+		fetchTargetSuggestions(false);
 	}
 
 	// ── Client-side validation ─────────────────────────────────────────
