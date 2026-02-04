@@ -37,14 +37,14 @@ jobs:
 
       - name: Build plugin ZIP
         run: |
-          mkdir -p build/cloudflare-images-sync
-          cp -r plugin/* build/cloudflare-images-sync/
+          mkdir -p build/cfi-images-sync
+          cp -r plugin/* build/cfi-images-sync/
           cd build
-          zip -r ../cloudflare-images-sync.zip cloudflare-images-sync -x '*.DS_Store' -x '*.git*'
+          zip -r ../cfi-images-sync.zip cfi-images-sync -x '*.DS_Store' -x '*.git*'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cloudflare-images-sync
-          path: cloudflare-images-sync.zip
+          name: cfi-images-sync
+          path: cfi-images-sync.zip
           retention-days: 7

@@ -50,7 +50,7 @@ class LogsPage {
 			$this->repo->clear();
 			$this->redirect_with_notice(
 				admin_url( 'admin.php?page=cfi-logs' ),
-				__( 'Logs cleared.', 'cloudflare-images-sync' )
+				__( 'Logs cleared.', 'cfi-images-sync' )
 			);
 		}
 	}
@@ -62,36 +62,36 @@ class LogsPage {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
+			wp_die( esc_html__( 'Unauthorized.', 'cfi-images-sync' ) );
 		}
 
 		$items = $this->repo->all();
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'CF Images — Logs', 'cloudflare-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Logs', 'cfi-images-sync' ); ?></h1>
 
 			<?php $this->render_notice(); ?>
 
 			<?php if ( empty( $items ) ) : ?>
-				<p><?php esc_html_e( 'No log entries yet. Events will appear here as the plugin runs.', 'cloudflare-images-sync' ); ?></p>
+				<p><?php esc_html_e( 'No log entries yet. Events will appear here as the plugin runs.', 'cfi-images-sync' ); ?></p>
 			<?php else : ?>
 				<div class="cfi-tablenav">
 					<form method="post">
 						<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
-						<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cloudflare-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cloudflare-images-sync' ); ?>');" />
+						<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cfi-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cfi-images-sync' ); ?>');" />
 					</form>
 					<?php /* translators: %d: number of log entries */ ?>
-					<span class="cfi-count-badge"><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
+					<span class="cfi-count-badge"><?php echo esc_html( sprintf( __( '%d entries', 'cfi-images-sync' ), count( $items ) ) ); ?></span>
 				</div>
 				<table class="widefat striped">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Time', 'cloudflare-images-sync' ); ?></th>
-							<th><?php esc_html_e( 'Level', 'cloudflare-images-sync' ); ?></th>
-							<th><?php esc_html_e( 'Message', 'cloudflare-images-sync' ); ?></th>
-							<th><?php esc_html_e( 'Post', 'cloudflare-images-sync' ); ?></th>
-							<th><?php esc_html_e( 'Mapping', 'cloudflare-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Time', 'cfi-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Level', 'cfi-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Message', 'cfi-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Post', 'cfi-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Mapping', 'cfi-images-sync' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>

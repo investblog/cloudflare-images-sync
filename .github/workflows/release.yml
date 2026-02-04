@@ -20,7 +20,7 @@ jobs:
 
       - name: Verify plugin version matches tag
         run: |
-          PLUGIN_VERSION=$(grep "Version:" plugin/cloudflare-images-sync.php | sed "s/.*Version:[[:space:]]*//")
+          PLUGIN_VERSION=$(grep "Version:" plugin/cfi-images-sync.php | sed "s/.*Version:[[:space:]]*//")
           TAG_VERSION=${{ steps.version.outputs.VERSION }}
           if [ "$PLUGIN_VERSION" != "$TAG_VERSION" ]; then
             echo "::error::Plugin version ($PLUGIN_VERSION) does not match tag version ($TAG_VERSION)"
@@ -41,15 +41,15 @@ jobs:
 
       - name: Build plugin ZIP
         run: |
-          mkdir -p build/cloudflare-images-sync
-          cp -r plugin/* build/cloudflare-images-sync/
+          mkdir -p build/cfi-images-sync
+          cp -r plugin/* build/cfi-images-sync/
           cd build
-          zip -r ../cloudflare-images-sync-${{ steps.version.outputs.VERSION }}.zip cloudflare-images-sync -x '*.DS_Store' -x '*.git*'
+          zip -r ../cfi-images-sync-${{ steps.version.outputs.VERSION }}.zip cfi-images-sync -x '*.DS_Store' -x '*.git*'
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: cloudflare-images-sync-${{ steps.version.outputs.VERSION }}.zip
+          files: cfi-images-sync-${{ steps.version.outputs.VERSION }}.zip
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref, '-beta') || contains(github.ref, '-alpha') || contains(github.ref, '-rc') }}

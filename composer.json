@@ -1,5 +1,5 @@
 {
-    "name": "cloudflare-images-sync/dev-tools",
+    "name": "cfi-images-sync/dev-tools",
     "description": "Development tools for Cloudflare Images Sync WordPress plugin",
     "type": "project",
     "require-dev": {

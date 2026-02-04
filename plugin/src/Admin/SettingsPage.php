@@ -54,7 +54,7 @@ class SettingsPage {
 		if ( isset( $_POST['cfi_save_settings'] ) ) {
 			check_admin_referer( 'cfi_settings_save' );
 			$this->save_from_post();
-			$this->redirect_with_notice( $redirect_url, __( 'Settings saved.', 'cloudflare-images-sync' ) );
+			$this->redirect_with_notice( $redirect_url, __( 'Settings saved.', 'cfi-images-sync' ) );
 		}
 
 		// Handle test connection (save first, then test).
@@ -80,12 +80,12 @@ class SettingsPage {
 				'info',
 				sprintf(
 					/* translators: %s: masked Cloudflare account ID */
-					__( 'Connection test passed for account %s.', 'cloudflare-images-sync' ),
+					__( 'Connection test passed for account %s.', 'cfi-images-sync' ),
 					Mask::token( $settings['account_id'] )
 				)
 			);
 
-			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cloudflare-images-sync' ) );
+			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cfi-images-sync' ) );
 		}
 	}
 
@@ -121,7 +121,7 @@ class SettingsPage {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
+			wp_die( esc_html__( 'Unauthorized.', 'cfi-images-sync' ) );
 		}
 
 		$settings     = $this->repo->get();
@@ -129,7 +129,7 @@ class SettingsPage {
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'CF Images — Settings', 'cloudflare-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Settings', 'cfi-images-sync' ); ?></h1>
 
 			<?php $this->render_notice(); ?>
 
@@ -138,7 +138,7 @@ class SettingsPage {
 
 				<table class="form-table">
 					<tr>
-						<th><label for="account_id"><?php esc_html_e( 'Account ID', 'cloudflare-images-sync' ); ?></label></th>
+						<th><label for="account_id"><?php esc_html_e( 'Account ID', 'cfi-images-sync' ); ?></label></th>
 						<td><input type="text" id="account_id" name="account_id" value="<?php echo esc_attr( $settings['account_id'] ); ?>" class="regular-text" />
 						<p class="description">
 							<?php
@@ -149,11 +149,11 @@ class SettingsPage {
 									'rel'    => array(),
 								),
 							);
-							$images_link  = '<a href="https://dash.cloudflare.com/?to=/:account/images" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images', 'cloudflare-images-sync' ) . '</a>';
+							$images_link  = '<a href="https://dash.cloudflare.com/?to=/:account/images" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images', 'cfi-images-sync' ) . '</a>';
 							echo wp_kses(
 								sprintf(
 									/* translators: %s: link to Cloudflare Images dashboard */
-									__( 'Found on the %s page (right sidebar).', 'cloudflare-images-sync' ),
+									__( 'Found on the %s page (right sidebar).', 'cfi-images-sync' ),
 									$images_link
 								),
 								$allowed_link
@@ -162,14 +162,14 @@ class SettingsPage {
 						</p></td>
 					</tr>
 					<tr>
-						<th><label for="account_hash"><?php esc_html_e( 'Account Hash', 'cloudflare-images-sync' ); ?></label></th>
+						<th><label for="account_hash"><?php esc_html_e( 'Account Hash', 'cfi-images-sync' ); ?></label></th>
 						<td><input type="text" id="account_hash" name="account_hash" value="<?php echo esc_attr( $settings['account_hash'] ); ?>" class="regular-text" />
 						<p class="description">
 							<?php
 							echo wp_kses(
 								sprintf(
 									/* translators: %s: link to Cloudflare Images dashboard */
-									__( 'Found on the %s page (right sidebar). Used for delivery URLs.', 'cloudflare-images-sync' ),
+									__( 'Found on the %s page (right sidebar). Used for delivery URLs.', 'cfi-images-sync' ),
 									$images_link
 								),
 								$allowed_link
@@ -182,11 +182,11 @@ class SettingsPage {
 						<td>
 							<p class="description">
 								<?php
-								$flex_link = '<a href="https://developers.cloudflare.com/images/transform-images/flexible-variants/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Flexible Variants docs', 'cloudflare-images-sync' ) . '</a>';
+								$flex_link = '<a href="https://developers.cloudflare.com/images/transform-images/flexible-variants/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Flexible Variants docs', 'cfi-images-sync' ) . '</a>';
 								echo wp_kses(
 									sprintf(
 										/* translators: %s: link to Cloudflare Flexible Variants docs */
-										__( '<strong>Flexible Variants</strong> must be enabled in your Cloudflare Images settings for parameter-based presets (w=, h=, fit=...). See %s.', 'cloudflare-images-sync' ),
+										__( '<strong>Flexible Variants</strong> must be enabled in your Cloudflare Images settings for parameter-based presets (w=, h=, fit=...). See %s.', 'cfi-images-sync' ),
 										$flex_link
 									),
 									array(
@@ -203,51 +203,51 @@ class SettingsPage {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="api_token"><?php esc_html_e( 'API Token', 'cloudflare-images-sync' ); ?></label></th>
+						<th><label for="api_token"><?php esc_html_e( 'API Token', 'cfi-images-sync' ); ?></label></th>
 						<td><input type="password" id="api_token" name="api_token" value="" placeholder="<?php echo esc_attr( $masked_token ); ?>" class="regular-text" autocomplete="new-password" />
 						<p class="description">
 							<?php
-							$tokens_link = '<a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API Tokens', 'cloudflare-images-sync' ) . '</a>';
+							$tokens_link = '<a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API Tokens', 'cfi-images-sync' ) . '</a>';
 							echo wp_kses(
 								sprintf(
 									/* translators: %s: link to Cloudflare API Tokens page */
-									__( 'Create at %s with "Cloudflare Images: Edit" permission. Not the signature token from the Images Keys tab.', 'cloudflare-images-sync' ),
+									__( 'Create at %s with "Cloudflare Images: Edit" permission. Not the signature token from the Images Keys tab.', 'cfi-images-sync' ),
 									$tokens_link
 								),
 								$allowed_link
 							);
 							?>
 						</p>
-						<p class="description"><?php esc_html_e( 'Leave blank to keep the current token.', 'cloudflare-images-sync' ); ?></p></td>
+						<p class="description"><?php esc_html_e( 'Leave blank to keep the current token.', 'cfi-images-sync' ); ?></p></td>
 					</tr>
 					<tr>
-						<th><?php esc_html_e( 'Debug mode', 'cloudflare-images-sync' ); ?></th>
-						<td><label><input type="checkbox" name="debug" value="1" <?php checked( $settings['debug'] ); ?> /> <?php esc_html_e( 'Enable debug logging', 'cloudflare-images-sync' ); ?></label></td>
+						<th><?php esc_html_e( 'Debug mode', 'cfi-images-sync' ); ?></th>
+						<td><label><input type="checkbox" name="debug" value="1" <?php checked( $settings['debug'] ); ?> /> <?php esc_html_e( 'Enable debug logging', 'cfi-images-sync' ); ?></label></td>
 					</tr>
 					<tr>
-						<th><?php esc_html_e( 'Use queue', 'cloudflare-images-sync' ); ?></th>
+						<th><?php esc_html_e( 'Use queue', 'cfi-images-sync' ); ?></th>
 						<td>
 							<?php $has_as = function_exists( 'as_enqueue_async_action' ); ?>
 							<label>
 								<input type="checkbox" name="use_queue" value="1" <?php checked( $settings['use_queue'] ); ?> <?php disabled( ! $has_as ); ?> />
-								<?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'cloudflare-images-sync' ); ?>
+								<?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'cfi-images-sync' ); ?>
 							</label>
 							<?php if ( ! $has_as ) : ?>
 								<p class="description" style="color: #d63638;">
-									<?php esc_html_e( 'Action Scheduler is not available. Install and activate a plugin that includes it (e.g. WooCommerce or Action Scheduler standalone) to enable background processing.', 'cloudflare-images-sync' ); ?>
+									<?php esc_html_e( 'Action Scheduler is not available. Install and activate a plugin that includes it (e.g. WooCommerce or Action Scheduler standalone) to enable background processing.', 'cfi-images-sync' ); ?>
 								</p>
 							<?php endif; ?>
 						</td>
 					</tr>
 					<tr>
-						<th><label for="logs_max"><?php esc_html_e( 'Max log entries', 'cloudflare-images-sync' ); ?></label></th>
+						<th><label for="logs_max"><?php esc_html_e( 'Max log entries', 'cfi-images-sync' ); ?></label></th>
 						<td><input type="number" id="logs_max" name="logs_max" value="<?php echo esc_attr( $settings['logs_max'] ); ?>" min="50" max="1000" class="small-text" /></td>
 					</tr>
 				</table>
 
 				<p class="submit">
-					<input type="submit" name="cfi_save_settings" class="button-primary" value="<?php esc_attr_e( 'Save Settings', 'cloudflare-images-sync' ); ?>" />
-					<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'cloudflare-images-sync' ); ?>" />
+					<input type="submit" name="cfi_save_settings" class="button-primary" value="<?php esc_attr_e( 'Save Settings', 'cfi-images-sync' ); ?>" />
+					<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'cfi-images-sync' ); ?>" />
 				</p>
 			</form>
 		</div>

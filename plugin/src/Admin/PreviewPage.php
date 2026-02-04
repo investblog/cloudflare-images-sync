@@ -52,7 +52,7 @@ class PreviewPage {
 
 			$message = is_wp_error( $result )
 				? $result->get_error_message()
-				: __( 'Demo image uploaded successfully.', 'cloudflare-images-sync' );
+				: __( 'Demo image uploaded successfully.', 'cfi-images-sync' );
 			$type = is_wp_error( $result ) ? 'error' : 'success';
 
 			$this->redirect_with_notice(
@@ -90,7 +90,7 @@ class PreviewPage {
 			if ( $mapping_id !== '' && ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
 				$this->redirect_with_notice(
 					admin_url( 'admin.php?page=cfi-preview&mode=post' ),
-					__( 'Invalid mapping ID.', 'cloudflare-images-sync' ),
+					__( 'Invalid mapping ID.', 'cfi-images-sync' ),
 					'error'
 				);
 			}
@@ -102,10 +102,10 @@ class PreviewPage {
 				if ( $mapping ) {
 					$engine = new SyncEngine();
 					$result = $engine->sync( $post_id, $mapping );
-					$msg    = is_wp_error( $result ) ? $result->get_error_message() : __( 'Synced successfully.', 'cloudflare-images-sync' );
+					$msg    = is_wp_error( $result ) ? $result->get_error_message() : __( 'Synced successfully.', 'cfi-images-sync' );
 					$type   = is_wp_error( $result ) ? 'error' : 'success';
 				} else {
-					$msg  = __( 'Mapping not found.', 'cloudflare-images-sync' );
+					$msg  = __( 'Mapping not found.', 'cfi-images-sync' );
 					$type = 'error';
 				}
 
@@ -125,7 +125,7 @@ class PreviewPage {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cloudflare-images-sync' ) );
+			wp_die( esc_html__( 'Unauthorized.', 'cfi-images-sync' ) );
 		}
 
 		wp_enqueue_media();
@@ -134,11 +134,11 @@ class PreviewPage {
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'CF Images — Preview / Variant Studio', 'cloudflare-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Preview / Variant Studio', 'cfi-images-sync' ); ?></h1>
 
 			<h2 class="nav-tab-wrapper">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=attachment' ) ); ?>" class="nav-tab <?php echo $mode === 'attachment' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Attachment Preview', 'cloudflare-images-sync' ); ?></a>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=post' ) ); ?>" class="nav-tab <?php echo $mode === 'post' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Post + Mapping', 'cloudflare-images-sync' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=attachment' ) ); ?>" class="nav-tab <?php echo $mode === 'attachment' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Attachment Preview', 'cfi-images-sync' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=post' ) ); ?>" class="nav-tab <?php echo $mode === 'post' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Post + Mapping', 'cfi-images-sync' ); ?></a>
 			</h2>
 
 			<?php $this->render_notice(); ?>
@@ -167,12 +167,12 @@ class PreviewPage {
 			<input type="hidden" name="page" value="cfi-preview" />
 			<input type="hidden" name="mode" value="attachment" />
 			<p>
-				<label for="attachment_id"><?php esc_html_e( 'Attachment ID:', 'cloudflare-images-sync' ); ?></label>
+				<label for="attachment_id"><?php esc_html_e( 'Attachment ID:', 'cfi-images-sync' ); ?></label>
 				<input type="number" id="attachment_id" name="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>" min="1" class="small-text" />
-				<input type="submit" class="button" value="<?php esc_attr_e( 'Load', 'cloudflare-images-sync' ); ?>" />
+				<input type="submit" class="button" value="<?php esc_attr_e( 'Load', 'cfi-images-sync' ); ?>" />
 			</p>
 			<p class="description">
-				<?php esc_html_e( 'Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand.', 'cloudflare-images-sync' ); ?>
+				<?php esc_html_e( 'Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand.', 'cfi-images-sync' ); ?>
 			</p>
 		</form>
 
@@ -196,11 +196,11 @@ class PreviewPage {
 			// Empty state: offer both options.
 			?>
 			<div class="cfi-empty-state">
-				<p><?php esc_html_e( 'Enter an attachment ID above, or use the sample image to preview presets.', 'cloudflare-images-sync' ); ?></p>
+				<p><?php esc_html_e( 'Enter an attachment ID above, or use the sample image to preview presets.', 'cfi-images-sync' ); ?></p>
 				<form method="post">
 					<?php wp_nonce_field( 'cfi_demo_upload' ); ?>
 					<button type="submit" name="cfi_demo_upload" class="button button-primary">
-						<?php esc_html_e( 'Use Sample Image', 'cloudflare-images-sync' ); ?>
+						<?php esc_html_e( 'Use Sample Image', 'cfi-images-sync' ); ?>
 					</button>
 				</form>
 			</div>
@@ -212,11 +212,11 @@ class PreviewPage {
 
 		if ( $cf_image_id === '' ) {
 			?>
-			<p><?php esc_html_e( 'This attachment has not been uploaded to Cloudflare yet.', 'cloudflare-images-sync' ); ?></p>
+			<p><?php esc_html_e( 'This attachment has not been uploaded to Cloudflare yet.', 'cfi-images-sync' ); ?></p>
 			<form method="post">
 				<?php wp_nonce_field( 'cfi_preview_upload' ); ?>
 				<input type="hidden" name="page" value="cfi-preview" />
-				<input type="submit" name="cfi_preview_upload" class="button-primary" value="<?php esc_attr_e( 'Upload for Preview', 'cloudflare-images-sync' ); ?>" />
+				<input type="submit" name="cfi_preview_upload" class="button-primary" value="<?php esc_attr_e( 'Upload for Preview', 'cfi-images-sync' ); ?>" />
 			</form>
 			<?php
 			return;
@@ -244,21 +244,21 @@ class PreviewPage {
 			<input type="hidden" name="page" value="cfi-preview" />
 			<input type="hidden" name="mode" value="post" />
 			<p>
-				<label for="post_id"><?php esc_html_e( 'Post ID:', 'cloudflare-images-sync' ); ?></label>
+				<label for="post_id"><?php esc_html_e( 'Post ID:', 'cfi-images-sync' ); ?></label>
 				<input type="number" id="post_id" name="post_id" value="<?php echo esc_attr( $post_id ); ?>" min="1" class="small-text" />
 
-				<label for="mapping_id"><?php esc_html_e( 'Mapping:', 'cloudflare-images-sync' ); ?></label>
+				<label for="mapping_id"><?php esc_html_e( 'Mapping:', 'cfi-images-sync' ); ?></label>
 				<select id="mapping_id" name="mapping_id">
-					<option value=""><?php esc_html_e( '— Select —', 'cloudflare-images-sync' ); ?></option>
+					<option value=""><?php esc_html_e( '— Select —', 'cfi-images-sync' ); ?></option>
 					<?php foreach ( $all_mappings as $m ) : ?>
 						<option value="<?php echo esc_attr( $m['id'] ); ?>" <?php selected( $mapping_id, $m['id'] ); ?>><?php echo esc_html( $m['post_type'] . ' → ' . ( $m['target']['url_meta'] ?? '' ) ); ?></option>
 					<?php endforeach; ?>
 				</select>
 
-				<input type="submit" class="button" value="<?php esc_attr_e( 'Preview', 'cloudflare-images-sync' ); ?>" />
+				<input type="submit" class="button" value="<?php esc_attr_e( 'Preview', 'cfi-images-sync' ); ?>" />
 			</p>
 			<p class="description">
-				<?php esc_html_e( 'Check the current delivery URL for a post or use "Sync Now" to manually trigger image sync for the selected mapping.', 'cloudflare-images-sync' ); ?>
+				<?php esc_html_e( 'Check the current delivery URL for a post or use "Sync Now" to manually trigger image sync for the selected mapping.', 'cfi-images-sync' ); ?>
 			</p>
 		</form>
 
@@ -269,7 +269,7 @@ class PreviewPage {
 
 		$mapping = $mappings_repo->find( $mapping_id );
 		if ( ! $mapping ) {
-			echo '<p>' . esc_html__( 'Mapping not found.', 'cloudflare-images-sync' ) . '</p>';
+			echo '<p>' . esc_html__( 'Mapping not found.', 'cfi-images-sync' ) . '</p>';
 			return;
 		}
 
@@ -277,7 +277,7 @@ class PreviewPage {
 		$resolved = SourceResolver::resolve( $post_id, $mapping['source'] ?? array() );
 
 		if ( $resolved->is_empty() ) {
-			echo '<p>' . esc_html__( 'Source field is empty for this post.', 'cloudflare-images-sync' ) . '</p>';
+			echo '<p>' . esc_html__( 'Source field is empty for this post.', 'cfi-images-sync' ) . '</p>';
 			return;
 		}
 
@@ -286,17 +286,17 @@ class PreviewPage {
 		$stored_url = $url_meta ? (string) get_post_meta( $post_id, $url_meta, true ) : '';
 
 		if ( $stored_url !== '' ) {
-			echo '<h3>' . esc_html__( 'Current Delivery URL', 'cloudflare-images-sync' ) . '</h3>';
+			echo '<h3>' . esc_html__( 'Current Delivery URL', 'cfi-images-sync' ) . '</h3>';
 			echo '<p><code>' . esc_html( $stored_url ) . '</code></p>';
 			echo '<p><img src="' . esc_url( $stored_url ) . '" class="cfi-preview-img" loading="lazy" /></p>';
 		} else {
-			echo '<p>' . esc_html__( 'No delivery URL stored yet.', 'cloudflare-images-sync' ) . '</p>';
+			echo '<p>' . esc_html__( 'No delivery URL stored yet.', 'cfi-images-sync' ) . '</p>';
 		}
 
 		?>
 		<form method="post">
 			<?php wp_nonce_field( 'cfi_sync_now' ); ?>
-			<input type="submit" name="cfi_sync_now" class="button-primary" value="<?php esc_attr_e( 'Sync Now', 'cloudflare-images-sync' ); ?>" />
+			<input type="submit" name="cfi_sync_now" class="button-primary" value="<?php esc_attr_e( 'Sync Now', 'cfi-images-sync' ); ?>" />
 		</form>
 		<?php
 	}
@@ -311,7 +311,7 @@ class PreviewPage {
 		$file_path = get_attached_file( $attachment_id );
 
 		if ( ! $file_path || ! file_exists( $file_path ) ) {
-			return __( 'Attachment file not found.', 'cloudflare-images-sync' );
+			return __( 'Attachment file not found.', 'cfi-images-sync' );
 		}
 
 		// Check if already uploaded and unchanged.
@@ -319,7 +319,7 @@ class PreviewPage {
 		$cf_id      = (string) get_post_meta( $attachment_id, OptionKeys::META_PREVIEW_IMAGE_ID, true );
 
 		if ( $cf_id !== '' && ! Signature::has_changed( $file_path, $stored_sig ) ) {
-			return __( 'Already uploaded (unchanged).', 'cloudflare-images-sync' );
+			return __( 'Already uploaded (unchanged).', 'cfi-images-sync' );
 		}
 
 		$client = CloudflareImagesClient::from_settings();
@@ -354,7 +354,7 @@ class PreviewPage {
 		update_post_meta( $attachment_id, OptionKeys::META_PREVIEW_IMAGE_ID, $new_cf_id );
 		update_post_meta( $attachment_id, OptionKeys::META_PREVIEW_SIG, $new_sig );
 
-		return __( 'Uploaded successfully.', 'cloudflare-images-sync' );
+		return __( 'Uploaded successfully.', 'cfi-images-sync' );
 	}
 
 	/**
@@ -391,7 +391,7 @@ class PreviewPage {
 		$presets  = ( new PresetsRepo() )->all();
 
 		if ( empty( $presets ) ) {
-			echo '<p>' . esc_html__( 'No presets configured. Add presets first.', 'cloudflare-images-sync' ) . '</p>';
+			echo '<p>' . esc_html__( 'No presets configured. Add presets first.', 'cfi-images-sync' ) . '</p>';
 			return;
 		}
 
@@ -402,7 +402,7 @@ class PreviewPage {
 			$presets = $highlighted + $presets;
 		}
 
-		echo '<h3>' . esc_html__( 'Variant Previews', 'cloudflare-images-sync' ) . '</h3>';
+		echo '<h3>' . esc_html__( 'Variant Previews', 'cfi-images-sync' ) . '</h3>';
 		echo '<div class="cfi-preset-grid">';
 
 		foreach ( $presets as $id => $preset ) {
@@ -420,7 +420,7 @@ class PreviewPage {
 			echo '<div class="' . esc_attr( $card_class ) . '">';
 			echo '<h4>' . esc_html( $preset['name'] ) . '</h4>';
 			echo '<img src="' . esc_url( $url ) . '" loading="lazy" />';
-			echo '<p><code class="cfi-copy-url" title="' . esc_attr__( 'Click to copy', 'cloudflare-images-sync' ) . '">' . esc_html( $url ) . '</code></p>';
+			echo '<p><code class="cfi-copy-url" title="' . esc_attr__( 'Click to copy', 'cfi-images-sync' ) . '">' . esc_html( $url ) . '</code></p>';
 			echo '</div>';
 		}
 

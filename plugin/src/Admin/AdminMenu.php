@@ -49,8 +49,8 @@ class AdminMenu {
 		$logs_page     = new LogsPage();
 
 		$hook = add_menu_page(
-			__( 'Images Sync for Cloudflare', 'cloudflare-images-sync' ),
-			__( 'CF Images', 'cloudflare-images-sync' ),
+			__( 'Images Sync for Cloudflare', 'cfi-images-sync' ),
+			__( 'CF Images', 'cfi-images-sync' ),
 			$capability,
 			'cfi-settings',
 			array( $settings_page, 'render' ),
@@ -62,8 +62,8 @@ class AdminMenu {
 		// Rename the auto-generated first submenu item from "CF Images" to "Settings".
 		add_submenu_page(
 			'cfi-settings',
-			__( 'Settings', 'cloudflare-images-sync' ),
-			__( 'Settings', 'cloudflare-images-sync' ),
+			__( 'Settings', 'cfi-images-sync' ),
+			__( 'Settings', 'cfi-images-sync' ),
 			$capability,
 			'cfi-settings',
 			array( $settings_page, 'render' )
@@ -71,8 +71,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Presets', 'cloudflare-images-sync' ),
-			__( 'Presets', 'cloudflare-images-sync' ),
+			__( 'Presets', 'cfi-images-sync' ),
+			__( 'Presets', 'cfi-images-sync' ),
 			$capability,
 			'cfi-presets',
 			array( $presets_page, 'render' )
@@ -81,8 +81,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Mappings', 'cloudflare-images-sync' ),
-			__( 'Mappings', 'cloudflare-images-sync' ),
+			__( 'Mappings', 'cfi-images-sync' ),
+			__( 'Mappings', 'cfi-images-sync' ),
 			$capability,
 			'cfi-mappings',
 			array( $mappings_page, 'render' )
@@ -91,8 +91,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Preview', 'cloudflare-images-sync' ),
-			__( 'Preview', 'cloudflare-images-sync' ),
+			__( 'Preview', 'cfi-images-sync' ),
+			__( 'Preview', 'cfi-images-sync' ),
 			$capability,
 			'cfi-preview',
 			array( $preview_page, 'render' )
@@ -101,8 +101,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Logs', 'cloudflare-images-sync' ),
-			__( 'Logs', 'cloudflare-images-sync' ),
+			__( 'Logs', 'cfi-images-sync' ),
+			__( 'Logs', 'cfi-images-sync' ),
 			$capability,
 			'cfi-logs',
 			array( $logs_page, 'render' )
@@ -146,16 +146,16 @@ class AdminMenu {
 		$settings_url = admin_url( 'admin.php?page=cfi-settings' );
 		printf(
 			'<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-			esc_html__( 'Cloudflare Images not configured.', 'cloudflare-images-sync' ),
+			esc_html__( 'Cloudflare Images not configured.', 'cfi-images-sync' ),
 			esc_html(
 				sprintf(
 					/* translators: %s: comma-separated list of missing fields */
-					__( 'Missing: %s.', 'cloudflare-images-sync' ),
+					__( 'Missing: %s.', 'cfi-images-sync' ),
 					implode( ', ', $missing )
 				)
 			),
 			esc_url( $settings_url ),
-			esc_html__( 'Go to Settings →', 'cloudflare-images-sync' )
+			esc_html__( 'Go to Settings →', 'cfi-images-sync' )
 		);
 	}
 
