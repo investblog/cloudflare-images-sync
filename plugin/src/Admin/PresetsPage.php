@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use CFI\Repos\Defaults;
 use CFI\Repos\PresetsRepo;
 use CFI\Support\Validators;
 
@@ -62,6 +63,33 @@ class PresetsPage {
 			}
 
 			$this->redirect_with_notice( $redirect_url, __( 'Preset deleted.', 'cloudflare-images-sync' ) );
+		}
+
+		// Handle install recommended presets.
+		if ( isset( $_POST['cfi_install_recommended'] ) ) {
+			check_admin_referer( 'cfi_install_recommended' );
+			$result = $this->repo->install_recommended();
+			$count  = count( $result['installed'] );
+			$skip   = count( $result['skipped'] );
+
+			if ( $count > 0 ) {
+				$message = sprintf(
+					/* translators: %d: number of presets installed */
+					_n( '%d preset installed.', '%d presets installed.', $count, 'cloudflare-images-sync' ),
+					$count
+				);
+				if ( $skip > 0 ) {
+					$message .= ' ' . sprintf(
+						/* translators: %d: number of presets skipped */
+						_n( '%d already existed (skipped).', '%d already existed (skipped).', $skip, 'cloudflare-images-sync' ),
+						$skip
+					);
+				}
+			} else {
+				$message = __( 'All recommended presets already exist.', 'cloudflare-images-sync' );
+			}
+
+			$this->redirect_with_notice( $redirect_url, $message );
 		}
 
 		// Handle create/update (POST).
@@ -144,9 +172,17 @@ class PresetsPage {
 				</p>
 			</form>
 
-			<h2><?php esc_html_e( 'Existing Presets', 'cloudflare-images-sync' ); ?></h2>
+			<div style="display:flex;align-items:center;gap:12px;margin:20px 0 12px;">
+				<h2 style="margin:0;"><?php esc_html_e( 'Existing Presets', 'cloudflare-images-sync' ); ?></h2>
+				<form method="post" style="display:inline;">
+					<?php wp_nonce_field( 'cfi_install_recommended' ); ?>
+					<button type="submit" name="cfi_install_recommended" class="button">
+						<?php esc_html_e( 'Install Recommended Presets', 'cloudflare-images-sync' ); ?>
+					</button>
+				</form>
+			</div>
 			<?php if ( empty( $presets ) ) : ?>
-				<p><?php esc_html_e( 'No presets yet.', 'cloudflare-images-sync' ); ?></p>
+				<p><?php esc_html_e( 'No presets yet. Click "Install Recommended Presets" to add a curated set.', 'cloudflare-images-sync' ); ?></p>
 			<?php else : ?>
 				<table class="widefat striped">
 					<thead>
@@ -159,10 +195,18 @@ class PresetsPage {
 					<tbody>
 						<?php foreach ( $presets as $preset ) : ?>
 							<tr>
-								<td><strong><?php echo esc_html( $preset['name'] ); ?></strong><br/><code><?php echo esc_html( $preset['id'] ); ?></code></td>
+								<td>
+									<strong><?php echo esc_html( $preset['name'] ); ?></strong>
+									<?php if ( Defaults::is_recommended_name( $preset['name'] ) ) : ?>
+										<span class="cfi-badge cfi-badge--recommended"><?php esc_html_e( 'Recommended', 'cloudflare-images-sync' ); ?></span>
+									<?php endif; ?>
+									<br/><code><?php echo esc_html( $preset['id'] ); ?></code>
+								</td>
 								<td><code><?php echo esc_html( $preset['variant'] ); ?></code></td>
 								<td>
 									<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-presets&action=edit&preset_id=' . $preset['id'] ) ); ?>"><?php esc_html_e( 'Edit', 'cloudflare-images-sync' ); ?></a>
+									|
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=attachment&preset_id=' . $preset['id'] ) ); ?>"><?php esc_html_e( 'Preview', 'cloudflare-images-sync' ); ?></a>
 									|
 									<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=cfi-presets&action=delete&preset_id=' . $preset['id'] ), 'cfi_delete_preset_' . $preset['id'] ) ); ?>" onclick="return confirm('<?php esc_attr_e( 'Delete this preset?', 'cloudflare-images-sync' ); ?>');"><?php esc_html_e( 'Delete', 'cloudflare-images-sync' ); ?></a>
 								</td>

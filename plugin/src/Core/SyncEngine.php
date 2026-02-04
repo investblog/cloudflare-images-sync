@@ -40,6 +40,18 @@ class SyncEngine {
 			'mapping_id' => $mapping['id'] ?? '',
 		);
 
+		// 0. Validate mapping at sync time.
+		$post_type = $mapping['post_type'] ?? '';
+		if ( $post_type === '' || ! post_type_exists( $post_type ) ) {
+			$logs->push( 'error', 'Mapping has invalid post type.', $ctx );
+			return new \WP_Error( 'cfi_invalid_mapping', 'Invalid post type in mapping.' );
+		}
+
+		if ( empty( $mapping['target']['url_meta'] ) ) {
+			$logs->push( 'error', 'Mapping has no target url_meta configured.', $ctx );
+			return new \WP_Error( 'cfi_invalid_mapping', 'No target url_meta in mapping.' );
+		}
+
 		// 1. Resolve source.
 		$source   = $mapping['source'] ?? array();
 		$resolved = SourceResolver::resolve( $post_id, $source );
@@ -61,6 +73,10 @@ class SyncEngine {
 		if ( $att_cf_id !== '' && ! Signature::has_changed( $file_path, $att_sig ) ) {
 			// File unchanged and already on CF — skip upload, just store target meta.
 			$url = $this->build_url( $att_cf_id, $mapping );
+			if ( $url === '' ) {
+				$logs->push( 'error', 'Could not build delivery URL (check account_hash setting).', $ctx );
+				return new \WP_Error( 'cfi_url_build_failed', 'Could not build delivery URL.' );
+			}
 			$this->store_meta( $post_id, $target, $att_cf_id, $url, $att_sig );
 			$logs->push( 'info', 'Reused existing CF image from attachment cache.', $ctx );
 			return true;
@@ -103,11 +119,10 @@ class SyncEngine {
 			'mapping_id'       => $mapping['id'] ?? '',
 		);
 
-		// If re-uploading, only delete old CF image when it's NOT shared via attachment cache.
-		if ( $stored_cfid !== '' && $stored_cfid !== $att_cf_id ) {
+		// Optionally delete old CF image on re-upload (disabled by default).
+		if ( $stored_cfid !== '' && ! empty( $behavior['delete_cf_on_reupload'] ) && $stored_cfid !== $att_cf_id ) {
 			$client->delete( $stored_cfid );
-		} elseif ( $stored_cfid !== '' ) {
-			$logs->push( 'debug', 'Skipped CF image deletion — shared via attachment cache.', $ctx );
+			$logs->push( 'debug', 'Deleted old CF image before re-upload.', $ctx );
 		}
 
 		$upload = $client->upload( $file_path, $metadata );
@@ -247,15 +262,15 @@ class SyncEngine {
 	 * @param string               $signature  File signature.
 	 */
 	private function store_meta( int $post_id, array $target, string $cf_id, string $url, string $signature ): void {
-		if ( ! empty( $target['url_meta'] ) ) {
+		if ( ! empty( $target['url_meta'] ) && $url !== '' ) {
 			update_post_meta( $post_id, $target['url_meta'], $url );
 		}
 
-		if ( ! empty( $target['id_meta'] ) ) {
+		if ( ! empty( $target['id_meta'] ) && $cf_id !== '' ) {
 			update_post_meta( $post_id, $target['id_meta'], $cf_id );
 		}
 
-		if ( ! empty( $target['sig_meta'] ) ) {
+		if ( ! empty( $target['sig_meta'] ) && $signature !== '' ) {
 			update_post_meta( $post_id, $target['sig_meta'], $signature );
 		}
 	}

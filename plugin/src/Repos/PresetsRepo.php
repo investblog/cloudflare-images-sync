@@ -172,7 +172,7 @@ class PresetsRepo {
 	 * @param string $name Preset name to check.
 	 * @return bool
 	 */
-	private function name_exists( string $name ): bool {
+	public function name_exists( string $name ): bool {
 		$lower = strtolower( $name );
 
 		foreach ( $this->all() as $preset ) {
@@ -182,6 +182,37 @@ class PresetsRepo {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Install recommended presets, skipping any whose name already exists.
+	 *
+	 * @return array{installed: string[], skipped: string[]}
+	 */
+	public function install_recommended(): array {
+		$recommended = Defaults::recommended_presets();
+		$installed   = array();
+		$skipped     = array();
+
+		foreach ( $recommended as $data ) {
+			if ( $this->name_exists( $data['name'] ) ) {
+				$skipped[] = $data['name'];
+				continue;
+			}
+
+			$result = $this->create( $data );
+
+			if ( is_wp_error( $result ) ) {
+				$skipped[] = $data['name'];
+			} else {
+				$installed[] = $data['name'];
+			}
+		}
+
+		return array(
+			'installed' => $installed,
+			'skipped'   => $skipped,
+		);
 	}
 
 	/**

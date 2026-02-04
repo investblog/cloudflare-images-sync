@@ -33,4 +33,11 @@ final class OptionKeys {
 	 */
 	public const META_CF_IMAGE_ID = '_cfi_cf_image_id';
 	public const META_SIG         = '_cfi_sig';
+
+	/**
+	 * Demo image option keys (Preview sample image cache).
+	 */
+	public const DEMO_IMAGE_ID = 'cfi_demo_image_id';
+	public const DEMO_SIG      = 'cfi_demo_sig';
+	public const DEMO_UPDATED  = 'cfi_demo_updated_at';
 }

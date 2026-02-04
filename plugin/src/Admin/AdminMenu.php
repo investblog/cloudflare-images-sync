@@ -25,11 +25,13 @@ class AdminMenu {
 	public function init(): void {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_show_config_warning' ) );
 
 		// AJAX handlers.
 		$mappings_page = new MappingsPage();
 		add_action( 'wp_ajax_cfi_meta_keys', array( $mappings_page, 'ajax_meta_keys' ) );
 		add_action( 'wp_ajax_cfi_acf_fields', array( $mappings_page, 'ajax_acf_fields' ) );
+		add_action( 'wp_ajax_cfi_test_mapping', array( $mappings_page, 'ajax_test_mapping' ) );
 	}
 
 	/**
@@ -106,6 +108,55 @@ class AdminMenu {
 			array( $logs_page, 'render' )
 		);
 		add_action( 'load-' . $hook, array( $logs_page, 'handle_actions' ) );
+	}
+
+	/**
+	 * Show a warning banner when Cloudflare credentials are not configured.
+	 *
+	 * @return void
+	 */
+	public function maybe_show_config_warning(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || strpos( $screen->id, 'cfi-' ) === false ) {
+			return;
+		}
+
+		// Skip on the settings page itself — the user is likely configuring right now.
+		if ( $screen->id === 'toplevel_page_cfi-settings' ) {
+			return;
+		}
+
+		$settings = ( new \CFI\Repos\SettingsRepo() )->get();
+		$missing  = array();
+
+		if ( $settings['account_id'] === '' ) {
+			$missing[] = 'Account ID';
+		}
+		if ( $settings['account_hash'] === '' ) {
+			$missing[] = 'Account Hash';
+		}
+		if ( $settings['api_token'] === '' ) {
+			$missing[] = 'API Token';
+		}
+
+		if ( empty( $missing ) ) {
+			return;
+		}
+
+		$settings_url = admin_url( 'admin.php?page=cfi-settings' );
+		printf(
+			'<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
+			esc_html__( 'Cloudflare Images not configured.', 'cloudflare-images-sync' ),
+			esc_html(
+				sprintf(
+					/* translators: %s: comma-separated list of missing fields */
+					__( 'Missing: %s.', 'cloudflare-images-sync' ),
+					implode( ', ', $missing )
+				)
+			),
+			esc_url( $settings_url ),
+			esc_html__( 'Go to Settings →', 'cloudflare-images-sync' )
+		);
 	}
 
 	/**

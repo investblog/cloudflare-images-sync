@@ -178,6 +178,27 @@ class SettingsPage {
 						</p></td>
 					</tr>
 					<tr>
+						<th></th>
+						<td>
+							<p class="description">
+								<?php
+								$flex_link = '<a href="https://developers.cloudflare.com/images/transform-images/flexible-variants/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Flexible Variants docs', 'cloudflare-images-sync' ) . '</a>';
+								echo wp_kses(
+									sprintf(
+										/* translators: %s: link to Cloudflare Flexible Variants docs */
+										__( '<strong>Flexible Variants</strong> must be enabled in your Cloudflare Images settings for parameter-based presets (w=, h=, fit=...). See %s.', 'cloudflare-images-sync' ),
+										$flex_link
+									),
+									array(
+										'strong' => array(),
+										'a'      => array( 'href' => array(), 'target' => array(), 'rel' => array() ),
+									)
+								);
+								?>
+							</p>
+						</td>
+					</tr>
+					<tr>
 						<th><label for="api_token"><?php esc_html_e( 'API Token', 'cloudflare-images-sync' ); ?></label></th>
 						<td><input type="password" id="api_token" name="api_token" value="" placeholder="<?php echo esc_attr( $masked_token ); ?>" class="regular-text" autocomplete="new-password" />
 						<p class="description">

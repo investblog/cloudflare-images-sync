@@ -304,3 +304,165 @@
 	font-size: 13px;
 	font-style: italic;
 }
+
+/* ── Copy buttons ────────────────────────────────────────────────────── */
+
+.cfi-input-with-copy {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.cfi-copy-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #f6f7f7;
+	color: #50575e;
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: color 0.2s, border-color 0.2s;
+}
+
+.cfi-copy-btn:hover:not(:disabled) {
+	color: #2271b1;
+	border-color: #2271b1;
+}
+
+.cfi-copy-btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.cfi-copy-btn.copied {
+	color: #00a32a;
+	border-color: #00a32a;
+}
+
+.cfi-copy-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.cfi-copy-btn-all {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 6px;
+}
+
+.cfi-copy-btn-all svg {
+	width: 16px;
+	height: 16px;
+}
+
+.cfi-copy-btn-all.copied {
+	color: #00a32a;
+	border-color: #00a32a;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+
+.cfi-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 500;
+	vertical-align: middle;
+	margin-left: 6px;
+}
+
+.cfi-badge--recommended {
+	background: #e7f5e8;
+	color: #1a5e1f;
+}
+
+/* ── Highlighted preset card (deep link) ─────────────────────────────── */
+
+.cfi-preset-card--highlighted {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+
+.cfi-empty-state {
+	background: #f6f7f7;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+	padding: 24px;
+	text-align: center;
+	margin-top: 16px;
+}
+
+.cfi-empty-state p {
+	margin: 0 0 12px;
+	color: #646970;
+}
+
+/* ── Test Mapping results ─────────────────────────────────────────── */
+
+.cfi-test-results {
+	margin-top: 12px;
+	padding: 12px 16px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #f6f7f7;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.cfi-test-results dl {
+	margin: 0;
+	display: grid;
+	grid-template-columns: 140px 1fr;
+	gap: 4px 12px;
+}
+
+.cfi-test-results dt {
+	color: #646970;
+	font-weight: 600;
+}
+
+.cfi-test-results dd {
+	margin: 0;
+	word-break: break-all;
+}
+
+.cfi-test-results .cfi-test-status {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.cfi-test-status--found {
+	background: #e7f5e8;
+	color: #1a5e1f;
+}
+
+.cfi-test-status--missing {
+	background: #fcf0f1;
+	color: #8a1116;
+}
+
+.cfi-test-status--upload {
+	background: #fef8ee;
+	color: #6e4600;
+}
+
+.cfi-test-status--skip {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+.cfi-test-results .cfi-test-error {
+	color: #d63638;
+	font-weight: 500;
+}

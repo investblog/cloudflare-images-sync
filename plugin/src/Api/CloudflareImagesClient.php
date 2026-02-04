@@ -108,6 +108,10 @@ class CloudflareImagesClient {
 	 * @return array<string, mixed>|\WP_Error Response with 'id', 'filename', 'variants' on success.
 	 */
 	public function upload_from_url( string $url, array $metadata = array() ) {
+		if ( ! wp_http_validate_url( $url ) ) {
+			return new \WP_Error( 'cfi_invalid_url', 'Invalid image URL. Only http and https URLs are accepted.' );
+		}
+
 		$boundary = wp_generate_password( 24, false );
 		$body     = $this->build_multipart_body_url( $url, $metadata, $boundary );
 

@@ -17,3 +17,6 @@ delete_option( 'cfi_settings' );
 delete_option( 'cfi_presets' );
 delete_option( 'cfi_mappings' );
 delete_option( 'cfi_logs' );
+delete_option( 'cfi_demo_image_id' );
+delete_option( 'cfi_demo_sig' );
+delete_option( 'cfi_demo_updated_at' );

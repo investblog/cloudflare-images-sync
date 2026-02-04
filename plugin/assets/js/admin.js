@@ -4,19 +4,103 @@
 (function ($) {
 	'use strict';
 
-	// ── Copy URL to clipboard ──────────────────────────────────────────
+	// ── Copy to clipboard (universal) ─────────────────────────────────
+
+	function copyToClipboard(text, $el) {
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(function () {
+				showCopied($el);
+			}).catch(function () {
+				fallbackCopy(text, $el);
+			});
+		} else {
+			fallbackCopy(text, $el);
+		}
+	}
+
+	function fallbackCopy(text, $el) {
+		var $textarea = $('<textarea>')
+			.val(text)
+			.css({ position: 'fixed', left: '-9999px', opacity: 0 })
+			.appendTo('body');
+		$textarea[0].select();
+		try {
+			document.execCommand('copy');
+			showCopied($el);
+		} catch (e) {
+			// Silent fail.
+		}
+		$textarea.remove();
+	}
+
+	function showCopied($el) {
+		$el.addClass('copied');
+		setTimeout(function () {
+			$el.removeClass('copied');
+		}, 1500);
+	}
+
+	// Copy URL (preset grid cards, preview page).
 	$(document).on('click', '.cfi-copy-url', function () {
 		var $el = $(this);
-		var url = $el.text();
-
-		if (navigator.clipboard && navigator.clipboard.writeText) {
-			navigator.clipboard.writeText(url).then(function () {
-				$el.addClass('copied');
-				setTimeout(function () {
-					$el.removeClass('copied');
-				}, 1500);
-			});
+		var url = $.trim($el.text());
+		if (url !== '') {
+			copyToClipboard(url, $el);
 		}
+	});
+
+	// Copy button (data-copy-from attribute).
+	$(document).on('click', '.cfi-copy-btn', function () {
+		var $btn = $(this);
+		var selector = $btn.data('copyFrom');
+		if (!selector) {
+			return;
+		}
+		var value = $.trim($(selector).val());
+		if (value !== '') {
+			copyToClipboard(value, $btn);
+		}
+	});
+
+	// Copy all targets button.
+	$(document).on('click', '#cfi-copy-all-targets', function () {
+		var $btn = $(this);
+		var json = JSON.stringify({
+			url_meta: $.trim($('#target_url_meta').val()),
+			id_meta: $.trim($('#target_id_meta').val()),
+			sig_meta: $.trim($('#target_sig_meta').val())
+		}, null, 2);
+		copyToClipboard(json, $btn);
+	});
+
+	// Enable/disable copy buttons based on input value.
+	function updateCopyBtnState($input) {
+		var selector = '#' + $input.attr('id');
+		var $btn = $('.cfi-copy-btn[data-copy-from="' + selector + '"]');
+		if ($btn.length) {
+			$btn.prop('disabled', $.trim($input.val()) === '');
+		}
+	}
+
+	function updateCopyAllState() {
+		var allEmpty =
+			$.trim($('#target_url_meta').val()) === '' &&
+			$.trim($('#target_id_meta').val()) === '' &&
+			$.trim($('#target_sig_meta').val()) === '';
+		$('#cfi-copy-all-targets').prop('disabled', allEmpty);
+	}
+
+	$(document).on('input change', '#target_url_meta, #target_id_meta, #target_sig_meta', function () {
+		updateCopyBtnState($(this));
+		updateCopyAllState();
+	});
+
+	// Initialize copy button states on page load (edit mode with pre-filled values).
+	$(function () {
+		$('#target_url_meta, #target_id_meta, #target_sig_meta').each(function () {
+			updateCopyBtnState($(this));
+		});
+		updateCopyAllState();
 	});
 
 	// ── Autocomplete component ─────────────────────────────────────────
@@ -318,6 +402,20 @@
 		});
 	}
 
+	// WordPress internal meta prefixes — unsafe to overwrite.
+	var internalPrefixes = ['_wp_', '_edit_', '_oembed_', '_pingme', '_encloseme'];
+
+	function filterSafeTargetKeys(items) {
+		return items.filter(function (item) {
+			for (var i = 0; i < internalPrefixes.length; i++) {
+				if (item.name.indexOf(internalPrefixes[i]) === 0) {
+					return false;
+				}
+			}
+			return true;
+		});
+	}
+
 	// Update destination autocompletes with meta keys for current post type.
 	function fetchTargetSuggestions(reset) {
 		var postType = $postType.val();
@@ -333,8 +431,9 @@
 		}
 
 		fetchCached('cfi_meta_keys', postType, function (items) {
+			var safe = filterSafeTargetKeys(items);
 			for (var i = 0; i < targetAutocompletes.length; i++) {
-				targetAutocompletes[i].setItems(items);
+				targetAutocompletes[i].setItems(safe);
 			}
 		});
 	}
@@ -384,6 +483,28 @@
 		fetchTargetSuggestions(true);
 	});
 
+	// Smart defaults: auto-fill destination keys based on source key.
+	$sourceKey.on('change', function () {
+		var key = $.trim($sourceKey.val());
+		if (key === '') {
+			return;
+		}
+
+		var $urlMeta = $('#target_url_meta');
+		var $idMeta = $('#target_id_meta');
+		var $sigMeta = $('#target_sig_meta');
+
+		if ($.trim($urlMeta.val()) === '') {
+			$urlMeta.val('_' + key + '_cdn_url').trigger('change');
+		}
+		if ($.trim($idMeta.val()) === '') {
+			$idMeta.val('_' + key + '_cf_id').trigger('change');
+		}
+		if ($.trim($sigMeta.val()) === '') {
+			$sigMeta.val('_' + key + '_cf_sig').trigger('change');
+		}
+	});
+
 	updateSourceKeyRow();
 	// Fetch on load if post type is pre-selected (edit mode).
 	if ($postType.val()) {
@@ -391,8 +512,111 @@
 		fetchTargetSuggestions(false);
 	}
 
+	// ── Test Mapping dry-run ───────────────────────────────────────────
+
+	$('#cfi-test-btn').on('click', function () {
+		var postId = $.trim($('#cfi_test_post_id').val());
+		if (postId === '' || parseInt(postId, 10) <= 0) {
+			$('#cfi-test-results')
+				.html('<p class="cfi-test-error">Please enter a valid post ID.</p>')
+				.show();
+			return;
+		}
+
+		var $btn = $(this);
+		var $spinner = $('#cfi-test-spinner');
+		var $results = $('#cfi-test-results');
+
+		$btn.prop('disabled', true);
+		$spinner.addClass('is-active');
+		$results.hide();
+
+		$.post(ajax.ajaxUrl, {
+			action: 'cfi_test_mapping',
+			nonce: ajax.nonce,
+			post_id: postId,
+			source_type: $sourceType.val(),
+			source_key: $sourceKey.val(),
+			target_url_meta: $('#target_url_meta').val(),
+			target_id_meta: $('#target_id_meta').val(),
+			target_sig_meta: $('#target_sig_meta').val(),
+			preset_id: $('#preset_id').val(),
+			upload_if_missing: $('input[name="upload_if_missing"]').is(':checked') ? 1 : 0,
+			reupload_if_changed: $('input[name="reupload_if_changed"]').is(':checked') ? 1 : 0
+		}).always(function () {
+			$btn.prop('disabled', false);
+			$spinner.removeClass('is-active');
+		}).done(function (response) {
+			if (!response.success) {
+				$results
+					.html('<p class="cfi-test-error">' + escHtml(response.data || 'Unknown error.') + '</p>')
+					.show();
+				return;
+			}
+
+			var d = response.data;
+			var html = '<dl>';
+
+			// Post info.
+			html += '<dt>Post</dt><dd>' + escHtml(d.post_title) + ' <code>#' + d.post_type + '</code></dd>';
+
+			// Source status.
+			if (d.source_found) {
+				html += '<dt>Source</dt><dd><span class="cfi-test-status cfi-test-status--found">Found</span>';
+				if (d.attachment_id > 0) {
+					html += ' Attachment #' + d.attachment_id;
+				}
+				if (d.file_name) {
+					html += ' <code>' + escHtml(d.file_name) + '</code>';
+				}
+				html += '</dd>';
+			} else {
+				html += '<dt>Source</dt><dd><span class="cfi-test-status cfi-test-status--missing">Not found</span></dd>';
+			}
+
+			// Upload decision.
+			if (d.source_found) {
+				var uploadClass = d.would_upload ? 'cfi-test-status--upload' : 'cfi-test-status--skip';
+				var uploadLabel = d.would_upload ? 'Will upload' : 'Skip';
+				html += '<dt>Upload</dt><dd><span class="cfi-test-status ' + uploadClass + '">' + uploadLabel + '</span> ' + escHtml(d.upload_reason) + '</dd>';
+			} else {
+				html += '<dt>Upload</dt><dd>' + escHtml(d.upload_reason) + '</dd>';
+			}
+
+			// URLs.
+			if (d.current_url) {
+				html += '<dt>Current URL</dt><dd><code>' + escHtml(d.current_url) + '</code></dd>';
+			}
+			if (d.preview_url) {
+				html += '<dt>Preview URL</dt><dd><code>' + escHtml(d.preview_url) + '</code></dd>';
+			}
+
+			html += '</dl>';
+			$results.html(html).show();
+		}).fail(function () {
+			$results
+				.html('<p class="cfi-test-error">Request failed. Check your connection.</p>')
+				.show();
+		});
+	});
+
+	function escHtml(str) {
+		var div = document.createElement('div');
+		div.appendChild(document.createTextNode(str));
+		return div.innerHTML;
+	}
+
 	// ── Client-side validation ─────────────────────────────────────────
 	var keyPattern = /^[A-Za-z0-9_\-:.]+$/;
+
+	function isReservedKey(val) {
+		for (var i = 0; i < internalPrefixes.length; i++) {
+			if (val.indexOf(internalPrefixes[i]) === 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	function showError($field, message) {
 		var id = $field.attr('id') + '_error';
@@ -451,6 +675,9 @@
 		if (!$sourceType.val()) {
 			showError($sourceType, i18n.required || 'This field is required.');
 			valid = false;
+		} else if ($sourceType.val() === 'acf_field' && !hasAcf) {
+			showError($sourceType, 'ACF is not installed. This source type requires Advanced Custom Fields.');
+			valid = false;
 		}
 
 		// Source key (only if visible and required).
@@ -474,6 +701,15 @@
 		if (!validateKey($('#target_sig_meta'), false)) {
 			valid = false;
 		}
+
+		// Reserved key check for all target fields.
+		$('#target_url_meta, #target_id_meta, #target_sig_meta').each(function () {
+			var val = $.trim($(this).val());
+			if (val !== '' && isReservedKey(val)) {
+				showError($(this), 'This key is reserved by WordPress and cannot be used as a destination.');
+				valid = false;
+			}
+		});
 
 		if (!valid) {
 			e.preventDefault();

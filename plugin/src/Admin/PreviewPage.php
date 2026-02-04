@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use CFI\Api\CloudflareImagesClient;
+use CFI\Core\DemoImageManager;
 use CFI\Core\Signature;
 use CFI\Core\SourceResolver;
 use CFI\Core\SyncEngine;
@@ -40,6 +41,25 @@ class PreviewPage {
 	public function handle_actions(): void {
 		if ( ! current_user_can( 'manage_options' ) || ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
 			return;
+		}
+
+		// Handle demo image upload.
+		if ( isset( $_POST['cfi_demo_upload'] ) ) {
+			check_admin_referer( 'cfi_demo_upload' );
+
+			$demo   = new DemoImageManager();
+			$result = $demo->ensure_uploaded();
+
+			$message = is_wp_error( $result )
+				? $result->get_error_message()
+				: __( 'Demo image uploaded successfully.', 'cloudflare-images-sync' );
+			$type = is_wp_error( $result ) ? 'error' : 'success';
+
+			$this->redirect_with_notice(
+				admin_url( 'admin.php?page=cfi-preview&mode=attachment&use_demo=1' ),
+				$message,
+				$type
+			);
 		}
 
 		// Handle attachment upload-on-demand.
@@ -157,7 +177,34 @@ class PreviewPage {
 		</form>
 
 		<?php
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET param for UI state.
+		$use_demo        = isset( $_GET['use_demo'] ) ? absint( wp_unslash( $_GET['use_demo'] ) ) : 0;
+		$highlight_preset = $this->get_highlighted_preset_id();
+
 		if ( $attachment_id <= 0 ) {
+			// Demo mode: show grid with cached demo image.
+			if ( $use_demo ) {
+				$demo        = new DemoImageManager();
+				$cf_image_id = $demo->get_cf_image_id();
+
+				if ( $cf_image_id !== '' ) {
+					$this->render_preset_grid( $cf_image_id, $highlight_preset );
+					return;
+				}
+			}
+
+			// Empty state: offer both options.
+			?>
+			<div class="cfi-empty-state">
+				<p><?php esc_html_e( 'Enter an attachment ID above, or use the sample image to preview presets.', 'cloudflare-images-sync' ); ?></p>
+				<form method="post">
+					<?php wp_nonce_field( 'cfi_demo_upload' ); ?>
+					<button type="submit" name="cfi_demo_upload" class="button button-primary">
+						<?php esc_html_e( 'Use Sample Image', 'cloudflare-images-sync' ); ?>
+					</button>
+				</form>
+			</div>
+			<?php
 			return;
 		}
 
@@ -175,7 +222,7 @@ class PreviewPage {
 			return;
 		}
 
-		$this->render_preset_grid( $cf_image_id );
+		$this->render_preset_grid( $cf_image_id, $highlight_preset );
 	}
 
 	/**
@@ -311,12 +358,34 @@ class PreviewPage {
 	}
 
 	/**
+	 * Get the highlighted preset ID from GET param, if valid.
+	 *
+	 * @return string Preset ID or empty string.
+	 */
+	private function get_highlighted_preset_id(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET param for UI state.
+		$preset_id = isset( $_GET['preset_id'] ) ? sanitize_text_field( wp_unslash( $_GET['preset_id'] ) ) : '';
+
+		if ( $preset_id === '' || ! Validators::is_valid_id( $preset_id, 'preset' ) ) {
+			return '';
+		}
+
+		$repo = new PresetsRepo();
+		if ( $repo->find( $preset_id ) === null ) {
+			return '';
+		}
+
+		return $preset_id;
+	}
+
+	/**
 	 * Render a grid of preset variant previews.
 	 *
-	 * @param string $cf_image_id Cloudflare image ID.
+	 * @param string $cf_image_id      Cloudflare image ID.
+	 * @param string $highlight_preset Preset ID to show first / highlight (optional).
 	 * @return void
 	 */
-	private function render_preset_grid( string $cf_image_id ): void {
+	private function render_preset_grid( string $cf_image_id, string $highlight_preset = '' ): void {
 		$settings = ( new SettingsRepo() )->get();
 		$builder  = new UrlBuilder( $settings['account_hash'] );
 		$presets  = ( new PresetsRepo() )->all();
@@ -326,20 +395,32 @@ class PreviewPage {
 			return;
 		}
 
+		// Reorder: move highlighted preset to front.
+		if ( $highlight_preset !== '' && isset( $presets[ $highlight_preset ] ) ) {
+			$highlighted = array( $highlight_preset => $presets[ $highlight_preset ] );
+			unset( $presets[ $highlight_preset ] );
+			$presets = $highlighted + $presets;
+		}
+
 		echo '<h3>' . esc_html__( 'Variant Previews', 'cloudflare-images-sync' ) . '</h3>';
 		echo '<div class="cfi-preset-grid">';
 
-		foreach ( $presets as $preset ) {
+		foreach ( $presets as $id => $preset ) {
 			$url = $builder->url_from_preset( $cf_image_id, $preset );
 
 			if ( is_wp_error( $url ) ) {
 				continue;
 			}
 
-			echo '<div class="cfi-preset-card">';
+			$card_class = 'cfi-preset-card';
+			if ( $id === $highlight_preset ) {
+				$card_class .= ' cfi-preset-card--highlighted';
+			}
+
+			echo '<div class="' . esc_attr( $card_class ) . '">';
 			echo '<h4>' . esc_html( $preset['name'] ) . '</h4>';
 			echo '<img src="' . esc_url( $url ) . '" loading="lazy" />';
-			echo '<p><code class="cfi-copy-url" title="Click to copy">' . esc_html( $url ) . '</code></p>';
+			echo '<p><code class="cfi-copy-url" title="' . esc_attr__( 'Click to copy', 'cloudflare-images-sync' ) . '">' . esc_html( $url ) . '</code></p>';
 			echo '</div>';
 		}
 

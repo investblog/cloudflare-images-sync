@@ -169,17 +169,35 @@ class MappingsPage {
 				'sig_meta' => sanitize_text_field( wp_unslash( $_POST['target_sig_meta'] ?? '' ) ),
 			),
 			'behavior'  => array(
-				'upload_if_missing'   => ! empty( $_POST['upload_if_missing'] ),
-				'reupload_if_changed' => ! empty( $_POST['reupload_if_changed'] ),
-				'clear_on_empty'      => ! empty( $_POST['clear_on_empty'] ),
-				'store_cf_id_on_post' => ! empty( $_POST['store_cf_id_on_post'] ),
+				'upload_if_missing'     => ! empty( $_POST['upload_if_missing'] ),
+				'reupload_if_changed'   => ! empty( $_POST['reupload_if_changed'] ),
+				'clear_on_empty'        => ! empty( $_POST['clear_on_empty'] ),
+				'store_cf_id_on_post'   => ! empty( $_POST['store_cf_id_on_post'] ),
+				'delete_cf_on_reupload' => ! empty( $_POST['delete_cf_on_reupload'] ),
 			),
 			'preset_id' => sanitize_text_field( wp_unslash( $_POST['preset_id'] ?? '' ) ),
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		if ( $data['preset_id'] !== '' && ! Validators::is_valid_id( $data['preset_id'], 'preset' ) ) {
-			return __( 'Invalid preset ID.', 'cloudflare-images-sync' );
+		// Reject WordPress internal meta keys as destination targets.
+		foreach ( array( 'url_meta', 'id_meta', 'sig_meta' ) as $target_field ) {
+			$key = $data['target'][ $target_field ];
+			if ( $key !== '' && $this->is_reserved_meta_key( $key ) ) {
+				return sprintf(
+					/* translators: %s: meta key name */
+					__( 'The meta key "%s" is reserved by WordPress and cannot be used as a destination.', 'cloudflare-images-sync' ),
+					$key
+				);
+			}
+		}
+
+		if ( $data['preset_id'] !== '' ) {
+			if ( ! Validators::is_valid_id( $data['preset_id'], 'preset' ) ) {
+				return __( 'Invalid preset ID format.', 'cloudflare-images-sync' );
+			}
+			if ( $this->presets->find( $data['preset_id'] ) === null ) {
+				return __( 'Selected preset does not exist.', 'cloudflare-images-sync' );
+			}
 		}
 
 		if ( $edit_id !== '' ) {
@@ -382,6 +400,152 @@ class MappingsPage {
 	}
 
 	/**
+	 * AJAX handler: dry-run a mapping against a single post.
+	 *
+	 * Resolves the source, checks whether an upload would be needed,
+	 * and previews the delivery URL — without performing actual sync.
+	 *
+	 * @return void
+	 */
+	public function ajax_test_mapping(): void {
+		check_ajax_referer( 'cfi_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized', 403 );
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce checked via check_ajax_referer above.
+		$post_id = absint( wp_unslash( $_POST['post_id'] ?? 0 ) );
+
+		if ( $post_id <= 0 ) {
+			wp_send_json_error( __( 'Please enter a valid post ID.', 'cloudflare-images-sync' ) );
+		}
+
+		$post = get_post( $post_id );
+
+		if ( ! $post ) {
+			wp_send_json_error( __( 'Post not found.', 'cloudflare-images-sync' ) );
+		}
+
+		$source = array(
+			'type' => sanitize_text_field( wp_unslash( $_POST['source_type'] ?? '' ) ),
+			'key'  => sanitize_text_field( wp_unslash( $_POST['source_key'] ?? '' ) ),
+		);
+
+		$target = array(
+			'url_meta' => sanitize_text_field( wp_unslash( $_POST['target_url_meta'] ?? '' ) ),
+			'id_meta'  => sanitize_text_field( wp_unslash( $_POST['target_id_meta'] ?? '' ) ),
+			'sig_meta' => sanitize_text_field( wp_unslash( $_POST['target_sig_meta'] ?? '' ) ),
+		);
+
+		$preset_id = sanitize_text_field( wp_unslash( $_POST['preset_id'] ?? '' ) );
+
+		$behavior = array(
+			'upload_if_missing'   => ! empty( $_POST['upload_if_missing'] ),
+			'reupload_if_changed' => ! empty( $_POST['reupload_if_changed'] ),
+		);
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		// Resolve source.
+		$resolved = \CFI\Core\SourceResolver::resolve( $post_id, $source );
+
+		$result = array(
+			'post_title'    => $post->post_title,
+			'post_type'     => $post->post_type,
+			'source_found'  => ! $resolved->is_empty(),
+			'attachment_id' => 0,
+			'file_name'     => '',
+			'would_upload'  => false,
+			'upload_reason' => '',
+			'preview_url'   => '',
+			'current_url'   => '',
+		);
+
+		if ( $resolved->is_empty() ) {
+			$result['upload_reason'] = __( 'Source image not found or empty.', 'cloudflare-images-sync' );
+			wp_send_json_success( $result );
+		}
+
+		$att_id    = $resolved->get_attachment_id();
+		$file_path = $resolved->get_file_path();
+
+		$result['attachment_id'] = $att_id;
+		$result['file_name']     = wp_basename( $file_path );
+
+		// Check attachment-level CF cache.
+		$att_cf_id = $att_id > 0 ? (string) get_post_meta( $att_id, \CFI\Repos\OptionKeys::META_CF_IMAGE_ID, true ) : '';
+		$att_sig   = $att_id > 0 ? (string) get_post_meta( $att_id, \CFI\Repos\OptionKeys::META_SIG, true ) : '';
+
+		// Check per-post stored data.
+		$sig_meta    = $target['sig_meta'];
+		$stored_sig  = $sig_meta !== '' ? (string) get_post_meta( $post_id, $sig_meta, true ) : '';
+		$id_meta     = $target['id_meta'];
+		$stored_cfid = $id_meta !== '' ? (string) get_post_meta( $post_id, $id_meta, true ) : '';
+
+		// Determine upload necessity (mirrors SyncEngine logic).
+		if ( $att_cf_id !== '' && ! \CFI\Core\Signature::has_changed( $file_path, $att_sig ) ) {
+			$result['upload_reason'] = __( 'Reuse: image already on Cloudflare (attachment cache hit).', 'cloudflare-images-sync' );
+		} elseif ( $stored_cfid === '' && $att_cf_id === '' && ! empty( $behavior['upload_if_missing'] ) ) {
+			$result['would_upload']  = true;
+			$result['upload_reason'] = __( 'New upload: image not yet on Cloudflare.', 'cloudflare-images-sync' );
+		} elseif ( $stored_cfid !== '' && ! empty( $behavior['reupload_if_changed'] ) ) {
+			if ( \CFI\Core\Signature::has_changed( $file_path, $stored_sig ) ) {
+				$result['would_upload']  = true;
+				$result['upload_reason'] = __( 'Re-upload: local file has changed since last sync.', 'cloudflare-images-sync' );
+			} else {
+				$result['upload_reason'] = __( 'Skip: file unchanged since last sync.', 'cloudflare-images-sync' );
+			}
+		} else {
+			$result['upload_reason'] = __( 'Skip: upload not needed or not enabled by behavior settings.', 'cloudflare-images-sync' );
+		}
+
+		// Preview delivery URL.
+		$cf_id = $stored_cfid !== '' ? $stored_cfid : $att_cf_id;
+
+		if ( $cf_id !== '' ) {
+			$settings = ( new \CFI\Repos\SettingsRepo() )->get();
+			$builder  = new \CFI\Core\UrlBuilder( $settings['account_hash'] );
+			$variant  = 'public';
+
+			if ( $preset_id !== '' ) {
+				$preset = $this->presets->find( $preset_id );
+				if ( $preset && ! empty( $preset['variant'] ) ) {
+					$variant = $preset['variant'];
+				}
+			}
+
+			$url = $builder->url( $cf_id, $variant );
+			if ( ! is_wp_error( $url ) ) {
+				$result['preview_url'] = $url;
+			}
+		}
+
+		// Current stored URL.
+		if ( $target['url_meta'] !== '' ) {
+			$result['current_url'] = (string) get_post_meta( $post_id, $target['url_meta'], true );
+		}
+
+		wp_send_json_success( $result );
+	}
+
+	/**
+	 * Check if a meta key belongs to WordPress core internals.
+	 *
+	 * @param string $key Meta key name.
+	 * @return bool
+	 */
+	private function is_reserved_meta_key( string $key ): bool {
+		$prefixes = array( '_wp_', '_edit_', '_oembed_' );
+		foreach ( $prefixes as $prefix ) {
+			if ( str_starts_with( $key, $prefix ) ) {
+				return true;
+			}
+		}
+
+		return in_array( $key, array( '_pingme', '_encloseme', '_thumbnail_id' ), true );
+	}
+
+	/**
 	 * Render the mapping form.
 	 *
 	 * @param array<string, mixed>|null $mapping Existing mapping for editing, or null for new.
@@ -534,7 +698,12 @@ class MappingsPage {
 				</table>
 			</div>
 
-			<?php // ── Section 2: Destination ────────────────────────────────── ?>
+			<?php
+			// ── Section 2: Destination ────────────────────────────────────
+			// phpcs:disable Generic.WhiteSpace.ScopeIndent.IncorrectExact -- inline SVG.
+			$copy_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 22" width="16" height="16" fill="currentColor"><path d="M17 20H6V6h11m0-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m-3-4H2a2 2 0 0 0-2 2v14h2V2h12z"/></svg>';
+			// phpcs:enable Generic.WhiteSpace.ScopeIndent.IncorrectExact
+			?>
 			<div class="cfi-form-section">
 				<h3><?php esc_html_e( 'Destination', 'cloudflare-images-sync' ); ?></h3>
 				<p class="cfi-section-desc">
@@ -548,7 +717,12 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="target_url_meta" name="target_url_meta" value="<?php echo esc_attr( $m['target']['url_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_delivery_url" required />
+							<div class="cfi-input-with-copy">
+								<input type="text" id="target_url_meta" name="target_url_meta" value="<?php echo esc_attr( $m['target']['url_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_delivery_url" required />
+								<button type="button" class="cfi-copy-btn" data-copy-from="#target_url_meta" aria-label="<?php esc_attr_e( 'Copy key', 'cloudflare-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy key', 'cloudflare-images-sync' ); ?>" disabled>
+									<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
+								</button>
+							</div>
 							<p class="description">
 								<?php esc_html_e( 'The post meta key where the Cloudflare delivery URL will be stored. Use this key in your theme to display the optimized image.', 'cloudflare-images-sync' ); ?>
 							</p>
@@ -561,7 +735,12 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="target_id_meta" name="target_id_meta" value="<?php echo esc_attr( $m['target']['id_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_image_id" />
+							<div class="cfi-input-with-copy">
+								<input type="text" id="target_id_meta" name="target_id_meta" value="<?php echo esc_attr( $m['target']['id_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_image_id" />
+								<button type="button" class="cfi-copy-btn" data-copy-from="#target_id_meta" aria-label="<?php esc_attr_e( 'Copy key', 'cloudflare-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy key', 'cloudflare-images-sync' ); ?>" disabled>
+									<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
+								</button>
+							</div>
 							<p class="description">
 								<?php esc_html_e( 'Optional. Stores the Cloudflare image ID for management purposes.', 'cloudflare-images-sync' ); ?>
 							</p>
@@ -574,10 +753,24 @@ class MappingsPage {
 							</label>
 						</th>
 						<td>
-							<input type="text" id="target_sig_meta" name="target_sig_meta" value="<?php echo esc_attr( $m['target']['sig_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_change_sig" />
+							<div class="cfi-input-with-copy">
+								<input type="text" id="target_sig_meta" name="target_sig_meta" value="<?php echo esc_attr( $m['target']['sig_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_change_sig" />
+								<button type="button" class="cfi-copy-btn" data-copy-from="#target_sig_meta" aria-label="<?php esc_attr_e( 'Copy key', 'cloudflare-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy key', 'cloudflare-images-sync' ); ?>" disabled>
+									<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
+								</button>
+							</div>
 							<p class="description">
 								<?php esc_html_e( 'Optional. Stores a hash to detect image changes and avoid redundant uploads.', 'cloudflare-images-sync' ); ?>
 							</p>
+						</td>
+					</tr>
+					<tr>
+						<th></th>
+						<td>
+							<button type="button" id="cfi-copy-all-targets" class="button cfi-copy-btn-all" aria-label="<?php esc_attr_e( 'Copy all target keys as JSON', 'cloudflare-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy all target keys as JSON', 'cloudflare-images-sync' ); ?>" disabled>
+								<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
+								<?php esc_html_e( 'Copy All Target Keys', 'cloudflare-images-sync' ); ?>
+							</button>
 						</td>
 					</tr>
 					<tr>
@@ -666,10 +859,43 @@ class MappingsPage {
 									<input type="checkbox" name="store_cf_id_on_post" value="1" <?php checked( $m['behavior']['store_cf_id_on_post'] ?? true ); ?> />
 									<?php esc_html_e( 'Store Cloudflare image ID on the post', 'cloudflare-images-sync' ); ?>
 								</label>
+								<br/>
+								<label>
+									<input type="checkbox" name="delete_cf_on_reupload" value="1" <?php checked( $m['behavior']['delete_cf_on_reupload'] ?? false ); ?> />
+									<?php esc_html_e( 'Delete old Cloudflare image when re-uploading', 'cloudflare-images-sync' ); ?>
+								</label>
+								<p class="description">
+									<?php esc_html_e( 'Disabled by default. Enable only if you are sure no other mapping or post references the same Cloudflare image.', 'cloudflare-images-sync' ); ?>
+								</p>
 							</fieldset>
 						</td>
 					</tr>
 				</table>
+			</div>
+
+			<?php // ── Section 4: Test Mapping ─────────────────────────────────── ?>
+			<div class="cfi-form-section">
+				<h3><?php esc_html_e( 'Test Mapping', 'cloudflare-images-sync' ); ?></h3>
+				<p class="cfi-section-desc">
+					<?php esc_html_e( 'Dry-run this mapping against a single post to verify the source resolves correctly and preview the delivery URL. No upload or sync is performed.', 'cloudflare-images-sync' ); ?>
+				</p>
+				<table class="form-table">
+					<tr>
+						<th>
+							<label for="cfi_test_post_id">
+								<?php esc_html_e( 'Post ID', 'cloudflare-images-sync' ); ?>
+							</label>
+						</th>
+						<td>
+							<input type="number" id="cfi_test_post_id" class="small-text" min="1" placeholder="123" />
+							<button type="button" id="cfi-test-btn" class="button">
+								<?php esc_html_e( 'Test', 'cloudflare-images-sync' ); ?>
+							</button>
+							<span id="cfi-test-spinner" class="spinner"></span>
+						</td>
+					</tr>
+				</table>
+				<div id="cfi-test-results" class="cfi-test-results" style="display:none;"></div>
 			</div>
 
 			<p class="submit">
