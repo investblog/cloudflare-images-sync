@@ -382,6 +382,21 @@
 	color: #1a5e1f;
 }
 
+.cfi-badge--flexible {
+	background: #e7f5fe;
+	color: #0a4b78;
+}
+
+.cfi-badge--flex-warn {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.cfi-badge--flex-unknown {
+	background: #f0f0f1;
+	color: #646970;
+}
+
 /* ── Highlighted preset card (deep link) ─────────────────────────────── */
 
 .cfi-preset-card--highlighted {
@@ -465,4 +480,86 @@
 .cfi-test-results .cfi-test-error {
 	color: #d63638;
 	font-weight: 500;
+}
+
+/* ── Flexible Variants status ─────────────────────────────────────── */
+
+.cfi-flex-badge {
+	font-weight: 600;
+	display: inline-block;
+}
+
+.cfi-flex--enabled {
+	color: #00a32a;
+}
+
+.cfi-flex--disabled {
+	color: #d63638;
+}
+
+.cfi-flex--unknown {
+	color: #646970;
+}
+
+.cfi-flex-actions {
+	margin-top: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.cfi-flex-placeholder {
+	background: #f0f0f1;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+	padding: 40px 16px;
+	text-align: center;
+	color: #646970;
+	font-style: italic;
+}
+
+/* ── FV Callout banner ───────────────────────────────────────────── */
+
+.cfi-fv-callout {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-left-width: 4px;
+	border-radius: 4px;
+	padding: 12px 16px;
+	margin: 16px 0;
+}
+
+.cfi-fv-callout--enabled {
+	border-left-color: #00a32a;
+}
+
+.cfi-fv-callout--disabled {
+	border-left-color: #d63638;
+}
+
+.cfi-fv-callout--unknown {
+	border-left-color: #dba617;
+}
+
+.cfi-fv-callout__title {
+	font-weight: 600;
+	margin: 0 0 4px;
+}
+
+.cfi-fv-callout__text {
+	margin: 0 0 8px;
+	color: #646970;
+}
+
+.cfi-fv-callout__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.cfi-copy-url--disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	pointer-events: none;
 }

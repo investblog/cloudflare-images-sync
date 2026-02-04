@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use CFI\Api\CloudflareImagesClient;
 use CFI\Repos\LogsRepo;
+use CFI\Repos\OptionKeys;
 use CFI\Repos\SettingsRepo;
 use CFI\Support\Mask;
 
@@ -85,7 +86,18 @@ class SettingsPage {
 				)
 			);
 
-			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cfi-images-sync' ) );
+			// Check Flexible Variants status (non-blocking).
+			$fv_label  = '';
+			$fv_status = $this->check_flex_status( $client );
+			if ( $fv_status === 'enabled' ) {
+				$fv_label = ' ' . __( 'Flexible Variants: enabled.', 'cfi-images-sync' );
+			} elseif ( $fv_status === 'disabled' ) {
+				$fv_label = ' ' . __( 'Flexible Variants: disabled.', 'cfi-images-sync' );
+			} else {
+				$fv_label = ' ' . __( 'Flexible Variants: unknown (check manually).', 'cfi-images-sync' );
+			}
+
+			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cfi-images-sync' ) . $fv_label );
 		}
 	}
 
@@ -110,8 +122,127 @@ class SettingsPage {
 			$patch['api_token'] = $token_input;
 		}
 
+		// Reset flex status cache when credentials change.
+		$current = $this->repo->get();
+		if ( $patch['account_id'] !== $current['account_id'] || isset( $patch['api_token'] ) ) {
+			$patch['flex_status'] = 'unknown';
+		}
+
 		$this->repo->update( $patch );
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * Check Flexible Variants status via API, with canary fallback.
+	 *
+	 * @param CloudflareImagesClient $client API client.
+	 * @return string 'enabled', 'disabled', or 'unknown'.
+	 */
+	private function check_flex_status( CloudflareImagesClient $client ): string {
+		$fv_status = $client->get_flexible_variants_status();
+
+		// Fallback to canary if API config endpoint is unsupported.
+		if ( is_wp_error( $fv_status ) && $fv_status->get_error_code() === 'cfi_flex_unsupported' ) {
+			$settings  = $this->repo->get();
+			$demo_id   = get_option( OptionKeys::DEMO_IMAGE_ID, '' );
+
+			if ( $demo_id !== '' && $settings['account_hash'] !== '' ) {
+				$fv_status = $client->canary_flexible_variants( $settings['account_hash'], $demo_id );
+			}
+		}
+
+		$fv_value = is_wp_error( $fv_status ) ? 'unknown' : ( $fv_status ? 'enabled' : 'disabled' );
+
+		$this->repo->update(
+			array(
+				'flex_status'     => $fv_value,
+				'flex_checked_at' => time(),
+			)
+		);
+
+		return $fv_value;
+	}
+
+	/**
+	 * AJAX handler: test Flexible Variants status.
+	 *
+	 * @return void
+	 */
+	public function ajax_flex_test(): void {
+		check_ajax_referer( 'cfi_admin' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'cfi-images-sync' ) ) );
+		}
+
+		$client = CloudflareImagesClient::from_settings();
+
+		if ( is_wp_error( $client ) ) {
+			wp_send_json_error( array( 'message' => $client->get_error_message() ) );
+		}
+
+		$status = $this->check_flex_status( $client );
+
+		$messages = array(
+			'enabled'  => __( 'Flexible Variants are enabled.', 'cfi-images-sync' ),
+			'disabled' => __( 'Flexible Variants are disabled.', 'cfi-images-sync' ),
+			'unknown'  => __( 'Could not determine status.', 'cfi-images-sync' ),
+		);
+
+		wp_send_json_success(
+			array(
+				'status'  => $status,
+				'message' => $messages[ $status ] ?? $messages['unknown'],
+			)
+		);
+	}
+
+	/**
+	 * AJAX handler: enable Flexible Variants on the Cloudflare account.
+	 *
+	 * @return void
+	 */
+	public function ajax_flex_enable(): void {
+		check_ajax_referer( 'cfi_admin' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'cfi-images-sync' ) ) );
+		}
+
+		$client = CloudflareImagesClient::from_settings();
+
+		if ( is_wp_error( $client ) ) {
+			wp_send_json_error( array( 'message' => $client->get_error_message() ) );
+		}
+
+		$result = $client->enable_flexible_variants();
+
+		if ( is_wp_error( $result ) ) {
+			$data    = $result->get_error_data();
+			$cf_code = $data['cf_code'] ?? 0;
+
+			if ( in_array( $cf_code, array( 401, 403 ), true ) ) {
+				wp_send_json_error( array( 'message' => __( 'API token lacks permission to edit Images config.', 'cfi-images-sync' ) ) );
+			}
+
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		$status = $result ? 'enabled' : 'disabled';
+
+		$this->repo->update(
+			array(
+				'flex_status'     => $status,
+				'flex_checked_at' => time(),
+			)
+		);
+
+		wp_send_json_success(
+			array(
+				'status'  => $status,
+				'message' => __( 'Flexible Variants enabled!', 'cfi-images-sync' ),
+			)
+		);
 	}
 
 	/**
@@ -178,28 +309,75 @@ class SettingsPage {
 						</p></td>
 					</tr>
 					<tr>
-						<th></th>
+						<th><?php esc_html_e( 'Flexible Variants', 'cfi-images-sync' ); ?></th>
 						<td>
+							<?php
+							$flex_status = $settings['flex_status'];
+							$flex_labels = array(
+								'enabled'  => __( 'Enabled', 'cfi-images-sync' ),
+								'disabled' => __( 'Disabled', 'cfi-images-sync' ),
+								'unknown'  => __( 'Unknown', 'cfi-images-sync' ),
+							);
+							$flex_label  = $flex_labels[ $flex_status ] ?? $flex_labels['unknown'];
+							?>
+							<span id="cfi-flex-badge" class="cfi-flex-badge cfi-flex--<?php echo esc_attr( $flex_status ); ?>"><?php echo esc_html( $flex_label ); ?></span>
 							<p class="description">
 								<?php
 								$flex_link = '<a href="https://developers.cloudflare.com/images/transform-images/flexible-variants/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Flexible Variants docs', 'cfi-images-sync' ) . '</a>';
-								echo wp_kses(
-									sprintf(
-										/* translators: %s: link to Cloudflare Flexible Variants docs */
-										__( '<strong>Flexible Variants</strong> must be enabled in your Cloudflare Images settings for parameter-based presets (w=, h=, fit=...). See %s.', 'cfi-images-sync' ),
-										$flex_link
-									),
-									array(
-										'strong' => array(),
-										'a'      => array(
-											'href'   => array(),
-											'target' => array(),
-											'rel'    => array(),
+								if ( $flex_status === 'enabled' ) {
+									echo wp_kses(
+										sprintf(
+											/* translators: %s: link to Cloudflare Flexible Variants docs */
+											__( 'Parameter-based presets (w=, h=, fit=...) are available. See %s.', 'cfi-images-sync' ),
+											$flex_link
 										),
-									)
-								);
+										array(
+											'a' => array(
+												'href'   => array(),
+												'target' => array(),
+												'rel'    => array(),
+											),
+										)
+									);
+								} elseif ( $flex_status === 'disabled' ) {
+									echo wp_kses(
+										sprintf(
+											/* translators: %s: link to Cloudflare Flexible Variants docs */
+											__( 'Parameter-based presets will not work until enabled. See %s.', 'cfi-images-sync' ),
+											$flex_link
+										),
+										array(
+											'a' => array(
+												'href'   => array(),
+												'target' => array(),
+												'rel'    => array(),
+											),
+										)
+									);
+								} else {
+									echo wp_kses(
+										sprintf(
+											/* translators: %s: link to Cloudflare Flexible Variants docs */
+											__( 'Status not yet checked. Use "Test Connection" or click "Test" below. See %s.', 'cfi-images-sync' ),
+											$flex_link
+										),
+										array(
+											'a' => array(
+												'href'   => array(),
+												'target' => array(),
+												'rel'    => array(),
+											),
+										)
+									);
+								}
 								?>
 							</p>
+							<div class="cfi-flex-actions" id="cfi-flex-actions">
+								<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test', 'cfi-images-sync' ); ?></button>
+								<button type="button" class="button" id="cfi-flex-enable" <?php echo $flex_status === 'enabled' ? 'style="display:none;"' : ''; ?>><?php esc_html_e( 'Enable', 'cfi-images-sync' ); ?></button>
+								<span id="cfi-flex-spinner" class="spinner"></span>
+								<span id="cfi-flex-result"></span>
+							</div>
 						</td>
 					</tr>
 					<tr>

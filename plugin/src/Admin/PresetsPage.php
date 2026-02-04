@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use CFI\Repos\Defaults;
 use CFI\Repos\PresetsRepo;
+use CFI\Repos\SettingsRepo;
 use CFI\Support\Validators;
 
 /**
@@ -134,8 +135,9 @@ class PresetsPage {
 			wp_die( esc_html__( 'Unauthorized.', 'cfi-images-sync' ) );
 		}
 
-		$presets  = $this->repo->all();
-		$editing  = null;
+		$presets     = $this->repo->all();
+		$editing     = null;
+		$flex_status = ( new SettingsRepo() )->get()['flex_status'];
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only GET params for UI state.
 		if ( isset( $_GET['action'] ) && $_GET['action'] === 'edit' && ! empty( $_GET['preset_id'] ) ) {
@@ -148,6 +150,8 @@ class PresetsPage {
 			<h1><?php esc_html_e( 'CF Images — Presets', 'cfi-images-sync' ); ?></h1>
 
 			<?php $this->render_notice(); ?>
+
+			<?php $this->render_flex_callout( $flex_status ); ?>
 
 			<h2><?php echo $editing ? esc_html__( 'Edit Preset', 'cfi-images-sync' ) : esc_html__( 'Add Preset', 'cfi-images-sync' ); ?></h2>
 			<form method="post">
@@ -174,11 +178,17 @@ class PresetsPage {
 
 			<div style="display:flex;align-items:center;gap:12px;margin:20px 0 12px;">
 				<h2 style="margin:0;"><?php esc_html_e( 'Existing Presets', 'cfi-images-sync' ); ?></h2>
-				<form method="post" style="display:inline;">
+				<form method="post" style="display:inline;" id="cfi-install-recommended-form">
 					<?php wp_nonce_field( 'cfi_install_recommended' ); ?>
-					<button type="submit" name="cfi_install_recommended" class="button">
-						<?php esc_html_e( 'Install Recommended Presets', 'cfi-images-sync' ); ?>
-					</button>
+					<?php if ( $flex_status === 'enabled' ) : ?>
+						<button type="submit" name="cfi_install_recommended" class="button">
+							<?php esc_html_e( 'Install Recommended Presets', 'cfi-images-sync' ); ?>
+						</button>
+					<?php else : ?>
+						<button type="button" class="button" id="cfi-install-recommended-btn" data-flex-status="<?php echo esc_attr( $flex_status ); ?>">
+							<?php esc_html_e( 'Install Recommended Presets', 'cfi-images-sync' ); ?>
+						</button>
+					<?php endif; ?>
 				</form>
 			</div>
 			<?php if ( empty( $presets ) ) : ?>
@@ -200,6 +210,15 @@ class PresetsPage {
 									<?php if ( Defaults::is_recommended_name( $preset['name'] ) ) : ?>
 										<span class="cfi-badge cfi-badge--recommended"><?php esc_html_e( 'Recommended', 'cfi-images-sync' ); ?></span>
 									<?php endif; ?>
+									<?php if ( Validators::is_flexible_variant( $preset['variant'] ) ) : ?>
+										<?php if ( $flex_status === 'enabled' ) : ?>
+											<span class="cfi-badge cfi-badge--flexible"><?php esc_html_e( 'Flexible', 'cfi-images-sync' ); ?></span>
+										<?php elseif ( $flex_status === 'disabled' ) : ?>
+											<span class="cfi-badge cfi-badge--flex-warn"><?php esc_html_e( 'Needs Flexible Variants', 'cfi-images-sync' ); ?></span>
+										<?php else : ?>
+											<span class="cfi-badge cfi-badge--flex-unknown"><?php esc_html_e( 'Flexible (status unknown)', 'cfi-images-sync' ); ?></span>
+										<?php endif; ?>
+									<?php endif; ?>
 									<br/><code><?php echo esc_html( $preset['id'] ); ?></code>
 								</td>
 								<td><code><?php echo esc_html( $preset['variant'] ); ?></code></td>
@@ -217,5 +236,51 @@ class PresetsPage {
 			<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the Flexible Variants status callout banner.
+	 *
+	 * @param string $flex_status Current FV status: 'enabled', 'disabled', or 'unknown'.
+	 * @return void
+	 */
+	private function render_flex_callout( string $flex_status ): void {
+		$settings_url = admin_url( 'admin.php?page=cfi-settings' );
+
+		if ( $flex_status === 'enabled' ) {
+			?>
+			<div class="cfi-fv-callout cfi-fv-callout--enabled">
+				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Enabled', 'cfi-images-sync' ); ?></p>
+				<p class="cfi-fv-callout__text"><?php esc_html_e( 'All parameter-based presets will work correctly.', 'cfi-images-sync' ); ?></p>
+			</div>
+			<?php
+		} elseif ( $flex_status === 'disabled' ) {
+			?>
+			<div class="cfi-fv-callout cfi-fv-callout--disabled">
+				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Disabled', 'cfi-images-sync' ); ?></p>
+				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Parameter-based presets (w=, h=, fit=, etc.) require Flexible Variants to be enabled on your Cloudflare account.', 'cfi-images-sync' ); ?></p>
+				<div class="cfi-fv-callout__actions">
+					<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'cfi-images-sync' ); ?></button>
+					<button type="button" class="button button-primary" id="cfi-flex-enable"><?php esc_html_e( 'Enable Flexible Variants', 'cfi-images-sync' ); ?></button>
+					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'cfi-images-sync' ); ?></a>
+					<span class="spinner" id="cfi-flex-spinner"></span>
+					<span id="cfi-flex-result"></span>
+				</div>
+			</div>
+			<?php
+		} else {
+			?>
+			<div class="cfi-fv-callout cfi-fv-callout--unknown">
+				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Status Unknown', 'cfi-images-sync' ); ?></p>
+				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Test the connection to check if Flexible Variants are enabled on your Cloudflare account.', 'cfi-images-sync' ); ?></p>
+				<div class="cfi-fv-callout__actions">
+					<button type="button" class="button button-primary" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'cfi-images-sync' ); ?></button>
+					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'cfi-images-sync' ); ?></a>
+					<span class="spinner" id="cfi-flex-spinner"></span>
+					<span id="cfi-flex-result"></span>
+				</div>
+			</div>
+			<?php
+		}
 	}
 }

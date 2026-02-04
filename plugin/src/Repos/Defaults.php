@@ -29,7 +29,9 @@ final class Defaults {
 			'api_token'    => '',
 			'debug'        => false,
 			'use_queue'    => true,
-			'logs_max'     => 200,
+			'logs_max'        => 200,
+			'flex_status'     => 'unknown',
+			'flex_checked_at' => 0,
 		);
 	}
 

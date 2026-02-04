@@ -32,6 +32,10 @@ class AdminMenu {
 		add_action( 'wp_ajax_cfi_meta_keys', array( $mappings_page, 'ajax_meta_keys' ) );
 		add_action( 'wp_ajax_cfi_acf_fields', array( $mappings_page, 'ajax_acf_fields' ) );
 		add_action( 'wp_ajax_cfi_test_mapping', array( $mappings_page, 'ajax_test_mapping' ) );
+
+		$settings_page = new SettingsPage();
+		add_action( 'wp_ajax_cfi_flex_test', array( $settings_page, 'ajax_flex_test' ) );
+		add_action( 'wp_ajax_cfi_flex_enable', array( $settings_page, 'ajax_flex_enable' ) );
 	}
 
 	/**
@@ -186,12 +190,20 @@ class AdminMenu {
 			true
 		);
 
+		$settings = ( new \CFI\Repos\SettingsRepo() )->get();
+
 		wp_localize_script(
 			'cfi-admin',
 			'cfiAdmin',
 			array(
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'cfi_admin' ),
+				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+				'nonce'      => wp_create_nonce( 'cfi_admin' ),
+				'flexStatus' => $settings['flex_status'],
+				'flexLabels' => array(
+					'enabled'  => __( 'Enabled', 'cfi-images-sync' ),
+					'disabled' => __( 'Disabled', 'cfi-images-sync' ),
+					'unknown'  => __( 'Unknown', 'cfi-images-sync' ),
+				),
 			)
 		);
 	}

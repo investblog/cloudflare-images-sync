@@ -215,6 +215,104 @@ class CloudflareImagesClient {
 	}
 
 	/**
+	 * Check whether Flexible Variants are enabled on the account.
+	 *
+	 * @return bool|\WP_Error True if enabled, false if disabled, WP_Error on failure.
+	 */
+	public function get_flexible_variants_status() {
+		$response = wp_remote_get(
+			$this->endpoint( '/images/v1/config' ),
+			array(
+				'headers' => $this->auth_headers(),
+				'timeout' => 15,
+			)
+		);
+
+		$parsed = $this->parse_response( $response );
+
+		if ( is_wp_error( $parsed ) ) {
+			$http_code = $parsed->get_error_data()['http_code'] ?? 0;
+			if ( in_array( $http_code, array( 404, 405 ), true ) ) {
+				return new \WP_Error( 'cfi_flex_unsupported', 'Config endpoint not available for this account.' );
+			}
+			return $parsed;
+		}
+
+		if ( ! array_key_exists( 'flexible_variants', $parsed ) ) {
+			return new \WP_Error( 'cfi_flex_unsupported', 'Config response does not include flexible_variants.' );
+		}
+
+		return ! empty( $parsed['flexible_variants'] );
+	}
+
+	/**
+	 * Enable Flexible Variants on the account.
+	 *
+	 * @return bool|\WP_Error True on success, WP_Error on failure.
+	 */
+	public function enable_flexible_variants() {
+		$response = wp_remote_request(
+			$this->endpoint( '/images/v1/config' ),
+			array(
+				'method'  => 'PATCH',
+				'headers' => array_merge(
+					$this->auth_headers(),
+					array( 'Content-Type' => 'application/json' )
+				),
+				'body'    => wp_json_encode( array( 'flexible_variants' => true ) ),
+				'timeout' => 15,
+			)
+		);
+
+		$parsed = $this->parse_response( $response );
+
+		if ( is_wp_error( $parsed ) ) {
+			return $parsed;
+		}
+
+		return ! empty( $parsed['flexible_variants'] );
+	}
+
+	/**
+	 * Canary check for Flexible Variants via imagedelivery.net probe.
+	 *
+	 * @param string $account_hash Cloudflare account hash.
+	 * @param string $image_id     A known Cloudflare image ID.
+	 * @return bool|\WP_Error True if enabled, false if disabled, WP_Error if inconclusive.
+	 */
+	public function canary_flexible_variants( string $account_hash, string $image_id ) {
+		$url = 'https://imagedelivery.net/' . rawurlencode( $account_hash ) . '/' . rawurlencode( $image_id ) . '/w=20,f=auto';
+
+		$response = wp_remote_get(
+			$url,
+			array(
+				'timeout'     => 10,
+				'redirection' => 2,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error( 'cfi_canary_inconclusive', 'Canary request failed: ' . $response->get_error_message() );
+		}
+
+		$code         = wp_remote_retrieve_response_code( $response );
+		$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+		$body         = wp_remote_retrieve_body( $response );
+
+		// HTTP 200 + image content type = flexible variants enabled.
+		if ( $code === 200 && strpos( $content_type, 'image/' ) === 0 ) {
+			return true;
+		}
+
+		// Body contains error 9429 = flexible variants disabled.
+		if ( strpos( $body, '9429' ) !== false ) {
+			return false;
+		}
+
+		return new \WP_Error( 'cfi_canary_inconclusive', 'Canary returned unexpected response (HTTP ' . $code . ').' );
+	}
+
+	/**
 	 * Build the full API endpoint URL.
 	 *
 	 * @param string $path API path after /accounts/{id}.

@@ -42,6 +42,11 @@ final class Validators {
 		$result['use_queue']    = (bool) $result['use_queue'];
 		$result['logs_max']     = self::clamp_int( (int) $result['logs_max'], 50, 1000 );
 
+		$result['flex_status']     = in_array( $result['flex_status'], array( 'unknown', 'enabled', 'disabled' ), true )
+			? $result['flex_status']
+			: 'unknown';
+		$result['flex_checked_at'] = (int) $result['flex_checked_at'];
+
 		return $result;
 	}
 
@@ -200,6 +205,22 @@ final class Validators {
 		}
 
 		return (bool) preg_match( '/^[A-Za-z0-9_\\-:.]+$/', $key );
+	}
+
+	/**
+	 * Check if a variant string uses Cloudflare Flexible Variants syntax.
+	 *
+	 * Named variants (e.g. "public", "thumbnail") don't contain known transform keys.
+	 * Flexible variants (e.g. "w=1200,h=630") use parameter=value pairs.
+	 *
+	 * @param string $variant Variant string.
+	 * @return bool
+	 */
+	public static function is_flexible_variant( string $variant ): bool {
+		return (bool) preg_match(
+			'/(?:^|,)(?:w|h|fit|f|quality|dpr|gravity|blur|sharpen|trim|metadata|slow-connection-quality)=/',
+			$variant
+		);
 	}
 
 	/**

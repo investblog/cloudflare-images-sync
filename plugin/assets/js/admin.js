@@ -103,6 +103,98 @@
 		updateCopyAllState();
 	});
 
+	// ── Flexible Variants Test / Enable ───────────────────────────────
+
+	var ajax = window.cfiAdmin || {};
+
+	$(document).on('click', '#cfi-flex-test', function () {
+		cfiFlexAction('cfi_flex_test');
+	});
+
+	$(document).on('click', '#cfi-flex-enable', function () {
+		if (!confirm('This enables Flexible Variants account-wide on your Cloudflare account. Continue?')) {
+			return;
+		}
+		cfiFlexAction('cfi_flex_enable', true);
+	});
+
+	function cfiFlexAction(action, reloadOnSuccess) {
+		var $spinner = $('#cfi-flex-spinner');
+		var $result = $('#cfi-flex-result');
+		$spinner.addClass('is-active');
+		$result.text('');
+
+		$.post(ajax.ajaxUrl, {
+			action: action,
+			_ajax_nonce: ajax.nonce
+		}, function (response) {
+			$spinner.removeClass('is-active');
+			if (response.success) {
+				updateFlexUI(response.data.status, response.data.message);
+				// Reload page on enable success to refresh UI state.
+				if (reloadOnSuccess && response.data.status === 'enabled') {
+					setTimeout(function () {
+						window.location.reload();
+					}, 1000);
+				}
+			} else {
+				$result.text(response.data.message || 'Error').css('color', '#d63638');
+			}
+		}).fail(function () {
+			$spinner.removeClass('is-active');
+			$result.text('Request failed.').css('color', '#d63638');
+		});
+	}
+
+	function updateFlexUI(status, message) {
+		var $badge = $('#cfi-flex-badge');
+		var $enable = $('#cfi-flex-enable');
+		var $result = $('#cfi-flex-result');
+		var labels = ajax.flexLabels || {};
+
+		$badge.removeClass('cfi-flex--enabled cfi-flex--disabled cfi-flex--unknown');
+		if (status === 'enabled') {
+			$badge.addClass('cfi-flex--enabled').text(labels.enabled || 'Enabled');
+			$enable.hide();
+			$result.text(message).css('color', '#00a32a');
+		} else if (status === 'disabled') {
+			$badge.addClass('cfi-flex--disabled').text(labels.disabled || 'Disabled');
+			$enable.show();
+			$result.text(message).css('color', '#d63638');
+		} else {
+			$badge.addClass('cfi-flex--unknown').text(labels.unknown || 'Unknown');
+			$enable.show();
+			$result.text(message).css('color', '#646970');
+		}
+	}
+
+	// ── Install Recommended Presets (blocked when FV not enabled) ─────
+
+	$(document).on('click', '#cfi-install-recommended-btn', function () {
+		var status = $(this).data('flexStatus');
+		var msg;
+
+		if (status === 'disabled') {
+			msg = 'Flexible Variants are disabled on your Cloudflare account. ' +
+				'Recommended presets use flexible syntax and will not render correctly.\n\n' +
+				'Options:\n' +
+				'• Go to Settings to enable Flexible Variants first\n' +
+				'• Click OK to install anyway (presets will be broken until FV enabled)\n' +
+				'• Click Cancel to abort';
+		} else {
+			msg = 'Flexible Variants status is unknown. Recommended presets may not work.\n\n' +
+				'Go to Settings to test the connection first, or click OK to install anyway.';
+		}
+
+		if (confirm(msg)) {
+			// Submit the actual form.
+			$('#cfi-install-recommended-form').find('button[type="button"]')
+				.attr('type', 'submit')
+				.attr('name', 'cfi_install_recommended');
+			$('#cfi-install-recommended-form').submit();
+		}
+	});
+
 	// ── Autocomplete component ─────────────────────────────────────────
 
 	/**
@@ -334,7 +426,6 @@
 	var config = window.cfiMapping || {};
 	var sourceKeyConfig = config.sourceKeyConfig || {};
 	var i18n = config.i18n || {};
-	var ajax = window.cfiAdmin || {};
 	var hasAcf = !!config.hasAcf;
 
 	var $sourceType = $('#source_type');

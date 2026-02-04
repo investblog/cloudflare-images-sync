@@ -402,6 +402,35 @@ class PreviewPage {
 			$presets = $highlighted + $presets;
 		}
 
+		// Check if any presets use flexible variants and FV is not enabled.
+		$flex_status    = $settings['flex_status'];
+		$has_flex       = false;
+		$flex_checked   = (int) $settings['flex_checked_at'];
+		$stale_hours    = 6;
+		$is_stale       = $flex_status === 'enabled' && $flex_checked > 0 && ( time() - $flex_checked ) > $stale_hours * 3600;
+
+		foreach ( $presets as $preset ) {
+			if ( Validators::is_flexible_variant( $preset['variant'] ) ) {
+				$has_flex = true;
+				break;
+			}
+		}
+
+		if ( $has_flex && $flex_status !== 'enabled' ) {
+			$this->render_flex_callout( $flex_status );
+		}
+
+		if ( $has_flex && $is_stale ) {
+			$ago = human_time_diff( $flex_checked );
+			echo '<p class="description" style="margin:8px 0;">';
+			printf(
+				/* translators: %s: human-readable time difference */
+				esc_html__( 'Flexible Variants status last checked %s ago.', 'cfi-images-sync' ),
+				esc_html( $ago )
+			);
+			echo '</p>';
+		}
+
 		echo '<h3>' . esc_html__( 'Variant Previews', 'cfi-images-sync' ) . '</h3>';
 		echo '<div class="cfi-preset-grid">';
 
@@ -412,6 +441,7 @@ class PreviewPage {
 				continue;
 			}
 
+			$is_flex    = Validators::is_flexible_variant( $preset['variant'] );
 			$card_class = 'cfi-preset-card';
 			if ( $id === $highlight_preset ) {
 				$card_class .= ' cfi-preset-card--highlighted';
@@ -419,11 +449,64 @@ class PreviewPage {
 
 			echo '<div class="' . esc_attr( $card_class ) . '">';
 			echo '<h4>' . esc_html( $preset['name'] ) . '</h4>';
-			echo '<img src="' . esc_url( $url ) . '" loading="lazy" />';
-			echo '<p><code class="cfi-copy-url" title="' . esc_attr__( 'Click to copy', 'cfi-images-sync' ) . '">' . esc_html( $url ) . '</code></p>';
+
+			if ( $is_flex && $flex_status !== 'enabled' ) {
+				// Show placeholder instead of broken <img>.
+				if ( $flex_status === 'disabled' ) {
+					echo '<p class="cfi-flex-placeholder">' . esc_html__( 'Needs Flexible Variants', 'cfi-images-sync' ) . '</p>';
+				} else {
+					echo '<p class="cfi-flex-placeholder">' . esc_html__( 'Flexible Variants status unknown', 'cfi-images-sync' ) . '</p>';
+				}
+				// Show URL but disabled (no copy).
+				echo '<p><code class="cfi-copy-url cfi-copy-url--disabled">' . esc_html( $url ) . '</code></p>';
+			} else {
+				echo '<img src="' . esc_url( $url ) . '" loading="lazy" />';
+				echo '<p><code class="cfi-copy-url" title="' . esc_attr__( 'Click to copy', 'cfi-images-sync' ) . '">' . esc_html( $url ) . '</code></p>';
+			}
+
 			echo '</div>';
 		}
 
 		echo '</div>';
+	}
+
+	/**
+	 * Render the Flexible Variants status callout banner.
+	 *
+	 * @param string $flex_status Current FV status: 'enabled', 'disabled', or 'unknown'.
+	 * @return void
+	 */
+	private function render_flex_callout( string $flex_status ): void {
+		$settings_url = admin_url( 'admin.php?page=cfi-settings' );
+
+		if ( $flex_status === 'disabled' ) {
+			?>
+			<div class="cfi-fv-callout cfi-fv-callout--disabled" style="margin: 12px 0;">
+				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Disabled', 'cfi-images-sync' ); ?></p>
+				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Parameter-based presets will not render. Enable Flexible Variants to see all previews.', 'cfi-images-sync' ); ?></p>
+				<div class="cfi-fv-callout__actions">
+					<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'cfi-images-sync' ); ?></button>
+					<button type="button" class="button button-primary" id="cfi-flex-enable"><?php esc_html_e( 'Enable Flexible Variants', 'cfi-images-sync' ); ?></button>
+					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'cfi-images-sync' ); ?></a>
+					<span class="spinner" id="cfi-flex-spinner"></span>
+					<span id="cfi-flex-result"></span>
+				</div>
+			</div>
+			<?php
+		} else {
+			// Unknown status.
+			?>
+			<div class="cfi-fv-callout cfi-fv-callout--unknown" style="margin: 12px 0;">
+				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Status Unknown', 'cfi-images-sync' ); ?></p>
+				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Test the connection to check if Flexible Variants are enabled.', 'cfi-images-sync' ); ?></p>
+				<div class="cfi-fv-callout__actions">
+					<button type="button" class="button button-primary" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'cfi-images-sync' ); ?></button>
+					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'cfi-images-sync' ); ?></a>
+					<span class="spinner" id="cfi-flex-spinner"></span>
+					<span id="cfi-flex-result"></span>
+				</div>
+			</div>
+			<?php
+		}
 	}
 }
