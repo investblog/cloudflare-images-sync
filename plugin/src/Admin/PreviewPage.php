@@ -235,7 +235,7 @@ class PreviewPage {
 		if ( $stored_url !== '' ) {
 			echo '<h3>' . esc_html__( 'Current Delivery URL', 'cloudflare-images-sync' ) . '</h3>';
 			echo '<p><code>' . esc_html( $stored_url ) . '</code></p>';
-			echo '<p><img src="' . esc_url( $stored_url ) . '" style="max-width:600px;height:auto;" loading="lazy" /></p>';
+			echo '<p><img src="' . esc_url( $stored_url ) . '" class="cfi-preview-img" loading="lazy" /></p>';
 		} else {
 			echo '<p>' . esc_html__( 'No delivery URL stored yet.', 'cloudflare-images-sync' ) . '</p>';
 		}
@@ -321,7 +321,7 @@ class PreviewPage {
 		}
 
 		echo '<h3>' . esc_html__( 'Variant Previews', 'cloudflare-images-sync' ) . '</h3>';
-		echo '<div class="cfi-preset-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">';
+		echo '<div class="cfi-preset-grid">';
 
 		foreach ( $presets as $preset ) {
 			$url = $builder->url_from_preset( $cf_image_id, $preset );
@@ -330,10 +330,10 @@ class PreviewPage {
 				continue;
 			}
 
-			echo '<div class="cfi-preset-card" style="border:1px solid #ccc;padding:12px;border-radius:4px;">';
-			echo '<h4 style="margin:0 0 8px;">' . esc_html( $preset['name'] ) . '</h4>';
-			echo '<img src="' . esc_url( $url ) . '" style="max-width:100%;height:auto;" loading="lazy" />';
-			echo '<p style="margin:8px 0 0;word-break:break-all;"><code class="cfi-copy-url" style="cursor:pointer;font-size:11px;" title="Click to copy">' . esc_html( $url ) . '</code></p>';
+			echo '<div class="cfi-preset-card">';
+			echo '<h4>' . esc_html( $preset['name'] ) . '</h4>';
+			echo '<img src="' . esc_url( $url ) . '" loading="lazy" />';
+			echo '<p><code class="cfi-copy-url" title="Click to copy">' . esc_html( $url ) . '</code></p>';
 			echo '</div>';
 		}
 

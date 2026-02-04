@@ -2,6 +2,48 @@
  * Cloudflare Images Sync — Admin styles.
  */
 
+/* ── Toolbar (counts + actions above tables) ─────────────────────────── */
+
+.cfi-tablenav {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 12px 0;
+}
+
+/* ── Log-level badges ────────────────────────────────────────────────── */
+
+.cfi-log-level {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	line-height: 1.4;
+	font-weight: 500;
+}
+
+.cfi-log-level--info {
+	background: #e7f5fe;
+	color: #0a4b78;
+}
+
+.cfi-log-level--error {
+	background: #fcf0f1;
+	color: #8a1116;
+}
+
+.cfi-log-level--warning {
+	background: #fef8ee;
+	color: #6e4600;
+}
+
+.cfi-log-level--debug {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+/* ── Preview page ────────────────────────────────────────────────────── */
+
 .cfi-preset-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -31,6 +73,15 @@
 	cursor: pointer;
 }
 
+.cfi-preset-card p {
+	margin: 8px 0 0;
+}
+
 .cfi-copy-url.copied {
 	color: #00a32a;
+}
+
+.cfi-preview-img {
+	max-width: 600px;
+	height: auto;
 }

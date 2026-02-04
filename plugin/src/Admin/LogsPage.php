@@ -73,12 +73,14 @@ class LogsPage {
 
 			<?php $this->render_notice(); ?>
 
-			<form method="post" style="margin-bottom:12px;">
-				<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
-				<?php /* translators: %d: number of log entries */ ?>
-			<span><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
-				<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cloudflare-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cloudflare-images-sync' ); ?>');" />
-			</form>
+			<div class="cfi-tablenav">
+				<form method="post">
+					<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
+					<?php /* translators: %d: number of log entries */ ?>
+					<span><?php echo esc_html( sprintf( __( '%d entries', 'cloudflare-images-sync' ), count( $items ) ) ); ?></span>
+					<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'cloudflare-images-sync' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'cloudflare-images-sync' ); ?>');" />
+				</form>
+			</div>
 
 			<?php if ( empty( $items ) ) : ?>
 				<p><?php esc_html_e( 'No log entries.', 'cloudflare-images-sync' ); ?></p>
@@ -97,7 +99,7 @@ class LogsPage {
 						<?php foreach ( array_reverse( $items ) as $entry ) : ?>
 							<tr>
 								<td><?php echo esc_html( wp_date( 'Y-m-d H:i:s', $entry['t'] ?? 0 ) ); ?></td>
-								<td><code><?php echo esc_html( $entry['lvl'] ?? '' ); ?></code></td>
+								<td><span class="cfi-log-level cfi-log-level--<?php echo esc_attr( $entry['lvl'] ?? 'info' ); ?>"><?php echo esc_html( $entry['lvl'] ?? '' ); ?></span></td>
 								<td><?php echo esc_html( $entry['msg'] ?? '' ); ?></td>
 								<td><?php echo isset( $entry['post_id'] ) ? esc_html( $entry['post_id'] ) : '—'; ?></td>
 								<td><?php echo isset( $entry['mapping_id'] ) ? '<code>' . esc_html( $entry['mapping_id'] ) . '</code>' : '—'; ?></td>
