@@ -696,14 +696,17 @@
 				html += '<dt>Source</dt><dd><span class="cfi-test-status cfi-test-status--missing">Not found</span></dd>';
 			}
 
-			// Upload decision.
-			if (d.source_found) {
-				var uploadClass = d.would_upload ? 'cfi-test-status--upload' : 'cfi-test-status--skip';
-				var uploadLabel = d.would_upload ? 'Will upload' : 'Skip';
-				html += '<dt>Upload</dt><dd><span class="cfi-test-status ' + uploadClass + '">' + uploadLabel + '</span> ' + escHtml(d.upload_reason) + '</dd>';
-			} else {
-				html += '<dt>Upload</dt><dd>' + escHtml(d.upload_reason) + '</dd>';
-			}
+			// Upload decision with detailed status.
+			var statusMap = {
+				'new_upload':     { label: 'New upload',  css: 'cfi-test-status--new' },
+				'reupload':       { label: 'Re-upload',   css: 'cfi-test-status--reupload' },
+				'cached':         { label: 'Cached',      css: 'cfi-test-status--cached' },
+				'skip_unchanged': { label: 'Unchanged',   css: 'cfi-test-status--skip' },
+				'skip_disabled':  { label: 'Disabled',    css: 'cfi-test-status--skip' },
+				'no_source':      { label: 'No source',   css: 'cfi-test-status--missing' }
+			};
+			var st = statusMap[d.status] || { label: d.status, css: 'cfi-test-status--skip' };
+			html += '<dt>Sync</dt><dd><span class="cfi-test-status ' + st.css + '">' + st.label + '</span> ' + escHtml(d.upload_reason) + '</dd>';
 
 			// URLs.
 			if (d.current_url) {

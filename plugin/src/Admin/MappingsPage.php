@@ -456,12 +456,14 @@ class MappingsPage {
 			'attachment_id' => 0,
 			'file_name'     => '',
 			'would_upload'  => false,
+			'status'        => '',
 			'upload_reason' => '',
 			'preview_url'   => '',
 			'current_url'   => '',
 		);
 
 		if ( $resolved->is_empty() ) {
+			$result['status']        = 'no_source';
 			$result['upload_reason'] = __( 'Source image not found or empty.', 'cfi-images-sync' );
 			wp_send_json_success( $result );
 		}
@@ -484,19 +486,24 @@ class MappingsPage {
 
 		// Determine upload necessity (mirrors SyncEngine logic).
 		if ( $att_cf_id !== '' && ! \CFI\Core\Signature::has_changed( $file_path, $att_sig ) ) {
-			$result['upload_reason'] = __( 'Reuse: image already on Cloudflare (attachment cache hit).', 'cfi-images-sync' );
+			$result['status']        = 'cached';
+			$result['upload_reason'] = __( 'Image already on Cloudflare (attachment cache hit).', 'cfi-images-sync' );
 		} elseif ( $stored_cfid === '' && $att_cf_id === '' && ! empty( $behavior['upload_if_missing'] ) ) {
 			$result['would_upload']  = true;
-			$result['upload_reason'] = __( 'New upload: image not yet on Cloudflare.', 'cfi-images-sync' );
+			$result['status']        = 'new_upload';
+			$result['upload_reason'] = __( 'Image not yet on Cloudflare.', 'cfi-images-sync' );
 		} elseif ( $stored_cfid !== '' && ! empty( $behavior['reupload_if_changed'] ) ) {
 			if ( \CFI\Core\Signature::has_changed( $file_path, $stored_sig ) ) {
 				$result['would_upload']  = true;
-				$result['upload_reason'] = __( 'Re-upload: local file has changed since last sync.', 'cfi-images-sync' );
+				$result['status']        = 'reupload';
+				$result['upload_reason'] = __( 'Local file has changed since last sync.', 'cfi-images-sync' );
 			} else {
-				$result['upload_reason'] = __( 'Skip: file unchanged since last sync.', 'cfi-images-sync' );
+				$result['status']        = 'skip_unchanged';
+				$result['upload_reason'] = __( 'File unchanged since last sync.', 'cfi-images-sync' );
 			}
 		} else {
-			$result['upload_reason'] = __( 'Skip: upload not needed or not enabled by behavior settings.', 'cfi-images-sync' );
+			$result['status']        = 'skip_disabled';
+			$result['upload_reason'] = __( 'Upload not needed or behavior not enabled.', 'cfi-images-sync' );
 		}
 
 		// Preview delivery URL.

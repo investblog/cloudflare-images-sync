@@ -467,9 +467,19 @@
 	color: #8a1116;
 }
 
-.cfi-test-status--upload {
-	background: #fef8ee;
-	color: #6e4600;
+.cfi-test-status--new {
+	background: #e7f5e8;
+	color: #1a5e1f;
+}
+
+.cfi-test-status--reupload {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.cfi-test-status--cached {
+	background: #e5f5fa;
+	color: #0a4b78;
 }
 
 .cfi-test-status--skip {
