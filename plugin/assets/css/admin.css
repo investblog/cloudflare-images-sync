@@ -215,6 +215,7 @@
 .cfi-autocomplete {
 	position: relative;
 	display: inline-block;
+	vertical-align: top;
 }
 
 .cfi-autocomplete__panel {
@@ -222,7 +223,7 @@
 	position: absolute;
 	top: 100%;
 	left: 0;
-	z-index: 100;
+	z-index: 100000;
 	min-width: 100%;
 	max-width: 500px;
 	max-height: 220px;

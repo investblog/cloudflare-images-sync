@@ -102,6 +102,11 @@
 		this.items = items || [];
 		this.activeIndex = -1;
 		this._filter();
+
+		// If the input already has focus (AJAX arrived after focus), show panel.
+		if (this.items.length > 0 && this.$input.is(':focus')) {
+			this._show();
+		}
 	};
 
 	CfiAutocomplete.prototype._debounce = function (fn, delay) {
