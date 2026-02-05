@@ -4,7 +4,7 @@ Tags: cloudflare, images, sync, cdn, optimization
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,11 @@ No. The plugin uploads a copy to Cloudflare Images and stores the delivery URL i
 Yes. The plugin supports ACF image fields (ID, array, and URL return formats) as source types.
 
 == Changelog ==
+
+= 0.2.1 =
+* Fixed: Auto-sync now correctly writes delivery URL to meta field when triggered by ACF save.
+* Improved: Hook priorities increased to 100 to run after ACF and other plugins complete their saves.
+* Improved: Debug logging now verifies meta writes and reports mismatches.
 
 = 0.2.0 =
 * New: Universal "public" preset that works without Flexible Variants.

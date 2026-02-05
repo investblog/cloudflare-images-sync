@@ -67,15 +67,18 @@ class Hooks {
 		}
 
 		// Register save_post_{cpt} for each post type.
+		// Priority 100 ensures we run after most other plugins.
 		foreach ( array_keys( $post_types ) as $pt ) {
-			add_action( 'save_post_' . $pt, array( $this, 'on_save_post' ), 20, 2 );
+			add_action( 'save_post_' . $pt, array( $this, 'on_save_post' ), 100, 2 );
 		}
 
 		$this->debug_log( 'Hooks::init — registered save_post hooks for: ' . implode( ', ', array_keys( $post_types ) ) );
 
 		// Register acf/save_post (fires for all post types).
+		// Priority 100 ensures we run after ACF has fully saved all fields
+		// and after any other plugins that might modify ACF data.
 		if ( function_exists( 'acf_get_field' ) || has_action( 'acf/init' ) ) {
-			add_action( 'acf/save_post', array( $this, 'on_acf_save_post' ), 20 );
+			add_action( 'acf/save_post', array( $this, 'on_acf_save_post' ), 100 );
 		}
 	}
 
@@ -117,10 +120,14 @@ class Hooks {
 			return;
 		}
 
+		$this->debug_log( "Hooks::on_acf_save_post fired for post #{$post_id} ({$post->post_type})" );
+
 		if ( ! $this->should_process( $post_id, $post ) ) {
+			$this->debug_log( "Hooks::on_acf_save_post — should_process returned false for post #{$post_id}" );
 			return;
 		}
 
+		$this->debug_log( "Hooks::on_acf_save_post — running mappings for post #{$post_id}" );
 		$this->run_mappings( $post_id, $post->post_type, 'acf_save_post' );
 	}
 

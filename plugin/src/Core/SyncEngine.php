@@ -162,7 +162,7 @@ class SyncEngine {
 		// 9. Store results on post.
 		$this->store_meta( $post_id, $target, $cf_image_id, $url, $new_sig );
 
-		$logs->push( 'info', 'Synced successfully.', $ctx );
+		$logs->push( 'info', 'Synced successfully. CF ID: ' . $cf_image_id . ', URL written to: ' . ( $target['url_meta'] ?? 'none' ), $ctx );
 
 		return true;
 	}
@@ -262,8 +262,27 @@ class SyncEngine {
 	 * @param string               $signature  File signature.
 	 */
 	private function store_meta( int $post_id, array $target, string $cf_id, string $url, string $signature ): void {
+		$logs     = new LogsRepo();
+		$settings = ( new SettingsRepo() )->get();
+		$debug    = ! empty( $settings['debug'] );
+
 		if ( ! empty( $target['url_meta'] ) && $url !== '' ) {
 			update_post_meta( $post_id, $target['url_meta'], $url );
+
+			if ( $debug ) {
+				// Verify the write succeeded by re-reading.
+				$stored = get_post_meta( $post_id, $target['url_meta'], true );
+				$logs->push(
+					'debug',
+					sprintf(
+						'store_meta: wrote URL to %s, value=%s, verified=%s',
+						$target['url_meta'],
+						$url,
+						$stored === $url ? 'OK' : 'MISMATCH: ' . $stored
+					),
+					array( 'post_id' => $post_id )
+				);
+			}
 		}
 
 		if ( ! empty( $target['id_meta'] ) && $cf_id !== '' ) {
