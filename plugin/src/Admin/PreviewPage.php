@@ -163,13 +163,14 @@ class PreviewPage {
 		$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		?>
-		<form method="get">
+		<form method="get" class="cfi-loading-form">
 			<input type="hidden" name="page" value="cfi-preview" />
 			<input type="hidden" name="mode" value="attachment" />
 			<p>
 				<label for="attachment_id"><?php esc_html_e( 'Attachment ID:', 'cfi-images-sync' ); ?></label>
 				<input type="number" id="attachment_id" name="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>" min="1" class="small-text" />
 				<input type="submit" class="button" value="<?php esc_attr_e( 'Load', 'cfi-images-sync' ); ?>" />
+				<span class="spinner cfi-form-spinner"></span>
 			</p>
 			<p class="description">
 				<?php esc_html_e( 'Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand.', 'cfi-images-sync' ); ?>
@@ -197,11 +198,12 @@ class PreviewPage {
 			?>
 			<div class="cfi-empty-state">
 				<p><?php esc_html_e( 'Enter an attachment ID above, or use the sample image to preview presets.', 'cfi-images-sync' ); ?></p>
-				<form method="post">
+				<form method="post" class="cfi-loading-form">
 					<?php wp_nonce_field( 'cfi_demo_upload' ); ?>
 					<button type="submit" name="cfi_demo_upload" class="button button-primary">
 						<?php esc_html_e( 'Use Sample Image', 'cfi-images-sync' ); ?>
 					</button>
+					<span class="spinner cfi-form-spinner"></span>
 				</form>
 			</div>
 			<?php
@@ -213,10 +215,11 @@ class PreviewPage {
 		if ( $cf_image_id === '' ) {
 			?>
 			<p><?php esc_html_e( 'This attachment has not been uploaded to Cloudflare yet.', 'cfi-images-sync' ); ?></p>
-			<form method="post">
+			<form method="post" class="cfi-loading-form">
 				<?php wp_nonce_field( 'cfi_preview_upload' ); ?>
 				<input type="hidden" name="page" value="cfi-preview" />
 				<input type="submit" name="cfi_preview_upload" class="button-primary" value="<?php esc_attr_e( 'Upload for Preview', 'cfi-images-sync' ); ?>" />
+				<span class="spinner cfi-form-spinner"></span>
 			</form>
 			<?php
 			return;
@@ -294,9 +297,10 @@ class PreviewPage {
 		}
 
 		?>
-		<form method="post">
+		<form method="post" class="cfi-loading-form">
 			<?php wp_nonce_field( 'cfi_sync_now' ); ?>
 			<input type="submit" name="cfi_sync_now" class="button-primary" value="<?php esc_attr_e( 'Sync Now', 'cfi-images-sync' ); ?>" />
+			<span class="spinner cfi-form-spinner"></span>
 		</form>
 		<?php
 	}

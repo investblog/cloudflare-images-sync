@@ -73,6 +73,11 @@
 		copyToClipboard(json, $btn);
 	});
 
+	// ── Loading form spinner ───────────────────────────────────────────
+	$(document).on('submit', '.cfi-loading-form', function () {
+		$(this).addClass('is-loading');
+	});
+
 	// Enable/disable copy buttons based on input value.
 	function updateCopyBtnState($input) {
 		var selector = '#' + $input.attr('id');

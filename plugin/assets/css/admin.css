@@ -404,6 +404,28 @@
 	box-shadow: 0 0 0 1px #2271b1;
 }
 
+/* ── Loading form spinner ────────────────────────────────────────────── */
+
+.cfi-loading-form {
+	position: relative;
+}
+
+.cfi-loading-form .cfi-form-spinner {
+	float: none;
+	margin: 0 4px;
+	vertical-align: middle;
+}
+
+.cfi-loading-form.is-loading .cfi-form-spinner {
+	visibility: visible;
+}
+
+.cfi-loading-form.is-loading button,
+.cfi-loading-form.is-loading input[type="submit"] {
+	pointer-events: none;
+	opacity: 0.6;
+}
+
 /* ── Empty state ─────────────────────────────────────────────────────── */
 
 .cfi-empty-state {
