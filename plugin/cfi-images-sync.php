@@ -74,6 +74,18 @@ function cfi_deactivate() {
 register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\cfi_deactivate' );
 
 /**
+ * Load plugin translations.
+ */
+function cfi_load_textdomain() {
+	load_plugin_textdomain(
+		'cfi-images-sync',
+		false,
+		dirname( plugin_basename( CFI_PLUGIN_FILE ) ) . '/languages'
+	);
+}
+add_action( 'init', __NAMESPACE__ . '\\cfi_load_textdomain' );
+
+/**
  * Initialize the plugin.
  */
 function cfi_init() {

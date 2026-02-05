@@ -53,6 +53,10 @@ final class Defaults {
 	 */
 	public static function recommended_presets(): array {
 		return array(
+			'public'           => array(
+				'name'    => 'public',
+				'variant' => 'public',
+			),
 			'og_1200x630'      => array(
 				'name'    => 'og_1200x630',
 				'variant' => 'w=1200,h=630,fit=cover,quality=85,f=auto',

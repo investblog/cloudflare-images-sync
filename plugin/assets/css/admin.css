@@ -397,6 +397,11 @@
 	color: #646970;
 }
 
+.cfi-badge--universal {
+	background: #d4edda;
+	color: #155724;
+}
+
 /* ── Highlighted preset card (deep link) ─────────────────────────────── */
 
 .cfi-preset-card--highlighted {

@@ -218,6 +218,8 @@ class PresetsPage {
 										<?php else : ?>
 											<span class="cfi-badge cfi-badge--flex-unknown"><?php esc_html_e( 'Flexible (status unknown)', 'cfi-images-sync' ); ?></span>
 										<?php endif; ?>
+									<?php else : ?>
+										<span class="cfi-badge cfi-badge--universal"><?php esc_html_e( 'Universal', 'cfi-images-sync' ); ?></span>
 									<?php endif; ?>
 									<br/><code><?php echo esc_html( $preset['id'] ); ?></code>
 								</td>
