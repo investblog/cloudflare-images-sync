@@ -1,81 +1,121 @@
 # Images Sync for Cloudflare
 
-A WordPress plugin that syncs images to Cloudflare Images with flexible mappings, presets, and variant delivery.
+Sync WordPress images to Cloudflare Images — store CDN URLs in post meta, ready for headless or classic themes.
+
+[![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-blue.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-8.0%2B-purple.svg)](https://php.net/)
+[![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
+
+## Why?
+
+Headless frontends need stable, cacheable CDN URLs. This plugin makes WordPress the source of truth while Cloudflare Images handles delivery and optimization. No custom resolvers needed — just query the meta field.
 
 ## Features
 
-- **Automatic Sync** — Upload images to Cloudflare Images on post save
-- **Flexible Mappings** — Map any image source (Featured Image, ACF fields, post meta) to Cloudflare
-- **Preset System** — Define reusable variant presets (dimensions, quality, format)
-- **Flexible Variants** — Use Cloudflare's on-the-fly image transformations
-- **Preview Studio** — Test presets with live image previews
-- **WP-CLI Support** — Bulk sync via command line
-- **Action Scheduler** — Background processing for large sites
+- **Flexible Mappings** — Map any image source (Featured Image, ACF fields, post meta) to Cloudflare Images
+- **Preset System** — Reusable presets for OG images, thumbnails, heroes — consistent URLs across your site
+- **Preview Studio** — Visually test presets with live images before going live
+- **Auto-Sync** — Images sync on post save, or bulk-process via Action Scheduler
+- **Flexible Variants** — Smart detection prevents broken images and 9429 errors
+- **Headless-Ready** — URLs in post meta, perfect for GraphQL/REST API
+- **WP-CLI Support** — `wp cfi sync` for scripted workflows
+- **No Lock-in** — Images stay in Media Library; URLs are plain meta values
+
+## Quick Start
+
+```bash
+# 1. Install
+composer create-project your-vendor/your-plugin  # or download from Releases
+
+# 2. Configure (WP Admin → CF Images → Settings)
+Account ID:    ← from Cloudflare dashboard
+Account Hash:  ← from Images → Overview
+API Token:     ← with "Cloudflare Images: Edit" permission
+
+# 3. Create preset
+Name: og_1200x630
+Variant: w=1200,h=630,fit=cover,f=auto
+
+# 4. Create mapping
+Post Type: post
+Source: Featured Image
+Target Meta: _og_image_url
+Preset: og_1200x630
+
+# 5. Done — URLs sync on save
+get_post_meta($post_id, '_og_image_url', true);
+// → https://imagedelivery.net/{hash}/{id}/w=1200,h=630,fit=cover,f=auto
+```
 
 ## Requirements
 
 - WordPress 6.0+
 - PHP 8.0+
-- Cloudflare account with Images enabled
+- [Cloudflare Images](https://www.cloudflare.com/products/cloudflare-images/) subscription
+- API Token with `Cloudflare Images: Edit` permission
 
 ## Installation
 
-1. Download the latest release from [Releases](https://github.com/investblog/cloudflare-images-sync/releases)
-2. Upload to `/wp-content/plugins/`
-3. Activate the plugin
-4. Go to **CF Images → Settings** and enter your Cloudflare credentials
+### From GitHub Releases
 
-## Configuration
+1. Download the latest `.zip` from [Releases](https://github.com/investblog/cloudflare-images-sync/releases)
+2. Upload via **Plugins → Add New → Upload Plugin**
+3. Activate and configure at **CF Images → Settings**
 
-### Cloudflare Credentials
+### Manual
 
-You'll need from your Cloudflare dashboard:
-- **Account ID** — Found in the URL or dashboard sidebar
-- **Account Hash** — Found in Images → Overview → "Your account hash"
-- **API Token** — Create one with `Cloudflare Images:Edit` permission
-
-### Flexible Variants
-
-For presets with custom dimensions (w=, h=, f=auto), enable Flexible Variants in your Cloudflare Images settings. The plugin can detect and enable this for you.
+```bash
+cd wp-content/plugins/
+git clone https://github.com/investblog/cloudflare-images-sync.git
+```
 
 ## Usage
 
-### 1. Create Presets
+### Presets
 
-Go to **CF Images → Presets** and create variant presets:
-- `public` — Universal, works without Flexible Variants
-- `og_1200x630` — Open Graph images (1200×630)
-- `thumb_400x300` — Thumbnails
+Define image variants at **CF Images → Presets**:
 
-### 2. Create Mappings
+| Preset | Variant | Use Case |
+|--------|---------|----------|
+| `public` | `public` | Universal (no Flexible Variants needed) |
+| `og_1200x630` | `w=1200,h=630,fit=cover,f=auto` | Open Graph / Social |
+| `thumb_400` | `w=400,quality=80,f=auto` | Thumbnails |
+| `hero_1920` | `w=1920,quality=85,f=auto` | Hero images |
 
-Go to **CF Images → Mappings** and define sync rules:
-- **Source** — Where to get the image (Featured Image, ACF field, meta key)
-- **Target** — Where to store the Cloudflare URL (post meta keys)
-- **Preset** — Which variant to use
-- **Triggers** — When to sync (on save, ACF save)
+### Mappings
 
-### 3. Preview & Test
+Connect sources to destinations at **CF Images → Mappings**:
 
-Use **CF Images → Preview** to:
-- Test presets with any attachment
-- Preview delivery URLs before going live
-- Verify Flexible Variants are working
+- **Source**: Featured Image, ACF field, or meta key containing attachment ID
+- **Target**: Meta keys for delivery URL, CF Image ID, and change signature
+- **Preset**: Which variant to use for the delivery URL
+- **Triggers**: `save_post`, `acf/save_post`, or both
 
-## WP-CLI Commands
+### Preview Studio
+
+Test presets before deploying:
+
+1. Go to **CF Images → Preview**
+2. Enter an attachment ID or select Post + Mapping
+3. See live previews with all your presets
+4. Copy URLs directly to clipboard
+
+## WP-CLI
 
 ```bash
-# Sync all posts for a mapping
-wp cfi sync --mapping=map_abc12345
-
-# Sync specific post
+# Sync single post
 wp cfi sync --post_id=123 --mapping=map_abc12345
 
-# List mappings
-wp cfi mappings list
+# Bulk sync all posts for a mapping
+wp cfi sync --mapping=map_abc12345
+
+# Test connection
+wp cfi test
 ```
 
-## Hooks & Filters
+## For Developers
+
+### Hooks
 
 ```php
 // Modify delivery URL before storing
@@ -89,11 +129,23 @@ add_filter('cfi_resolve_source', function($resolved, $post_id, $source) {
 }, 10, 3);
 ```
 
+### GraphQL Example
+
+With WPGraphQL, the meta field is immediately queryable:
+
+```graphql
+query {
+  post(id: "123") {
+    ogImageUrl: metaValue(key: "_og_image_url")
+  }
+}
+```
+
 ## Development
 
 ```bash
-# Clone repository
 git clone https://github.com/investblog/cloudflare-images-sync.git
+cd cloudflare-images-sync
 
 # Install dependencies
 composer install
@@ -101,9 +153,8 @@ composer install
 # Run linting
 composer run phpcs
 
-# Local development with wp-env
-npm install
-npx wp-env start
+# Local dev with wp-env
+npm install && npx wp-env start
 ```
 
 ## License
@@ -112,4 +163,4 @@ GPL-2.0+
 
 ## Credits
 
-Developed by [investblog](https://github.com/investblog)
+Developed by [301st](https://301.st) with [Claude AI](https://claude.ai).

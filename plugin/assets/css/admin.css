@@ -964,3 +964,84 @@
 .cfi-dashboard .cfi-empty-state {
 	margin-top: 0;
 }
+
+/* ── Dashboard Widget ────────────────────────────────────────────────── */
+
+.cfi-widget-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 8px;
+}
+
+.cfi-widget-table td {
+	padding: 4px 0;
+	font-size: 13px;
+	border: 0;
+}
+
+.cfi-widget-table td:first-child {
+	color: #646970;
+}
+
+.cfi-widget-table td:last-child {
+	text-align: right;
+}
+
+.cfi-widget-timestamp {
+	font-size: 12px;
+	color: #646970;
+	margin: 0 0 12px;
+	padding-top: 4px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.cfi-widget-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	font-size: 13px;
+	padding: 10px 0;
+	border-top: 1px solid #f0f0f1;
+	margin-bottom: 10px;
+}
+
+.cfi-widget-stats a {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: #646970;
+	text-decoration: none;
+}
+
+.cfi-widget-stats a:hover {
+	color: #2271b1;
+}
+
+.cfi-widget-stats .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+.cfi-widget-sep {
+	color: #c3c4c7;
+}
+
+#cfi_status_widget .cfi-widget-stats .cfi-widget-sep {
+	display: none;
+}
+
+.cfi-widget-actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+}
+
+.cfi-widget-actions a {
+	text-decoration: none;
+}
+
+.cfi-widget-actions a:hover {
+	text-decoration: underline;
+}

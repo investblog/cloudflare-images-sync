@@ -26,6 +26,7 @@ class AdminMenu {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', array( $this, 'maybe_show_config_warning' ) );
+		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 
 		// AJAX handlers.
 		$mappings_page = new MappingsPage();
@@ -47,49 +48,37 @@ class AdminMenu {
 	 * @return void
 	 */
 	public function register_menu(): void {
-		$capability     = 'manage_options';
-		$icon           = 'dashicons-cloud';
-		$dashboard_page = new DashboardPage();
-		$settings_page  = new SettingsPage();
-		$presets_page   = new PresetsPage();
-		$mappings_page  = new MappingsPage();
-		$preview_page   = new PreviewPage();
-		$logs_page      = new LogsPage();
+		$capability    = 'manage_options';
+		$icon          = 'dashicons-cloud';
+		$settings_page = new SettingsPage();
+		$presets_page  = new PresetsPage();
+		$mappings_page = new MappingsPage();
+		$preview_page  = new PreviewPage();
+		$logs_page     = new LogsPage();
 
-		// Main menu item points to Dashboard.
-		add_menu_page(
+		$hook = add_menu_page(
 			__( 'Images Sync for Cloudflare', 'cfi-images-sync' ),
 			__( 'CF Images', 'cfi-images-sync' ),
 			$capability,
-			'cfi-dashboard',
-			array( $dashboard_page, 'render' ),
+			'cfi-settings',
+			array( $settings_page, 'render' ),
 			$icon,
 			81
 		);
+		add_action( 'load-' . $hook, array( $settings_page, 'handle_actions' ) );
 
-		// Dashboard submenu (replaces auto-generated first item).
+		// Rename the auto-generated first submenu item from "CF Images" to "Settings".
 		add_submenu_page(
-			'cfi-dashboard',
-			__( 'Dashboard', 'cfi-images-sync' ),
-			__( 'Dashboard', 'cfi-images-sync' ),
-			$capability,
-			'cfi-dashboard',
-			array( $dashboard_page, 'render' )
-		);
-
-		// Settings submenu.
-		$hook = add_submenu_page(
-			'cfi-dashboard',
+			'cfi-settings',
 			__( 'Settings', 'cfi-images-sync' ),
 			__( 'Settings', 'cfi-images-sync' ),
 			$capability,
 			'cfi-settings',
 			array( $settings_page, 'render' )
 		);
-		add_action( 'load-' . $hook, array( $settings_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-dashboard',
+			'cfi-settings',
 			__( 'Presets', 'cfi-images-sync' ),
 			__( 'Presets', 'cfi-images-sync' ),
 			$capability,
@@ -99,7 +88,7 @@ class AdminMenu {
 		add_action( 'load-' . $hook, array( $presets_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-dashboard',
+			'cfi-settings',
 			__( 'Mappings', 'cfi-images-sync' ),
 			__( 'Mappings', 'cfi-images-sync' ),
 			$capability,
@@ -109,7 +98,7 @@ class AdminMenu {
 		add_action( 'load-' . $hook, array( $mappings_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-dashboard',
+			'cfi-settings',
 			__( 'Preview', 'cfi-images-sync' ),
 			__( 'Preview', 'cfi-images-sync' ),
 			$capability,
@@ -119,7 +108,7 @@ class AdminMenu {
 		add_action( 'load-' . $hook, array( $preview_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-dashboard',
+			'cfi-settings',
 			__( 'Logs', 'cfi-images-sync' ),
 			__( 'Logs', 'cfi-images-sync' ),
 			$capability,
@@ -140,8 +129,8 @@ class AdminMenu {
 			return;
 		}
 
-		// Skip on settings and dashboard pages — the user is likely configuring right now.
-		if ( in_array( $screen->id, array( 'toplevel_page_cfi-dashboard', 'cf-images_page_cfi-settings' ), true ) ) {
+		// Skip on the settings page itself — the user is likely configuring right now.
+		if ( $screen->id === 'toplevel_page_cfi-settings' ) {
 			return;
 		}
 
@@ -185,8 +174,11 @@ class AdminMenu {
 	 * @return void
 	 */
 	public function enqueue_assets( string $hook_suffix ): void {
-		// Only load on our pages.
-		if ( strpos( $hook_suffix, 'cfi-' ) === false && $hook_suffix !== 'toplevel_page_cfi-dashboard' ) {
+		// Only load on our pages and the main dashboard (for widget).
+		$is_our_page   = strpos( $hook_suffix, 'cfi-' ) !== false || $hook_suffix === 'toplevel_page_cfi-settings';
+		$is_dashboard  = $hook_suffix === 'index.php';
+
+		if ( ! $is_our_page && ! $is_dashboard ) {
 			return;
 		}
 
@@ -221,5 +213,135 @@ class AdminMenu {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Register the dashboard widget.
+	 *
+	 * @return void
+	 */
+	public function register_dashboard_widget(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		wp_add_dashboard_widget(
+			'cfi_status_widget',
+			$this->get_widget_title(),
+			array( $this, 'render_dashboard_widget' )
+		);
+	}
+
+	/**
+	 * Get widget title with Cloudflare icon.
+	 *
+	 * @return string
+	 */
+	private function get_widget_title(): string {
+		$icon = '<svg style="width:18px;height:18px;vertical-align:text-bottom;margin-right:6px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+			. '<path d="M19.027 11.311c-.056 0-.106.042-.127.097l-.337 1.156c-.148.499-.092.956.154 1.295.226.311.605.491 1.063.512l1.842.11a.16.16 0 0 1 .134.07.2.2 0 0 1 .021.152.24.24 0 0 1-.204.153l-1.92.11c-1.041.049-2.16.873-2.553 1.884l-.141.353c-.028.069.021.138.098.138h6.598a.17.17 0 0 0 .17-.125 4.7 4.7 0 0 0 .175-1.26c0-2.561-2.124-4.652-4.734-4.652-.077 0-.162 0-.24.007" fill="#fbad41"/>'
+			. '<path d="M16.509 16.767c.148-.499.091-.956-.155-1.295-.225-.311-.605-.492-1.062-.512l-8.659-.111a.16.16 0 0 1-.134-.07.2.2 0 0 1-.02-.152.24.24 0 0 1 .203-.152l8.737-.11c1.034-.05 2.159-.873 2.553-1.884l.5-1.28a.27.27 0 0 0 .013-.167c-.562-2.506-2.834-4.375-5.55-4.375-2.504 0-4.628 1.592-5.388 3.8a2.6 2.6 0 0 0-1.793-.49c-1.203.117-2.167 1.065-2.286 2.25a2.6 2.6 0 0 0 .063.878C1.57 13.153 0 14.731 0 16.677q.002.26.035.519a.17.17 0 0 0 .169.145h15.981a.22.22 0 0 0 .204-.152z" fill="#f6821f"/>'
+			. '</svg>';
+
+		return '<span>' . $icon . esc_html__( 'CF Images Sync', 'cfi-images-sync' ) . '</span>';
+	}
+
+	/**
+	 * Render the dashboard widget content.
+	 *
+	 * @return void
+	 */
+	public function render_dashboard_widget(): void {
+		$settings = ( new \CFI\Repos\SettingsRepo() )->get();
+		$mappings = ( new \CFI\Repos\MappingsRepo() )->all();
+		$presets  = ( new \CFI\Repos\PresetsRepo() )->all();
+
+		$flex_status  = $settings['flex_status'];
+		$flex_checked = (int) $settings['flex_checked_at'];
+		$api_tested   = (int) $settings['api_tested_at'];
+		$account_hash = $settings['account_hash'];
+		$account_id   = $settings['account_id'];
+		$has_token    = $settings['api_token'] !== '';
+
+		$hash_valid = preg_match( '/^[A-Za-z0-9_-]{10,}$/', $account_hash );
+		$id_valid   = preg_match( '/^[a-f0-9]{32}$/', $account_id );
+		?>
+		<div class="cfi-widget">
+			<!-- Connection Status -->
+			<table class="cfi-widget-table">
+				<tr>
+					<td><?php esc_html_e( 'API Access', 'cfi-images-sync' ); ?></td>
+					<td>
+						<?php if ( $api_tested > 0 ) : ?>
+							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'OK', 'cfi-images-sync' ); ?></span>
+						<?php elseif ( $has_token && $id_valid ) : ?>
+							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Not tested', 'cfi-images-sync' ); ?></span>
+						<?php elseif ( ! $has_token ) : ?>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing token', 'cfi-images-sync' ); ?></span>
+						<?php else : ?>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Invalid ID', 'cfi-images-sync' ); ?></span>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<tr>
+					<td><?php esc_html_e( 'Flexible Variants', 'cfi-images-sync' ); ?></td>
+					<td>
+						<?php if ( $flex_status === 'enabled' ) : ?>
+							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Enabled', 'cfi-images-sync' ); ?></span>
+						<?php elseif ( $flex_status === 'disabled' ) : ?>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Disabled', 'cfi-images-sync' ); ?></span>
+						<?php else : ?>
+							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Unknown', 'cfi-images-sync' ); ?></span>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<tr>
+					<td><?php esc_html_e( 'Account Hash', 'cfi-images-sync' ); ?></td>
+					<td>
+						<?php if ( $hash_valid ) : ?>
+							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Configured', 'cfi-images-sync' ); ?></span>
+						<?php elseif ( $account_hash === '' ) : ?>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing', 'cfi-images-sync' ); ?></span>
+						<?php else : ?>
+							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Check format', 'cfi-images-sync' ); ?></span>
+						<?php endif; ?>
+					</td>
+				</tr>
+			</table>
+
+			<?php if ( $flex_checked > 0 ) : ?>
+				<p class="cfi-widget-timestamp">
+					<?php
+					printf(
+						/* translators: %s: human-readable time difference */
+						esc_html__( 'Last checked: %s ago', 'cfi-images-sync' ),
+						esc_html( human_time_diff( $flex_checked ) )
+					);
+					?>
+				</p>
+			<?php endif; ?>
+
+			<!-- Stats -->
+			<div class="cfi-widget-stats">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-presets' ) ); ?>">
+					<span class="dashicons dashicons-images-alt2"></span>
+					<?php echo esc_html( count( $presets ) ); ?> <?php esc_html_e( 'Presets', 'cfi-images-sync' ); ?>
+				</a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-mappings' ) ); ?>">
+					<span class="dashicons dashicons-randomize"></span>
+					<?php echo esc_html( count( $mappings ) ); ?> <?php esc_html_e( 'Mappings', 'cfi-images-sync' ); ?>
+				</a>
+			</div>
+
+			<!-- Actions -->
+			<div class="cfi-widget-actions">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'cfi-images-sync' ); ?></a>
+				<span class="cfi-widget-sep">·</span>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview' ) ); ?>"><?php esc_html_e( 'Preview', 'cfi-images-sync' ); ?></a>
+				<span class="cfi-widget-sep">·</span>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-logs' ) ); ?>"><?php esc_html_e( 'Logs', 'cfi-images-sync' ); ?></a>
+			</div>
+		</div>
+		<?php
 	}
 }
