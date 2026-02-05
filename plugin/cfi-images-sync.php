@@ -64,8 +64,34 @@ spl_autoload_register(
 function cfi_activate() {
 	$repos = new Repos\PresetsRepo();
 	$repos->seed_defaults();
+
+	// Migrate plain-text token to encrypted storage.
+	cfi_migrate_token();
 }
 register_activation_hook( __FILE__, __NAMESPACE__ . '\\cfi_activate' );
+
+/**
+ * Migrate plain-text API token to encrypted storage.
+ *
+ * @return void
+ */
+function cfi_migrate_token(): void {
+	$settings = get_option( Repos\OptionKeys::SETTINGS, array() );
+
+	// Check if there's a plain-text token in settings.
+	if ( ! empty( $settings['api_token'] ) && is_string( $settings['api_token'] ) ) {
+		$token_storage = new Support\TokenStorage();
+
+		// Only migrate if encrypted storage is empty.
+		if ( ! $token_storage->has_token() ) {
+			$token_storage->store( $settings['api_token'] );
+		}
+
+		// Remove plain-text token from settings.
+		unset( $settings['api_token'] );
+		update_option( Repos\OptionKeys::SETTINGS, $settings, false );
+	}
+}
 
 /**
  * Plugin deactivation hook.
@@ -91,6 +117,13 @@ add_action( 'init', __NAMESPACE__ . '\\cfi_load_textdomain' );
  * Initialize the plugin.
  */
 function cfi_init() {
+	// Run migration for plugin updates (token encryption added in 1.0.0).
+	$db_version = get_option( 'cfi_db_version', '0' );
+	if ( version_compare( $db_version, '1.0.0', '<' ) ) {
+		cfi_migrate_token();
+		update_option( 'cfi_db_version', CFI_VERSION, false );
+	}
+
 	// Register save_post / acf/save_post hooks based on mappings.
 	$hooks = new Core\Hooks();
 	$hooks->init();

@@ -27,7 +27,12 @@ Headless frontends need stable, cacheable CDN URLs. This plugin makes WordPress 
 * **Flexible Variants** — Smart detection prevents broken images and 9429 errors
 * **Headless-Ready** — URLs stored in post meta, perfect for GraphQL/REST API consumption
 * **WP-CLI Support** — `wp cfi sync` commands for scripted workflows
+* **Secure Storage** — API token encrypted with libsodium (AES-256 fallback)
 * **No Lock-in** — Your images stay in WordPress Media Library; Cloudflare URLs are plain meta values
+
+= Security =
+
+Your Cloudflare API token is encrypted at rest using modern cryptography (libsodium or AES-256-CBC with HMAC). The token is never stored in plain text and is only decrypted when making API requests.
 
 = Requirements =
 
@@ -86,6 +91,7 @@ Your Cloudflare Images remain on Cloudflare, and the delivery URLs stay in post 
 == Changelog ==
 
 = 1.0.0 =
+* New: Encrypted API token storage (libsodium/AES-256)
 * New: Settings link on Plugins page
 * New: Translation template (.pot file) for localization
 * New: WordPress.org assets (icons and banners)
