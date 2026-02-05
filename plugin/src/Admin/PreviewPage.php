@@ -293,9 +293,17 @@ class PreviewPage {
 		$stored_url = $url_meta ? (string) get_post_meta( $post_id, $url_meta, true ) : '';
 
 		if ( $stored_url !== '' ) {
+			$is_valid_cf_url = strpos( $stored_url, 'imagedelivery.net/' ) !== false;
+
 			echo '<h3>' . esc_html__( 'Current Delivery URL', 'cfi-images-sync' ) . '</h3>';
 			echo '<p><code>' . esc_html( $stored_url ) . '</code></p>';
-			echo '<p><img src="' . esc_url( $stored_url ) . '" class="cfi-preview-img" loading="lazy" /></p>';
+
+			if ( $is_valid_cf_url ) {
+				echo '<p><img src="' . esc_url( $stored_url ) . '" class="cfi-preview-img" loading="lazy" /></p>';
+			} else {
+				echo '<p class="notice notice-warning inline" style="padding:8px 12px;"><strong>' . esc_html__( 'Warning:', 'cfi-images-sync' ) . '</strong> ';
+				echo esc_html__( 'Stored value is not a valid Cloudflare delivery URL. Click "Sync Now" to generate a proper URL.', 'cfi-images-sync' ) . '</p>';
+			}
 		} else {
 			echo '<p>' . esc_html__( 'No delivery URL stored yet.', 'cfi-images-sync' ) . '</p>';
 		}
