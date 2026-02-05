@@ -1,0 +1,1021 @@
+# Copyright (C) 2026 301st
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: Images Sync for Cloudflare 0.2.6\n"
+"Report-Msgid-Bugs-To: https://github.com/investblog/cloudflare-images-sync/issues\n"
+"POT-Creation-Date: 2026-02-05 15:58+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"X-Generator: Claude Code\n"
+"X-Domain: cfi-images-sync\n"
+
+#: src/Admin/LogsPage.php:85
+msgid "%d entries"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:677
+msgid "%s (ACF not active)"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:936
+msgid "(deleted)"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:578
+msgid "ACF Field Name"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:253
+msgid "ACF Image Field"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:840
+msgid "ACF is not active on this site. Install Advanced Custom Fields to enable this trigger."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:273
+#: src/Admin/SettingsPage.php:336
+msgid "API Access"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:354
+msgid "API Token"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:359
+msgid "API Tokens"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:233
+msgid "API token lacks permission to edit Images config."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:299
+#: src/Admin/SettingsPage.php:297
+msgid "Account Hash"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:341
+msgid "Account ID"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:380
+msgid "Account → Cloudflare Images → Edit"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:379
+msgid "Account → Cloudflare Images → Read"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:417
+msgid "Action Scheduler is not available. Install WooCommerce or Action Scheduler standalone plugin."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:230
+msgid "Action Scheduler is not available. Install it or use WP-CLI for bulk sync."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:202
+msgid "Actions"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:128
+msgid "Add New"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:156
+msgid "Add Preset"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:394
+msgid "Advanced"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:256
+msgid "All parameter-based presets will work correctly."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:90
+msgid "All recommended presets already exist."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:338
+msgid "Already uploaded (unchanged)."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:650
+msgid "Any"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:257
+msgid "Attachment (post is the image)"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:170
+msgid "Attachment ID:"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:140
+msgid "Attachment Preview"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:330
+msgid "Attachment file not found."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:457
+msgid "Attachment not found."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:826
+msgid "Auto-Sync Triggers"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:977
+msgid "Bulk Sync"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:243
+msgid "Bulk sync enqueued. Check Logs for progress."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:741
+msgid "CF Image ID Meta Key"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:61
+msgid "CF Images"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:246
+msgid "CF Images Sync"
+msgstr ""
+
+#: src/Admin/LogsPage.php:72
+msgid "CF Images — Logs"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:126
+msgid "CF Images — Mappings"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:150
+msgid "CF Images — Presets"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:137
+msgid "CF Images — Preview / Variant Studio"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:283
+msgid "CF Images — Settings"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:802
+msgid "CF Images → Presets"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:911
+#: src/Admin/PresetsPage.php:174
+msgid "Cancel"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:759
+msgid "Change Signature Meta Key"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:306
+msgid "Check format"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:268
+msgid "Check the current delivery URL for a post or use \"Sync Now\" to manually trigger image sync for the selected mapping."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:637
+msgid "Choose which content type this mapping applies to."
+msgstr ""
+
+#: src/Admin/LogsPage.php:82
+msgid "Clear Logs"
+msgstr ""
+
+#: src/Admin/LogsPage.php:82
+msgid "Clear all logs?"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:862
+msgid "Clear delivery URL if the source image is removed"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:546
+msgid "Click to copy"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:345
+msgid "Cloudflare Account ID (32-character hex string)."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:349
+msgid "Cloudflare Dashboard → Images (right sidebar), or Workers & Pages → Overview (right sidebar under \"Account ID\")."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:315
+msgid "Cloudflare Dashboard → Images → any image → copy the hash from the delivery URL, or check the right sidebar on the %s."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:157
+msgid "Cloudflare Images not configured."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:822
+msgid "Configure when and how the sync runs."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:302
+msgid "Configured"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:103
+msgid "Connection successful!"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:84
+msgid "Connection test passed for account %s."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:779
+msgid "Copy All Target Keys"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:777
+msgid "Copy all target keys as JSON"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:729
+#: src/Admin/MappingsPage.php:747
+#: src/Admin/MappingsPage.php:765
+msgid "Copy key"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:194
+msgid "Could not determine status."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:363
+msgid "Create at %s with \"Cloudflare Images: Edit\" permission."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:337
+msgid "Credentials for uploading images and managing config."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:298
+msgid "Current Delivery URL"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:398
+msgid "Debug mode"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:933
+msgid "Default (public)"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:717
+msgid "Define where the Cloudflare delivery URL and metadata will be stored on each post. Meta keys are created automatically on first sync — no need to register them beforehand."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:616
+msgid "Define which posts to process and where the original image comes from."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:981
+#: src/Admin/PresetsPage.php:232
+msgid "Delete"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:872
+msgid "Delete old Cloudflare image when re-uploading"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:980
+msgid "Delete this mapping?"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:232
+msgid "Delete this preset?"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:292
+msgid "Delivery"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:723
+msgid "Delivery URL Meta Key"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:55
+msgid "Demo image uploaded successfully."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:715
+msgid "Destination"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:211
+#: src/Admin/AdminMenu.php:292
+#: src/Admin/SettingsPage.php:452
+msgid "Disabled"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:875
+msgid "Disabled by default. Enable only if you are sure no other mapping or post references the same Cloudflare image."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:371
+msgid "Do NOT use the signature token from Images → Keys tab."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:887
+msgid "Dry-run this mapping against a single post to verify the source resolves correctly and preview the delivery URL. No upload or sync is performed."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:971
+#: src/Admin/PresetsPage.php:228
+msgid "Edit"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:606
+msgid "Edit Mapping"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:156
+msgid "Edit Preset"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:473
+msgid "Enable"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:266
+#: src/Admin/PreviewPage.php:571
+msgid "Enable Flexible Variants"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:402
+msgid "Enable debug logging"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:210
+#: src/Admin/AdminMenu.php:290
+#: src/Admin/SettingsPage.php:451
+msgid "Enabled"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:976
+msgid "Enqueue bulk sync for this mapping?"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:202
+msgid "Enter an attachment ID above, or use the sample image to preview presets."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:180
+msgid "Existing Presets"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:254
+msgid "Featured Image (Thumbnail)"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:502
+msgid "File unchanged since last sync."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:215
+msgid "Flexible"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:219
+msgid "Flexible (status unknown)"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:287
+#: src/Admin/SettingsPage.php:326
+msgid "Flexible Variants"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:193
+msgid "Flexible Variants are disabled."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:192
+msgid "Flexible Variants are enabled."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:253
+msgid "Flexible Variants enabled!"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:510
+msgid "Flexible Variants status last checked %s ago."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:540
+msgid "Flexible Variants status unknown"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:262
+#: src/Admin/PreviewPage.php:567
+msgid "Flexible Variants: Disabled"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:255
+msgid "Flexible Variants: Enabled"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:276
+#: src/Admin/PreviewPage.php:582
+msgid "Flexible Variants: Status Unknown"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:98
+msgid "Flexible Variants: disabled."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:96
+msgid "Flexible Variants: enabled."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:100
+msgid "Flexible Variants: unknown (check manually)."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:267
+#: src/Admin/PresetsPage.php:280
+#: src/Admin/PreviewPage.php:572
+#: src/Admin/PreviewPage.php:586
+msgid "Go to Settings"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:166
+msgid "Go to Settings →"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:614
+msgid "Image Source"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:490
+msgid "Image already on Cloudflare (attachment cache hit)."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:494
+msgid "Image not yet on Cloudflare."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:806
+msgid "Image variant preset for the delivery URL. Manage presets under %s."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:60
+msgid "Images Sync for Cloudflare"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:311
+msgid "Images page"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:185
+#: src/Admin/PresetsPage.php:189
+msgid "Install Recommended Presets"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:282
+msgid "Invalid ID"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:65
+#: src/Admin/MappingsPage.php:86
+#: src/Admin/MappingsPage.php:152
+#: src/Admin/PreviewPage.php:93
+msgid "Invalid mapping ID."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:196
+msgid "Invalid preset ID format."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:57
+#: src/Admin/PresetsPage.php:107
+msgid "Invalid preset ID."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:317
+msgid "Last checked: %s ago"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:467
+msgid "Learn more"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:374
+msgid "Leave blank to keep the current token."
+msgstr ""
+
+#: src/Admin/LogsPage.php:91
+msgid "Level"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:172
+msgid "Load"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:177
+msgid "Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:499
+msgid "Local file has changed since last sync."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:112
+#: src/Admin/AdminMenu.php:113
+#: src/Admin/AdminMenu.php:342
+msgid "Logs"
+msgstr ""
+
+#: src/Admin/LogsPage.php:53
+msgid "Logs cleared."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:404
+msgid "Logs detailed info about sync operations. Check Logs page."
+msgstr ""
+
+#: src/Admin/LogsPage.php:94
+msgid "Mapping"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:213
+msgid "Mapping created."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:74
+msgid "Mapping deleted."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:226
+#: src/Admin/PreviewPage.php:108
+#: src/Admin/PreviewPage.php:279
+msgid "Mapping not found."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:213
+msgid "Mapping updated."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:257
+msgid "Mapping:"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:92
+#: src/Admin/AdminMenu.php:93
+#: src/Admin/AdminMenu.php:332
+msgid "Mappings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:425
+msgid "Max log entries"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:598
+msgid "Maximum 191 characters."
+msgstr ""
+
+#: src/Admin/LogsPage.php:92
+msgid "Message"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:255
+msgid "Meta Field → Attachment ID"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:256
+msgid "Meta Field → Image URL"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:583
+#: src/Admin/MappingsPage.php:588
+msgid "Meta Key"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:304
+msgid "Missing"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:280
+msgid "Missing token"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:161
+msgid "Missing: %s."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:162
+#: src/Admin/PresetsPage.php:200
+msgid "Name"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:217
+#: src/Admin/PreviewPage.php:538
+msgid "Needs Flexible Variants"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:606
+msgid "New Mapping"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:308
+msgid "No delivery URL stored yet."
+msgstr ""
+
+#: src/Admin/LogsPage.php:77
+msgid "No log entries yet. Events will appear here as the plugin runs."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:926
+msgid "No mappings yet. Click \"Add New\" to create one."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:476
+msgid "No presets configured. Add presets first."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:195
+msgid "No presets yet. Click \"Install Recommended Presets\" to add a curated set."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:278
+msgid "Not tested"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:276
+msgid "OK"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:420
+msgid "Offloads image uploads to background jobs, avoiding timeouts."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:597
+msgid "Only letters, numbers, underscores, hyphens, colons, and dots are allowed."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:770
+msgid "Optional. Stores a hash to detect image changes and avoid redundant uploads."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:752
+msgid "Optional. Stores the Cloudflare image ID for management purposes."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:263
+msgid "Parameter-based presets (w=, h=, fit=, etc.) require Flexible Variants to be enabled on your Cloudflare account."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:568
+msgid "Parameter-based presets will not render. Enable Flexible Variants to see all previews."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:413
+msgid "Please enter a valid ID."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:421
+msgid "Please enter a valid post ID."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:599
+msgid "Please select a post type."
+msgstr ""
+
+#: src/Admin/LogsPage.php:93
+msgid "Post"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:141
+msgid "Post + Mapping"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:893
+msgid "Post ID"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:252
+msgid "Post ID:"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:644
+msgid "Post Status"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:622
+msgid "Post Type"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:427
+msgid "Post not found."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:786
+#: src/Admin/MappingsPage.php:961
+msgid "Preset"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:122
+msgid "Preset created."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:66
+msgid "Preset deleted."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:121
+msgid "Preset updated."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:82
+#: src/Admin/AdminMenu.php:83
+#: src/Admin/AdminMenu.php:328
+msgid "Presets"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:102
+#: src/Admin/AdminMenu.php:103
+#: src/Admin/AdminMenu.php:340
+#: src/Admin/PresetsPage.php:230
+#: src/Admin/PreviewPage.php:265
+msgid "Preview"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:413
+msgid "Process syncs via Action Scheduler (recommended)"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:653
+msgid "Published only"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:857
+msgid "Re-upload if the local file has changed"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:211
+msgid "Recommended"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:462
+msgid "Required for parameter presets like w=, h=, fit=, quality=. This is an account-wide Cloudflare setting."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:428
+msgid "Ring buffer size for the Logs page (50–1000)."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:909
+msgid "Save Mapping"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:172
+msgid "Save Preset"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:435
+msgid "Save Settings"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:199
+msgid "Selected preset does not exist."
+msgstr ""
+
+#: src/Admin/AdminMenu.php:73
+#: src/Admin/AdminMenu.php:74
+#: src/Admin/AdminMenu.php:338
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:293
+msgid "Settings for image delivery URLs (imagedelivery.net)."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:58
+msgid "Settings saved."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:949
+msgid "Source"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:695
+msgid "Source Key"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:664
+msgid "Source Type"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:287
+msgid "Source field is empty for this post."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:467
+msgid "Source image not found or empty."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:867
+msgid "Store Cloudflare image ID on the post"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:305
+msgid "Stored value is not a valid Cloudflare delivery URL. Click \"Sync Now\" to generate a proper URL."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:314
+msgid "Sync Now"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:820
+msgid "Sync Settings"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:657
+msgid "Sync only published posts, or include drafts and other statuses."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:105
+msgid "Synced successfully."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:957
+msgid "Target"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:899
+#: src/Admin/SettingsPage.php:472
+msgid "Test"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:388
+msgid "Test Connection"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:885
+msgid "Test Mapping"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:265
+#: src/Admin/PresetsPage.php:279
+#: src/Admin/PreviewPage.php:570
+#: src/Admin/PreviewPage.php:585
+msgid "Test Status"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:277
+msgid "Test the connection to check if Flexible Variants are enabled on your Cloudflare account."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:583
+msgid "Test the connection to check if Flexible Variants are enabled."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:701
+msgid "The field name or meta key that holds the image. Not needed for Featured Image or Attachment source types."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:188
+msgid "The meta key \"%s\" is reserved by WordPress and cannot be used as a destination."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:734
+msgid "The post meta key where the Cloudflare delivery URL will be stored. Use this key in your theme to display the optimized image."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:219
+msgid "This attachment has not been uploaded to Cloudflare yet."
+msgstr ""
+
+#: src/Admin/MappingsPage.php:596
+msgid "This field is required."
+msgstr ""
+
+#: src/Admin/LogsPage.php:90
+msgid "Time"
+msgstr ""
+
+#: src/Admin/LogsPage.php:65
+#: src/Admin/MappingsPage.php:109
+#: src/Admin/PresetsPage.php:135
+#: src/Admin/PreviewPage.php:128
+#: src/Admin/SettingsPage.php:180
+#: src/Admin/SettingsPage.php:217
+#: src/Admin/SettingsPage.php:266
+msgid "Unauthorized."
+msgstr ""
+
+#: src/Admin/PresetsPage.php:222
+msgid "Universal"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:212
+#: src/Admin/AdminMenu.php:294
+#: src/Admin/SettingsPage.php:453
+msgid "Unknown"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:847
+msgid "Upload Behavior"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:223
+msgid "Upload for Preview"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:852
+msgid "Upload image if not yet on Cloudflare"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:506
+msgid "Upload not needed or behavior not enabled."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:373
+msgid "Uploaded successfully."
+msgstr ""
+
+#: src/Admin/PreviewPage.php:206
+msgid "Use Sample Image"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:408
+msgid "Use queue"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:301
+msgid "Used to build delivery URLs. Copy from any Cloudflare Images URL:"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:166
+#: src/Admin/PresetsPage.php:201
+msgid "Variant"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:516
+msgid "Variant Previews"
+msgstr ""
+
+#: src/Admin/PreviewPage.php:304
+msgid "Warning:"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:377
+msgid "What permissions are needed?"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:836
+msgid "When ACF fields are updated"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:831
+msgid "When a post is saved"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:305
+#: src/Admin/SettingsPage.php:348
+msgid "Where do I find this?"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:688
+msgid "Where does the original image come from?"
+msgstr ""
+
+#: src/Admin/PresetsPage.php:168
+msgid "e.g. w=1200,height=630,fit=cover,quality=85,f=auto"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:792
+msgid "— Default (public) —"
+msgstr ""
+
+#: src/Admin/MappingsPage.php:628
+#: src/Admin/PreviewPage.php:259
+msgid "— Select —"
+msgstr ""
