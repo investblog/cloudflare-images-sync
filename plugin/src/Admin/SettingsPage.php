@@ -476,5 +476,4 @@ class SettingsPage {
 		</div>
 		<?php
 	}
-
 }
