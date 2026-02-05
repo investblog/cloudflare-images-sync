@@ -387,8 +387,6 @@ class SettingsPage {
 					<p class="submit" style="margin-top: 0; padding-top: 0;">
 						<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'cfi-images-sync' ); ?>" />
 					</p>
-
-					<?php $this->render_status_box( $settings ); ?>
 				</div>
 
 				<!-- Section C: Advanced (collapsed) -->
@@ -479,78 +477,4 @@ class SettingsPage {
 		<?php
 	}
 
-	/**
-	 * Render the Connection Status box.
-	 *
-	 * @param array $settings Current settings.
-	 * @return void
-	 */
-	private function render_status_box( array $settings ): void {
-		$flex_status    = $settings['flex_status'];
-		$flex_checked   = (int) $settings['flex_checked_at'];
-		$api_tested     = (int) $settings['api_tested_at'];
-		$account_hash   = $settings['account_hash'];
-		$account_id     = $settings['account_id'];
-		$has_token      = $settings['api_token'] !== '';
-
-		$hash_valid = preg_match( '/^[A-Za-z0-9_-]{10,}$/', $account_hash );
-		$id_valid   = preg_match( '/^[a-f0-9]{32}$/', $account_id );
-		?>
-		<div class="cfi-status-box" id="cfi-status-box">
-			<h4><?php esc_html_e( 'Connection Status', 'cfi-images-sync' ); ?></h4>
-			<dl>
-				<dt><?php esc_html_e( 'API Access', 'cfi-images-sync' ); ?></dt>
-				<dd id="cfi-status-api">
-					<?php if ( $api_tested > 0 ) : ?>
-						<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'OK', 'cfi-images-sync' ); ?></span>
-					<?php elseif ( $has_token && $id_valid ) : ?>
-						<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Not tested', 'cfi-images-sync' ); ?></span>
-					<?php elseif ( ! $has_token ) : ?>
-						<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing token', 'cfi-images-sync' ); ?></span>
-					<?php else : ?>
-						<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Invalid Account ID', 'cfi-images-sync' ); ?></span>
-					<?php endif; ?>
-				</dd>
-
-				<dt><?php esc_html_e( 'Flexible Variants', 'cfi-images-sync' ); ?></dt>
-				<dd id="cfi-status-flex">
-					<?php if ( $flex_status === 'enabled' ) : ?>
-						<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Enabled', 'cfi-images-sync' ); ?></span>
-					<?php elseif ( $flex_status === 'disabled' ) : ?>
-						<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Disabled', 'cfi-images-sync' ); ?></span>
-					<?php else : ?>
-						<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Unknown', 'cfi-images-sync' ); ?></span>
-					<?php endif; ?>
-				</dd>
-
-				<dt><?php esc_html_e( 'Account Hash', 'cfi-images-sync' ); ?></dt>
-				<dd id="cfi-status-hash">
-					<?php if ( $hash_valid ) : ?>
-						<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Looks valid', 'cfi-images-sync' ); ?></span>
-					<?php elseif ( $account_hash === '' ) : ?>
-						<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing', 'cfi-images-sync' ); ?></span>
-					<?php else : ?>
-						<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Check format', 'cfi-images-sync' ); ?></span>
-					<?php endif; ?>
-				</dd>
-			</dl>
-
-			<?php if ( $flex_checked > 0 ) : ?>
-				<p class="cfi-status-timestamp" id="cfi-status-timestamp" data-timestamp="<?php echo esc_attr( $flex_checked ); ?>">
-					<?php
-					printf(
-						/* translators: %s: human-readable time difference */
-						esc_html__( 'Last checked: %s ago', 'cfi-images-sync' ),
-						esc_html( human_time_diff( $flex_checked ) )
-					);
-					?>
-				</p>
-			<?php else : ?>
-				<p class="cfi-status-timestamp" id="cfi-status-timestamp">
-					<?php esc_html_e( 'Not yet checked. Click "Test Connection".', 'cfi-images-sync' ); ?>
-				</p>
-			<?php endif; ?>
-		</div>
-		<?php
-	}
 }

@@ -47,37 +47,49 @@ class AdminMenu {
 	 * @return void
 	 */
 	public function register_menu(): void {
-		$capability    = 'manage_options';
-		$icon          = 'dashicons-cloud';
-		$settings_page = new SettingsPage();
-		$presets_page  = new PresetsPage();
-		$mappings_page = new MappingsPage();
-		$preview_page  = new PreviewPage();
-		$logs_page     = new LogsPage();
+		$capability     = 'manage_options';
+		$icon           = 'dashicons-cloud';
+		$dashboard_page = new DashboardPage();
+		$settings_page  = new SettingsPage();
+		$presets_page   = new PresetsPage();
+		$mappings_page  = new MappingsPage();
+		$preview_page   = new PreviewPage();
+		$logs_page      = new LogsPage();
 
-		$hook = add_menu_page(
+		// Main menu item points to Dashboard.
+		add_menu_page(
 			__( 'Images Sync for Cloudflare', 'cfi-images-sync' ),
 			__( 'CF Images', 'cfi-images-sync' ),
 			$capability,
-			'cfi-settings',
-			array( $settings_page, 'render' ),
+			'cfi-dashboard',
+			array( $dashboard_page, 'render' ),
 			$icon,
 			81
 		);
-		add_action( 'load-' . $hook, array( $settings_page, 'handle_actions' ) );
 
-		// Rename the auto-generated first submenu item from "CF Images" to "Settings".
+		// Dashboard submenu (replaces auto-generated first item).
 		add_submenu_page(
-			'cfi-settings',
+			'cfi-dashboard',
+			__( 'Dashboard', 'cfi-images-sync' ),
+			__( 'Dashboard', 'cfi-images-sync' ),
+			$capability,
+			'cfi-dashboard',
+			array( $dashboard_page, 'render' )
+		);
+
+		// Settings submenu.
+		$hook = add_submenu_page(
+			'cfi-dashboard',
 			__( 'Settings', 'cfi-images-sync' ),
 			__( 'Settings', 'cfi-images-sync' ),
 			$capability,
 			'cfi-settings',
 			array( $settings_page, 'render' )
 		);
+		add_action( 'load-' . $hook, array( $settings_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-settings',
+			'cfi-dashboard',
 			__( 'Presets', 'cfi-images-sync' ),
 			__( 'Presets', 'cfi-images-sync' ),
 			$capability,
@@ -87,7 +99,7 @@ class AdminMenu {
 		add_action( 'load-' . $hook, array( $presets_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-settings',
+			'cfi-dashboard',
 			__( 'Mappings', 'cfi-images-sync' ),
 			__( 'Mappings', 'cfi-images-sync' ),
 			$capability,
@@ -97,7 +109,7 @@ class AdminMenu {
 		add_action( 'load-' . $hook, array( $mappings_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-settings',
+			'cfi-dashboard',
 			__( 'Preview', 'cfi-images-sync' ),
 			__( 'Preview', 'cfi-images-sync' ),
 			$capability,
@@ -107,7 +119,7 @@ class AdminMenu {
 		add_action( 'load-' . $hook, array( $preview_page, 'handle_actions' ) );
 
 		$hook = add_submenu_page(
-			'cfi-settings',
+			'cfi-dashboard',
 			__( 'Logs', 'cfi-images-sync' ),
 			__( 'Logs', 'cfi-images-sync' ),
 			$capability,
@@ -128,8 +140,8 @@ class AdminMenu {
 			return;
 		}
 
-		// Skip on the settings page itself — the user is likely configuring right now.
-		if ( $screen->id === 'toplevel_page_cfi-settings' ) {
+		// Skip on settings and dashboard pages — the user is likely configuring right now.
+		if ( in_array( $screen->id, array( 'toplevel_page_cfi-dashboard', 'cf-images_page_cfi-settings' ), true ) ) {
 			return;
 		}
 
@@ -174,7 +186,7 @@ class AdminMenu {
 	 */
 	public function enqueue_assets( string $hook_suffix ): void {
 		// Only load on our pages.
-		if ( strpos( $hook_suffix, 'cfi-' ) === false && $hook_suffix !== 'toplevel_page_cfi-settings' ) {
+		if ( strpos( $hook_suffix, 'cfi-' ) === false && $hook_suffix !== 'toplevel_page_cfi-dashboard' ) {
 			return;
 		}
 

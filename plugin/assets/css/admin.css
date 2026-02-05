@@ -801,3 +801,166 @@
 	font-size: 12px;
 	color: #646970;
 }
+
+/* ── Dashboard page ──────────────────────────────────────────────────── */
+
+.cfi-dashboard-title {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.cfi-cloudflare-icon {
+	flex-shrink: 0;
+}
+
+.cfi-dashboard-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 20px;
+	margin-top: 20px;
+}
+
+.cfi-dashboard-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 16px 20px;
+}
+
+.cfi-dashboard-card h3 {
+	margin: 0 0 12px;
+	padding: 0;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.cfi-dashboard-card--status {
+	border-left: 4px solid #2271b1;
+}
+
+.cfi-dashboard-card--wide {
+	grid-column: 1 / -1;
+}
+
+.cfi-status-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 500;
+}
+
+.cfi-status-badge--ok {
+	background: #e7f5e8;
+	color: #1a5e1f;
+}
+
+.cfi-status-list {
+	margin: 0;
+	display: grid;
+	grid-template-columns: 130px 1fr;
+	gap: 8px 12px;
+	font-size: 13px;
+}
+
+.cfi-status-list dt {
+	color: #646970;
+}
+
+.cfi-status-list dd {
+	margin: 0;
+}
+
+.cfi-status-actions {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+
+/* Quick stats */
+.cfi-stats-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.cfi-stats-list li {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 0;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.cfi-stats-list li:last-child {
+	border-bottom: 0;
+}
+
+.cfi-stat-value {
+	font-size: 24px;
+	font-weight: 600;
+	color: #1d2327;
+	min-width: 40px;
+}
+
+.cfi-stat-label {
+	flex: 1;
+	color: #646970;
+}
+
+.cfi-stat-link {
+	font-size: 13px;
+	text-decoration: none;
+}
+
+/* Quick actions */
+.cfi-quick-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.cfi-quick-actions .button {
+	text-align: center;
+}
+
+/* Recent activity mini table */
+.cfi-logs-mini {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.cfi-logs-mini td {
+	padding: 6px 8px;
+	border-bottom: 1px solid #f0f0f1;
+	vertical-align: top;
+}
+
+.cfi-logs-mini tr:last-child td {
+	border-bottom: 0;
+}
+
+.cfi-logs-mini .cfi-log-level {
+	width: 60px;
+	text-align: center;
+}
+
+.cfi-logs-mini .cfi-log-message {
+	color: #1d2327;
+	word-break: break-word;
+}
+
+.cfi-logs-mini .cfi-log-time {
+	width: 80px;
+	color: #646970;
+	text-align: right;
+	white-space: nowrap;
+}
+
+.cfi-dashboard .cfi-empty-state {
+	margin-top: 0;
+}
