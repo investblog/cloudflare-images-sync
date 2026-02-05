@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use CFI\Repos\LogsRepo;
 use CFI\Repos\MappingsRepo;
+use CFI\Repos\PresetsRepo;
 use CFI\Repos\SettingsRepo;
 
 /**
@@ -67,18 +68,78 @@ class Hooks {
 		}
 
 		// Register save_post_{cpt} for each post type.
-		// Priority 100 ensures we run after most other plugins.
+		// Priority 999 ensures we run after ACF and all other plugins.
 		foreach ( array_keys( $post_types ) as $pt ) {
-			add_action( 'save_post_' . $pt, array( $this, 'on_save_post' ), 100, 2 );
+			add_action( 'save_post_' . $pt, array( $this, 'on_save_post' ), 999, 2 );
 		}
 
 		$this->debug_log( 'Hooks::init — registered save_post hooks for: ' . implode( ', ', array_keys( $post_types ) ) );
 
 		// Register acf/save_post (fires for all post types).
-		// Priority 100 ensures we run after ACF has fully saved all fields
+		// Priority 999 ensures we run after ACF has fully saved all fields
 		// and after any other plugins that might modify ACF data.
 		if ( function_exists( 'acf_get_field' ) || has_action( 'acf/init' ) ) {
-			add_action( 'acf/save_post', array( $this, 'on_acf_save_post' ), 100 );
+			add_action( 'acf/save_post', array( $this, 'on_acf_save_post' ), 999 );
+		}
+
+		// wp_after_insert_post runs after ALL save_post hooks complete.
+		// This is our last chance to ensure the URL is written.
+		foreach ( array_keys( $post_types ) as $pt ) {
+			add_action(
+				'wp_after_insert_post',
+				function ( $post_id, $post ) use ( $pt ) {
+					if ( $post->post_type === $pt ) {
+						$this->on_after_insert_post( $post_id, $post );
+					}
+				},
+				999,
+				2
+			);
+		}
+	}
+
+	/**
+	 * Handle wp_after_insert_post hook (runs after all save_post hooks).
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post    Post object.
+	 * @return void
+	 */
+	public function on_after_insert_post( int $post_id, \WP_Post $post ): void {
+		$this->debug_log( "Hooks::on_after_insert_post fired for post #{$post_id} ({$post->post_type})" );
+
+		if ( ! $this->should_process( $post_id, $post ) ) {
+			return;
+		}
+
+		// Re-verify that target meta has the URL. If not, re-run sync.
+		$mappings = $this->mappings->for_post_type( $post->post_type );
+
+		foreach ( $mappings as $mapping ) {
+			$url_meta = $mapping['target']['url_meta'] ?? '';
+			if ( $url_meta === '' ) {
+				continue;
+			}
+
+			$stored_url = get_post_meta( $post_id, $url_meta, true );
+			$cf_id_meta = $mapping['target']['id_meta'] ?? '';
+			$cf_id      = $cf_id_meta !== '' ? get_post_meta( $post_id, $cf_id_meta, true ) : '';
+
+			// If we have a CF ID but URL is empty, something cleared it — rewrite.
+			if ( $cf_id !== '' && $stored_url === '' ) {
+				$this->debug_log( "on_after_insert_post: URL was cleared for mapping '{$mapping['id']}', rewriting..." );
+
+				$settings = ( new SettingsRepo() )->get();
+				$builder  = new UrlBuilder( $settings['account_hash'] );
+				$preset   = ( new PresetsRepo() )->find( $mapping['preset_id'] ?? '' );
+				$variant  = $preset['variant'] ?? 'public';
+				$url      = $builder->url( $cf_id, $variant );
+
+				if ( ! is_wp_error( $url ) && $url !== '' ) {
+					update_post_meta( $post_id, $url_meta, $url );
+					$this->debug_log( "on_after_insert_post: rewrote URL to {$url_meta}" );
+				}
+			}
 		}
 	}
 
