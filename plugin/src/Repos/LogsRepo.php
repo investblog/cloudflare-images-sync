@@ -90,6 +90,34 @@ class LogsRepo {
 	}
 
 	/**
+	 * Get the most recent log entries.
+	 *
+	 * @param int $limit Number of entries to return.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function recent( int $limit = 5 ): array {
+		$all = $this->all();
+
+		// Logs are stored oldest-first, so reverse and take $limit.
+		$reversed = array_reverse( $all );
+		$recent   = array_slice( $reversed, 0, $limit );
+
+		// Format for display.
+		$formatted = array();
+		foreach ( $recent as $entry ) {
+			$formatted[] = array(
+				'time'       => isset( $entry['t'] ) ? gmdate( 'Y-m-d H:i:s', $entry['t'] ) : '',
+				'level'      => $entry['lvl'] ?? 'info',
+				'message'    => $entry['msg'] ?? '',
+				'post_id'    => $entry['post_id'] ?? null,
+				'mapping_id' => $entry['mapping_id'] ?? null,
+			);
+		}
+
+		return $formatted;
+	}
+
+	/**
 	 * Load and normalize the logs option.
 	 *
 	 * @return array<string, mixed>
