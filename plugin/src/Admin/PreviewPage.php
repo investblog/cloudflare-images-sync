@@ -248,9 +248,11 @@ class PreviewPage {
 		<form method="get">
 			<input type="hidden" name="page" value="cfi-preview" />
 			<input type="hidden" name="mode" value="post" />
-			<p>
+			<p class="cfi-post-mapping-form">
 				<label for="post_id"><?php esc_html_e( 'Post ID:', 'cfi-images-sync' ); ?></label>
-				<input type="number" id="post_id" name="post_id" value="<?php echo esc_attr( $post_id ); ?>" min="1" class="small-text" />
+				<input type="number" id="post_id" name="post_id" value="<?php echo esc_attr( $post_id ); ?>" min="1" class="small-text cfi-no-spinner" />
+
+				<span class="cfi-form-arrow">→</span>
 
 				<label for="mapping_id"><?php esc_html_e( 'Mapping:', 'cfi-images-sync' ); ?></label>
 				<select id="mapping_id" name="mapping_id">

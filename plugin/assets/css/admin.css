@@ -431,6 +431,31 @@
 	opacity: 0.6;
 }
 
+/* ── Post + Mapping form ─────────────────────────────────────────────── */
+
+.cfi-post-mapping-form {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.cfi-no-spinner::-webkit-outer-spin-button,
+.cfi-no-spinner::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.cfi-no-spinner {
+	-moz-appearance: textfield;
+}
+
+.cfi-form-arrow {
+	font-size: 18px;
+	color: #646970;
+	margin: 0 4px;
+}
+
 /* ── Attachment ID validation ────────────────────────────────────────── */
 
 #cfi-attachment-status {
