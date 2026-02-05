@@ -1,3 +1,5 @@
+![Images Sync for Cloudflare](assets/banner-1544x500.png)
+
 # Images Sync for Cloudflare
 
 Sync WordPress images to Cloudflare Images — store CDN URLs in post meta, ready for headless or classic themes.
@@ -5,6 +7,7 @@ Sync WordPress images to Cloudflare Images — store CDN URLs in post meta, read
 [![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-blue.svg)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-8.0%2B-purple.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![Version](https://img.shields.io/badge/version-1.0.0-orange.svg)](https://github.com/investblog/cloudflare-images-sync/releases/tag/v1.0.0)
 
 ## Why?
 
