@@ -36,6 +36,9 @@ class AdminMenu {
 		$settings_page = new SettingsPage();
 		add_action( 'wp_ajax_cfi_flex_test', array( $settings_page, 'ajax_flex_test' ) );
 		add_action( 'wp_ajax_cfi_flex_enable', array( $settings_page, 'ajax_flex_enable' ) );
+
+		$preview_page = new PreviewPage();
+		add_action( 'wp_ajax_cfi_validate_attachment', array( $preview_page, 'ajax_validate_attachment' ) );
 	}
 
 	/**

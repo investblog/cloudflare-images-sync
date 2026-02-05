@@ -78,6 +78,79 @@
 		$(this).addClass('is-loading');
 	});
 
+	// ── Attachment ID validation ───────────────────────────────────────
+	(function () {
+		var $input = $('#cfi-attachment-id');
+		var $status = $('#cfi-attachment-status');
+		var $suggestions = $('#cfi-attachment-suggestions');
+		var $loadBtn = $('#cfi-attachment-load');
+		var debounceTimer;
+
+		if (!$input.length) {
+			return;
+		}
+
+		$input.on('input change', function () {
+			clearTimeout(debounceTimer);
+			var val = $.trim($input.val());
+
+			$status.html('').removeClass('cfi-att-valid cfi-att-invalid');
+			$suggestions.hide().html('');
+
+			if (val === '' || parseInt(val, 10) <= 0) {
+				return;
+			}
+
+			debounceTimer = setTimeout(function () {
+				validateAttachment(val);
+			}, 400);
+		});
+
+		function validateAttachment(id) {
+			$status.html('<span class="spinner is-active" style="float:none;margin:0 4px;"></span>');
+
+			$.post(cfiAdmin.ajaxUrl, {
+				action: 'cfi_validate_attachment',
+				attachment_id: id,
+				_ajax_nonce: cfiAdmin.nonce
+			}, function (response) {
+				if (response.success) {
+					$status
+						.html('<span class="dashicons dashicons-yes-alt"></span> ' + escHtml(response.data.title || response.data.filename))
+						.addClass('cfi-att-valid');
+					$suggestions.hide();
+				} else {
+					$status
+						.html('<span class="dashicons dashicons-warning"></span> ' + escHtml(response.data.message))
+						.addClass('cfi-att-invalid');
+
+					if (response.data.suggestions && response.data.suggestions.length) {
+						var html = 'Available attachments: ';
+						var links = response.data.suggestions.map(function (s) {
+							return '<a href="#" class="cfi-suggest-id" data-id="' + s.id + '">#' + s.id + '</a> (' + escHtml(s.title) + ')';
+						});
+						html += links.join(', ');
+						$suggestions.html(html).show();
+					}
+				}
+			}).fail(function () {
+				$status.html('');
+			});
+		}
+
+		// Click suggestion to fill input.
+		$(document).on('click', '.cfi-suggest-id', function (e) {
+			e.preventDefault();
+			var id = $(this).data('id');
+			$input.val(id).trigger('change');
+		});
+
+		function escHtml(str) {
+			if (!str) return '';
+			return $('<div>').text(str).html();
+		}
+	})();
+
 	// Enable/disable copy buttons based on input value.
 	function updateCopyBtnState($input) {
 		var selector = '#' + $input.attr('id');

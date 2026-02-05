@@ -163,18 +163,20 @@ class PreviewPage {
 		$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		?>
-		<form method="get" class="cfi-loading-form">
+		<form method="get" class="cfi-loading-form" id="cfi-attachment-form">
 			<input type="hidden" name="page" value="cfi-preview" />
 			<input type="hidden" name="mode" value="attachment" />
 			<p>
 				<label for="attachment_id"><?php esc_html_e( 'Attachment ID:', 'cfi-images-sync' ); ?></label>
-				<input type="number" id="attachment_id" name="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>" min="1" class="small-text" />
-				<input type="submit" class="button" value="<?php esc_attr_e( 'Load', 'cfi-images-sync' ); ?>" />
+				<input type="number" id="cfi-attachment-id" name="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>" min="1" class="small-text" />
+				<input type="submit" class="button" id="cfi-attachment-load" value="<?php esc_attr_e( 'Load', 'cfi-images-sync' ); ?>" />
 				<span class="spinner cfi-form-spinner"></span>
+				<span id="cfi-attachment-status"></span>
 			</p>
 			<p class="description">
 				<?php esc_html_e( 'Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand.', 'cfi-images-sync' ); ?>
 			</p>
+			<p id="cfi-attachment-suggestions" class="cfi-suggestions" style="display: none;"></p>
 		</form>
 
 		<?php
@@ -380,6 +382,72 @@ class PreviewPage {
 		}
 
 		return $preset_id;
+	}
+
+	/**
+	 * AJAX handler: validate attachment ID and suggest nearby IDs.
+	 *
+	 * @return void
+	 */
+	public function ajax_validate_attachment(): void {
+		check_ajax_referer( 'cfi_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized', 403 );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked above.
+		$attachment_id = isset( $_POST['attachment_id'] ) ? absint( wp_unslash( $_POST['attachment_id'] ) ) : 0;
+
+		if ( $attachment_id <= 0 ) {
+			wp_send_json_error( array( 'message' => __( 'Please enter a valid ID.', 'cfi-images-sync' ) ) );
+		}
+
+		$attachment = get_post( $attachment_id );
+
+		if ( $attachment && $attachment->post_type === 'attachment' ) {
+			// Valid attachment.
+			$filename = wp_basename( get_attached_file( $attachment_id ) );
+			wp_send_json_success(
+				array(
+					'valid'    => true,
+					'filename' => $filename,
+					'title'    => $attachment->post_title,
+				)
+			);
+		}
+
+		// Not found — find nearby attachments.
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- simple lookup for suggestions.
+		$nearby = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, post_title FROM {$wpdb->posts}
+				WHERE post_type = 'attachment'
+				AND ID BETWEEN %d AND %d
+				ORDER BY ABS(ID - %d)
+				LIMIT 5",
+				$attachment_id - 20,
+				$attachment_id + 20,
+				$attachment_id
+			)
+		);
+
+		$suggestions = array();
+		foreach ( $nearby as $row ) {
+			$suggestions[] = array(
+				'id'    => (int) $row->ID,
+				'title' => $row->post_title,
+			);
+		}
+
+		wp_send_json_error(
+			array(
+				'message'     => __( 'Attachment not found.', 'cfi-images-sync' ),
+				'suggestions' => $suggestions,
+			)
+		);
 	}
 
 	/**
