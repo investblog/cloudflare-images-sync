@@ -83,6 +83,14 @@ cd wp-content/plugins/
 git clone https://github.com/investblog/cloudflare-images-sync.git
 ```
 
+### Auto-updates with Git Updater
+
+Install [Git Updater](https://git-updater.com/) to receive automatic updates from GitHub:
+
+1. Install Git Updater plugin
+2. This plugin will appear in your updates list automatically
+3. Updates pulled from GitHub Releases
+
 ## Usage
 
 ### Presets
