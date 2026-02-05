@@ -4,7 +4,7 @@ Tags: cloudflare, images, cdn, optimization, headless
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.2.6
+Stable tag: 1.0.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -85,8 +85,12 @@ Your Cloudflare Images remain on Cloudflare, and the delivery URLs stay in post 
 
 == Changelog ==
 
-= 0.2.6 =
+= 1.0.0 =
+* New: Settings link on Plugins page
+* New: Translation template (.pot file) for localization
 * New: WordPress.org assets (icons and banners)
+* Improved: Dashboard widget with connection status
+* First stable release
 
 = 0.2.5 =
 * New: Dashboard widget on main WP Dashboard with connection status

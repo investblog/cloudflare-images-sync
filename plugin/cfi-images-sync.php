@@ -3,7 +3,7 @@
  * Plugin Name:       Images Sync for Cloudflare
  * Plugin URI:        https://github.com/investblog/cloudflare-images-sync
  * Description:       Sync WordPress images to Cloudflare Images with flexible mappings, presets, and variant delivery.
- * Version:           0.2.6
+ * Version:           1.0.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            301st
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin constants.
  */
-define( 'CFI_VERSION', '0.2.6' );
+define( 'CFI_VERSION', '1.0.0' );
 define( 'CFI_PLUGIN_FILE', __FILE__ );
 define( 'CFI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CFI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -131,6 +131,23 @@ function cfi_admin_init() {
 	$admin_menu->init();
 }
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfi_admin_init' );
+
+/**
+ * Add Settings link to plugin action links.
+ *
+ * @param array $links Existing plugin action links.
+ * @return array Modified plugin action links.
+ */
+function cfi_plugin_action_links( array $links ): array {
+	$settings_link = sprintf(
+		'<a href="%s">%s</a>',
+		esc_url( admin_url( 'admin.php?page=cfi-settings' ) ),
+		esc_html__( 'Settings', 'cfi-images-sync' )
+	);
+	array_unshift( $links, $settings_link );
+	return $links;
+}
+add_filter( 'plugin_action_links_' . CFI_PLUGIN_BASENAME, __NAMESPACE__ . '\\cfi_plugin_action_links' );
 
 /**
  * Initialize REST API.
