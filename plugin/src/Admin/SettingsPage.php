@@ -287,51 +287,7 @@ class SettingsPage {
 			<form method="post">
 				<?php wp_nonce_field( 'cfi_settings_save' ); ?>
 
-				<!-- Section A: Delivery -->
-				<div class="cfi-settings-section">
-					<h2><?php esc_html_e( 'Delivery', 'cfi-images-sync' ); ?></h2>
-					<p class="description"><?php esc_html_e( 'Settings for image delivery URLs (imagedelivery.net).', 'cfi-images-sync' ); ?></p>
-
-					<table class="form-table">
-						<tr>
-							<th><label for="account_hash"><?php esc_html_e( 'Account Hash', 'cfi-images-sync' ); ?></label></th>
-							<td>
-								<input type="text" id="account_hash" name="account_hash" value="<?php echo esc_attr( $settings['account_hash'] ); ?>" class="regular-text" />
-								<p class="description">
-									<?php esc_html_e( 'Used to build delivery URLs. Copy from any Cloudflare Images URL:', 'cfi-images-sync' ); ?><br>
-									<code>https://imagedelivery.net/<strong>&lt;hash&gt;</strong>/&lt;image_id&gt;/...</code>
-								</p>
-								<details class="cfi-help-details">
-									<summary><?php esc_html_e( 'Where do I find this?', 'cfi-images-sync' ); ?></summary>
-									<p>
-										<?php
-										$images_url  = $settings['account_id'] !== ''
-											? 'https://dash.cloudflare.com/' . $settings['account_id'] . '/images'
-											: 'https://dash.cloudflare.com/?to=/:account/images';
-										$images_link = '<a href="' . esc_url( $images_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images page', 'cfi-images-sync' ) . '</a>';
-										echo wp_kses(
-											sprintf(
-												/* translators: %s: link to Cloudflare Images dashboard */
-												__( 'Cloudflare Dashboard → Images → any image → copy the hash from the delivery URL, or check the right sidebar on the %s.', 'cfi-images-sync' ),
-												$images_link
-											),
-											$allowed_link
-										);
-										?>
-									</p>
-								</details>
-							</td>
-						</tr>
-						<tr>
-							<th><?php esc_html_e( 'Flexible Variants', 'cfi-images-sync' ); ?></th>
-							<td>
-								<?php $this->render_flex_status_row( $settings ); ?>
-							</td>
-						</tr>
-					</table>
-				</div>
-
-				<!-- Section B: API Access -->
+				<!-- Section A: API Access -->
 				<div class="cfi-settings-section">
 					<h2><?php esc_html_e( 'API Access', 'cfi-images-sync' ); ?></h2>
 					<p class="description"><?php esc_html_e( 'Credentials for uploading images and managing config.', 'cfi-images-sync' ); ?></p>
@@ -387,6 +343,50 @@ class SettingsPage {
 					<p class="submit cfi-submit-compact">
 						<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'cfi-images-sync' ); ?>" />
 					</p>
+				</div>
+
+				<!-- Section B: Delivery -->
+				<div class="cfi-settings-section">
+					<h2><?php esc_html_e( 'Delivery', 'cfi-images-sync' ); ?></h2>
+					<p class="description"><?php esc_html_e( 'Settings for image delivery URLs (imagedelivery.net).', 'cfi-images-sync' ); ?></p>
+
+					<table class="form-table">
+						<tr>
+							<th><label for="account_hash"><?php esc_html_e( 'Account Hash', 'cfi-images-sync' ); ?></label></th>
+							<td>
+								<input type="text" id="account_hash" name="account_hash" value="<?php echo esc_attr( $settings['account_hash'] ); ?>" class="regular-text" />
+								<p class="description">
+									<?php esc_html_e( 'Used to build delivery URLs. Copy from any Cloudflare Images URL:', 'cfi-images-sync' ); ?><br>
+									<code>https://imagedelivery.net/<strong>&lt;hash&gt;</strong>/&lt;image_id&gt;/...</code>
+								</p>
+								<details class="cfi-help-details">
+									<summary><?php esc_html_e( 'Where do I find this?', 'cfi-images-sync' ); ?></summary>
+									<p>
+										<?php
+										$images_url  = $settings['account_id'] !== ''
+											? 'https://dash.cloudflare.com/' . $settings['account_id'] . '/images'
+											: 'https://dash.cloudflare.com/?to=/:account/images';
+										$images_link = '<a href="' . esc_url( $images_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images page', 'cfi-images-sync' ) . '</a>';
+										echo wp_kses(
+											sprintf(
+												/* translators: %s: link to Cloudflare Images dashboard */
+												__( 'Cloudflare Dashboard → Images → any image → copy the hash from the delivery URL, or check the right sidebar on the %s.', 'cfi-images-sync' ),
+												$images_link
+											),
+											$allowed_link
+										);
+										?>
+									</p>
+								</details>
+							</td>
+						</tr>
+						<tr>
+							<th><?php esc_html_e( 'Flexible Variants', 'cfi-images-sync' ); ?></th>
+							<td>
+								<?php $this->render_flex_status_row( $settings ); ?>
+							</td>
+						</tr>
+					</table>
 				</div>
 
 				<!-- Section C: Advanced (collapsed) -->
