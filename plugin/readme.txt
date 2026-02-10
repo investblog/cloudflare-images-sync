@@ -72,6 +72,21 @@ Yes. The plugin supports ACF image fields with ID, array, and URL return formats
 
 Flexible Variants allow on-the-fly image transformations via URL parameters (width, height, quality, format). The plugin detects if this feature is enabled on your account and adjusts the UI accordingly.
 
+= What fit modes are available? =
+
+Cloudflare Images supports several fit modes for resizing:
+
+* **scale-down** — Shrinks to fit within dimensions but never upscales. Best for content images where originals may be smaller than the target.
+* **cover** — Crops to fill exact dimensions. Best for OG images, thumbnails, and heroes where consistent sizing matters.
+* **contain** — Scales to fit within dimensions, adding letterboxing if needed. Preserves the full image.
+* **crop** — Crops to exact dimensions from the center (or custom gravity).
+
+Most presets use `fit=cover` for consistent sizing. Use `fit=scale-down` when you want to limit max width without stretching small images.
+
+= Do I need Action Scheduler? =
+
+Action Scheduler is optional but recommended for bulk syncing. It offloads image uploads to background jobs, avoiding timeouts on large sites. Action Scheduler is bundled with WooCommerce, or you can install it as a [standalone plugin](https://wordpress.org/plugins/action-scheduler/).
+
 = Is this good for headless WordPress? =
 
 Absolutely. Delivery URLs are stored as standard post meta, so they're immediately available via REST API or WPGraphQL without any custom resolvers.

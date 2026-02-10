@@ -73,7 +73,11 @@ final class Defaults {
 				'name'    => 'hero_1600x900',
 				'variant' => 'w=1600,h=900,fit=cover,quality=85,f=auto',
 			),
-			'mobile_600w_2x'   => array(
+			'content_1200w'    => array(
+			'name'    => 'content_1200w',
+			'variant' => 'w=1200,fit=scale-down,quality=85,f=auto',
+		),
+		'mobile_600w_2x'   => array(
 				'name'    => 'mobile_600w_2x',
 				'variant' => 'w=600,dpr=2,quality=85,f=auto',
 			),

@@ -100,9 +100,10 @@ Define image variants at **CF Images → Presets**:
 | Preset | Variant | Use Case |
 |--------|---------|----------|
 | `public` | `public` | Universal (no Flexible Variants needed) |
-| `og_1200x630` | `w=1200,h=630,fit=cover,f=auto` | Open Graph / Social |
-| `thumb_400` | `w=400,quality=80,f=auto` | Thumbnails |
-| `hero_1920` | `w=1920,quality=85,f=auto` | Hero images |
+| `og_1200x630` | `w=1200,h=630,fit=cover,quality=85,f=auto` | Open Graph / Social |
+| `content_1200w` | `w=1200,fit=scale-down,quality=85,f=auto` | Post content images (never upscales) |
+| `thumb_400x300` | `w=400,h=300,fit=cover,quality=80,f=auto` | Thumbnails |
+| `hero_1600x900` | `w=1600,h=900,fit=cover,quality=85,f=auto` | Hero images |
 
 ### Mappings
 
