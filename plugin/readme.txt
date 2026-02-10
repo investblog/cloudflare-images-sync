@@ -4,7 +4,7 @@ Tags: cloudflare, images, cdn, optimization, headless
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -142,6 +142,10 @@ Delivery URLs use the [Cloudflare Image Delivery](https://imagedelivery.net/) CD
 This plugin does not collect, store, or transmit any personal user data. Only image files and technical metadata (attachment IDs, image hashes) are sent to Cloudflare.
 
 == Changelog ==
+
+= 1.0.3 =
+* Fixed: Uninstall now removes encrypted API token and migration version
+* Fixed: Uninstall cleans up all plugin post meta from database
 
 = 1.0.2 =
 * New: content_1200w recommended preset (fit=scale-down, never upscales small images)
