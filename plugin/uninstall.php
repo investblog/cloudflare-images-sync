@@ -20,3 +20,9 @@ delete_option( 'cfi_logs' );
 delete_option( 'cfi_demo_image_id' );
 delete_option( 'cfi_demo_sig' );
 delete_option( 'cfi_demo_updated_at' );
+delete_option( 'cfi_api_token_encrypted' );
+delete_option( 'cfi_db_version' );
+
+// Remove plugin post meta from all posts.
+global $wpdb;
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ('cfi_preview_image_id','cfi_preview_sig','_cfi_cf_image_id','_cfi_sig')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
