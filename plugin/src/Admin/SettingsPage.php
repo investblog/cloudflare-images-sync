@@ -367,7 +367,7 @@ class SettingsPage {
 									);
 									?>
 								</p>
-								<p class="description" style="color: #d63638;">
+								<p class="description cfi-description-error">
 									<?php esc_html_e( 'Do NOT use the signature token from Images → Keys tab.', 'cfi-images-sync' ); ?>
 								</p>
 								<p class="description">
@@ -375,7 +375,7 @@ class SettingsPage {
 								</p>
 								<details class="cfi-help-details">
 									<summary><?php esc_html_e( 'What permissions are needed?', 'cfi-images-sync' ); ?></summary>
-									<ul style="margin: 8px 0 0 20px; list-style: disc;">
+									<ul>
 										<li><?php esc_html_e( 'Account → Cloudflare Images → Read', 'cfi-images-sync' ); ?></li>
 										<li><?php esc_html_e( 'Account → Cloudflare Images → Edit', 'cfi-images-sync' ); ?></li>
 									</ul>
@@ -384,14 +384,14 @@ class SettingsPage {
 						</tr>
 					</table>
 
-					<p class="submit" style="margin-top: 0; padding-top: 0;">
+					<p class="submit cfi-submit-compact">
 						<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'cfi-images-sync' ); ?>" />
 					</p>
 				</div>
 
 				<!-- Section C: Advanced (collapsed) -->
 				<details class="cfi-settings-section cfi-settings-advanced">
-					<summary><h2 style="display: inline;"><?php esc_html_e( 'Advanced', 'cfi-images-sync' ); ?></h2></summary>
+					<summary><h2 class="cfi-heading-inline"><?php esc_html_e( 'Advanced', 'cfi-images-sync' ); ?></h2></summary>
 
 					<table class="form-table">
 						<tr>
@@ -413,7 +413,7 @@ class SettingsPage {
 									<?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'cfi-images-sync' ); ?>
 								</label>
 								<?php if ( ! $has_as ) : ?>
-									<p class="description" style="color: #d63638;">
+									<p class="description cfi-description-error">
 										<?php esc_html_e( 'Action Scheduler is not available. Install WooCommerce or Action Scheduler standalone plugin.', 'cfi-images-sync' ); ?>
 									</p>
 								<?php else : ?>
@@ -470,7 +470,7 @@ class SettingsPage {
 		</p>
 		<div class="cfi-flex-actions" id="cfi-flex-actions">
 			<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test', 'cfi-images-sync' ); ?></button>
-			<button type="button" class="button" id="cfi-flex-enable" <?php echo $flex_status === 'enabled' ? 'style="display:none;"' : ''; ?>><?php esc_html_e( 'Enable', 'cfi-images-sync' ); ?></button>
+			<button type="button" class="button<?php echo $flex_status === 'enabled' ? ' cfi-hidden' : ''; ?>" id="cfi-flex-enable"><?php esc_html_e( 'Enable', 'cfi-images-sync' ); ?></button>
 			<span id="cfi-flex-spinner" class="spinner"></span>
 			<span id="cfi-flex-result"></span>
 		</div>

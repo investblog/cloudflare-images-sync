@@ -292,12 +292,14 @@ class MappingsPage {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- admin AJAX lookup, cached via transient.
 		$keys = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT pm.meta_key
-				FROM {$wpdb->postmeta} pm
-				INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				'SELECT DISTINCT pm.meta_key
+				FROM %i pm
+				INNER JOIN %i p ON p.ID = pm.post_id
 				WHERE p.post_type = %s
 				ORDER BY pm.meta_key
-				LIMIT 200",
+				LIMIT 200',
+				$wpdb->postmeta,
+				$wpdb->posts,
 				$post_type
 			)
 		);
@@ -902,7 +904,7 @@ class MappingsPage {
 						</td>
 					</tr>
 				</table>
-				<div id="cfi-test-results" class="cfi-test-results" style="display:none;"></div>
+				<div id="cfi-test-results" class="cfi-test-results"></div>
 			</div>
 
 			<p class="submit">

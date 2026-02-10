@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/investblog/cloudflare-images-sync
  * Description:       Sync WordPress images to Cloudflare Images with flexible mappings, presets, and variant delivery.
  * Version:           1.0.0
- * Requires at least: 6.0
+ * Requires at least: 6.2
  * Requires PHP:      8.0
  * Author:            301st
  * Author URI:        https://301.st
@@ -107,15 +107,11 @@ register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\cfi_deactivate' );
 
 /**
  * Load plugin translations.
+ *
+ * Since WordPress 4.6, translations for plugins hosted on .org are loaded
+ * automatically. For GitHub / private distributions, WordPress still picks
+ * up .mo files from wp-content/languages/plugins/ without this call.
  */
-function cfi_load_textdomain() {
-	load_plugin_textdomain(
-		'cfi-images-sync',
-		false,
-		dirname( plugin_basename( CFI_PLUGIN_FILE ) ) . '/languages'
-	);
-}
-add_action( 'init', __NAMESPACE__ . '\\cfi_load_textdomain' );
 
 /**
  * Initialize the plugin.

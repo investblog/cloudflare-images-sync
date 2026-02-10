@@ -176,9 +176,9 @@ class PresetsPage {
 				</p>
 			</form>
 
-			<div style="display:flex;align-items:center;gap:12px;margin:20px 0 12px;">
-				<h2 style="margin:0;"><?php esc_html_e( 'Existing Presets', 'cfi-images-sync' ); ?></h2>
-				<form method="post" style="display:inline;" id="cfi-install-recommended-form">
+			<div class="cfi-presets-header">
+				<h2><?php esc_html_e( 'Existing Presets', 'cfi-images-sync' ); ?></h2>
+				<form method="post" class="cfi-inline-form" id="cfi-install-recommended-form">
 					<?php wp_nonce_field( 'cfi_install_recommended' ); ?>
 					<?php if ( $flex_status === 'enabled' ) : ?>
 						<button type="submit" name="cfi_install_recommended" class="button">

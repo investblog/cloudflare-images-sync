@@ -510,6 +510,7 @@
 /* ── Test Mapping results ─────────────────────────────────────────── */
 
 .cfi-test-results {
+	display: none;
 	margin-top: 12px;
 	padding: 12px 16px;
 	border: 1px solid #c3c4c7;
@@ -738,6 +739,11 @@
 	padding-left: 16px;
 	color: #646970;
 	font-size: 12px;
+}
+
+.cfi-help-details ul {
+	margin-left: 4px;
+	list-style: disc;
 }
 
 /* ── Connection Status box ───────────────────────────────────────── */
@@ -1044,4 +1050,65 @@
 
 .cfi-widget-actions a:hover {
 	text-decoration: underline;
+}
+
+/* ── Utility: initially hidden (JS-toggled) ─────────────────────────── */
+
+.cfi-hidden {
+	display: none;
+}
+
+#cfi-attachment-suggestions {
+	display: none;
+}
+
+/* ── SVG icon in dashboard widget title ──────────────────────────────── */
+
+.cfi-cloudflare-icon-svg {
+	width: 18px;
+	height: 18px;
+	vertical-align: text-bottom;
+	margin-right: 6px;
+}
+
+/* ── Presets page: header row ────────────────────────────────────────── */
+
+.cfi-presets-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 20px 0 12px;
+}
+
+.cfi-presets-header h2 {
+	margin: 0;
+}
+
+/* ── Description variants ────────────────────────────────────────────── */
+
+.cfi-description-error {
+	color: #d63638;
+}
+
+.cfi-description-compact {
+	margin: 8px 0;
+}
+
+/* ── Submit row: compact ─────────────────────────────────────────────── */
+
+.cfi-submit-compact {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+/* ── Heading: inline ─────────────────────────────────────────────────── */
+
+.cfi-heading-inline {
+	display: inline;
+}
+
+/* ── Notice: inline compact ──────────────────────────────────────────── */
+
+.cfi-notice-inline {
+	padding: 8px 12px;
 }

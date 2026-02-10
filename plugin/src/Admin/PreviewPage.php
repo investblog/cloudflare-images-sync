@@ -176,7 +176,7 @@ class PreviewPage {
 			<p class="description">
 				<?php esc_html_e( 'Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand.', 'cfi-images-sync' ); ?>
 			</p>
-			<p id="cfi-attachment-suggestions" class="cfi-suggestions" style="display: none;"></p>
+			<p id="cfi-attachment-suggestions" class="cfi-suggestions"></p>
 		</form>
 
 		<?php
@@ -301,7 +301,7 @@ class PreviewPage {
 			if ( $is_valid_cf_url ) {
 				echo '<p><img src="' . esc_url( $stored_url ) . '" class="cfi-preview-img" loading="lazy" /></p>';
 			} else {
-				echo '<p class="notice notice-warning inline" style="padding:8px 12px;"><strong>' . esc_html__( 'Warning:', 'cfi-images-sync' ) . '</strong> ';
+				echo '<p class="notice notice-warning inline cfi-notice-inline"><strong>' . esc_html__( 'Warning:', 'cfi-images-sync' ) . '</strong> ';
 				echo esc_html__( 'Stored value is not a valid Cloudflare delivery URL. Click "Sync Now" to generate a proper URL.', 'cfi-images-sync' ) . '</p>';
 			}
 		} else {
@@ -433,11 +433,13 @@ class PreviewPage {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- simple lookup for suggestions.
 		$nearby = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT ID, post_title FROM {$wpdb->posts}
-				WHERE post_type = 'attachment'
+				'SELECT ID, post_title FROM %i
+				WHERE post_type = %s
 				AND ID BETWEEN %d AND %d
 				ORDER BY ABS(ID - %d)
-				LIMIT 5",
+				LIMIT 5',
+				$wpdb->posts,
+				'attachment',
 				$attachment_id - 20,
 				$attachment_id + 20,
 				$attachment_id
@@ -504,7 +506,7 @@ class PreviewPage {
 
 		if ( $has_flex && $is_stale ) {
 			$ago = human_time_diff( $flex_checked );
-			echo '<p class="description" style="margin:8px 0;">';
+			echo '<p class="description cfi-description-compact">';
 			printf(
 				/* translators: %s: human-readable time difference */
 				esc_html__( 'Flexible Variants status last checked %s ago.', 'cfi-images-sync' ),
@@ -563,7 +565,7 @@ class PreviewPage {
 
 		if ( $flex_status === 'disabled' ) {
 			?>
-			<div class="cfi-fv-callout cfi-fv-callout--disabled" style="margin: 12px 0;">
+			<div class="cfi-fv-callout cfi-fv-callout--disabled">
 				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Disabled', 'cfi-images-sync' ); ?></p>
 				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Parameter-based presets will not render. Enable Flexible Variants to see all previews.', 'cfi-images-sync' ); ?></p>
 				<div class="cfi-fv-callout__actions">
@@ -578,7 +580,7 @@ class PreviewPage {
 		} else {
 			// Unknown status.
 			?>
-			<div class="cfi-fv-callout cfi-fv-callout--unknown" style="margin: 12px 0;">
+			<div class="cfi-fv-callout cfi-fv-callout--unknown">
 				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Status Unknown', 'cfi-images-sync' ); ?></p>
 				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Test the connection to check if Flexible Variants are enabled.', 'cfi-images-sync' ); ?></p>
 				<div class="cfi-fv-callout__actions">

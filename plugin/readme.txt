@@ -1,7 +1,7 @@
 === Images Sync for Cloudflare ===
 Contributors: 301st
 Tags: cloudflare, images, cdn, optimization, headless
-Requires at least: 6.0
+Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 1.0.0
@@ -87,6 +87,44 @@ Your Cloudflare Images remain on Cloudflare, and the delivery URLs stay in post 
 3. Presets page with recommended presets and Universal/Flexible badges
 4. Mapping configuration with source, target, and preset selection
 5. Preview Studio for testing presets with live images
+
+== Privacy & Third-Party Services ==
+
+This plugin connects to external Cloudflare services to upload, manage, and deliver images. No connection is made until the user configures API credentials and explicitly triggers a sync, test, or preview action.
+
+= Third-Party Service: Cloudflare Images API =
+
+This plugin sends requests to the [Cloudflare API](https://api.cloudflare.com/) (`api.cloudflare.com`).
+
+**What data is sent:**
+
+* API token — for authentication (sent as a Bearer token header, never logged or stored in plain text)
+* Image files — binary content of WordPress media attachments
+* Image metadata — WordPress attachment ID and a purpose label (e.g. "preview")
+* Configuration updates — Flexible Variants enable/disable flag
+
+**When data is sent:**
+
+* When the user clicks "Test Connection" on the Settings page
+* When a post is saved and auto-sync is enabled for a matching mapping
+* When the user triggers a bulk sync or WP-CLI sync command
+* When the user uploads an image for preview in Preview Studio
+* When the user checks or enables Flexible Variants status
+
+= Third-Party Service: Cloudflare Image Delivery =
+
+Delivery URLs use the [Cloudflare Image Delivery](https://imagedelivery.net/) CDN (`imagedelivery.net`). These URLs are stored in post meta and served directly to site visitors by their browsers. The plugin itself makes one request to this service to detect Flexible Variants support (canary check).
+
+**Service links:**
+
+* [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
+* [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
+* [Cloudflare Images Documentation](https://developers.cloudflare.com/images/)
+* [Cloudflare API Documentation](https://developers.cloudflare.com/api/)
+
+= Personal Data =
+
+This plugin does not collect, store, or transmit any personal user data. Only image files and technical metadata (attachment IDs, image hashes) are sent to Cloudflare.
 
 == Changelog ==
 
