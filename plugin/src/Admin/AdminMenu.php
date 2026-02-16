@@ -57,8 +57,8 @@ class AdminMenu {
 		$logs_page     = new LogsPage();
 
 		$hook = add_menu_page(
-			__( 'Images Sync for Cloudflare', 'cfi-images-sync' ),
-			__( 'CF Images', 'cfi-images-sync' ),
+			__( 'Images Sync for Cloudflare', 'images-sync-for-cloudflare' ),
+			__( 'CF Images', 'images-sync-for-cloudflare' ),
 			$capability,
 			'cfi-settings',
 			array( $settings_page, 'render' ),
@@ -70,8 +70,8 @@ class AdminMenu {
 		// Rename the auto-generated first submenu item from "CF Images" to "Settings".
 		add_submenu_page(
 			'cfi-settings',
-			__( 'Settings', 'cfi-images-sync' ),
-			__( 'Settings', 'cfi-images-sync' ),
+			__( 'Settings', 'images-sync-for-cloudflare' ),
+			__( 'Settings', 'images-sync-for-cloudflare' ),
 			$capability,
 			'cfi-settings',
 			array( $settings_page, 'render' )
@@ -79,8 +79,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Presets', 'cfi-images-sync' ),
-			__( 'Presets', 'cfi-images-sync' ),
+			__( 'Presets', 'images-sync-for-cloudflare' ),
+			__( 'Presets', 'images-sync-for-cloudflare' ),
 			$capability,
 			'cfi-presets',
 			array( $presets_page, 'render' )
@@ -89,8 +89,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Mappings', 'cfi-images-sync' ),
-			__( 'Mappings', 'cfi-images-sync' ),
+			__( 'Mappings', 'images-sync-for-cloudflare' ),
+			__( 'Mappings', 'images-sync-for-cloudflare' ),
 			$capability,
 			'cfi-mappings',
 			array( $mappings_page, 'render' )
@@ -99,8 +99,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Preview', 'cfi-images-sync' ),
-			__( 'Preview', 'cfi-images-sync' ),
+			__( 'Preview', 'images-sync-for-cloudflare' ),
+			__( 'Preview', 'images-sync-for-cloudflare' ),
 			$capability,
 			'cfi-preview',
 			array( $preview_page, 'render' )
@@ -109,8 +109,8 @@ class AdminMenu {
 
 		$hook = add_submenu_page(
 			'cfi-settings',
-			__( 'Logs', 'cfi-images-sync' ),
-			__( 'Logs', 'cfi-images-sync' ),
+			__( 'Logs', 'images-sync-for-cloudflare' ),
+			__( 'Logs', 'images-sync-for-cloudflare' ),
 			$capability,
 			'cfi-logs',
 			array( $logs_page, 'render' )
@@ -154,16 +154,16 @@ class AdminMenu {
 		$settings_url = admin_url( 'admin.php?page=cfi-settings' );
 		printf(
 			'<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-			esc_html__( 'Cloudflare Images not configured.', 'cfi-images-sync' ),
+			esc_html__( 'Cloudflare Images not configured.', 'images-sync-for-cloudflare' ),
 			esc_html(
 				sprintf(
 					/* translators: %s: comma-separated list of missing fields */
-					__( 'Missing: %s.', 'cfi-images-sync' ),
+					__( 'Missing: %s.', 'images-sync-for-cloudflare' ),
 					implode( ', ', $missing )
 				)
 			),
 			esc_url( $settings_url ),
-			esc_html__( 'Go to Settings →', 'cfi-images-sync' )
+			esc_html__( 'Go to Settings →', 'images-sync-for-cloudflare' )
 		);
 	}
 
@@ -207,9 +207,9 @@ class AdminMenu {
 				'nonce'      => wp_create_nonce( 'cfi_admin' ),
 				'flexStatus' => $settings['flex_status'],
 				'flexLabels' => array(
-					'enabled'  => __( 'Enabled', 'cfi-images-sync' ),
-					'disabled' => __( 'Disabled', 'cfi-images-sync' ),
-					'unknown'  => __( 'Unknown', 'cfi-images-sync' ),
+					'enabled'  => __( 'Enabled', 'images-sync-for-cloudflare' ),
+					'disabled' => __( 'Disabled', 'images-sync-for-cloudflare' ),
+					'unknown'  => __( 'Unknown', 'images-sync-for-cloudflare' ),
 				),
 			)
 		);
@@ -243,7 +243,7 @@ class AdminMenu {
 			. '<path d="M16.509 16.767c.148-.499.091-.956-.155-1.295-.225-.311-.605-.492-1.062-.512l-8.659-.111a.16.16 0 0 1-.134-.07.2.2 0 0 1-.02-.152.24.24 0 0 1 .203-.152l8.737-.11c1.034-.05 2.159-.873 2.553-1.884l.5-1.28a.27.27 0 0 0 .013-.167c-.562-2.506-2.834-4.375-5.55-4.375-2.504 0-4.628 1.592-5.388 3.8a2.6 2.6 0 0 0-1.793-.49c-1.203.117-2.167 1.065-2.286 2.25a2.6 2.6 0 0 0 .063.878C1.57 13.153 0 14.731 0 16.677q.002.26.035.519a.17.17 0 0 0 .169.145h15.981a.22.22 0 0 0 .204-.152z" fill="#f6821f"/>'
 			. '</svg>';
 
-		return '<span>' . $icon . esc_html__( 'CF Images Sync', 'cfi-images-sync' ) . '</span>';
+		return '<span>' . $icon . esc_html__( 'CF Images Sync', 'images-sync-for-cloudflare' ) . '</span>';
 	}
 
 	/**
@@ -270,40 +270,40 @@ class AdminMenu {
 			<!-- Connection Status -->
 			<table class="cfi-widget-table">
 				<tr>
-					<td><?php esc_html_e( 'API Access', 'cfi-images-sync' ); ?></td>
+					<td><?php esc_html_e( 'API Access', 'images-sync-for-cloudflare' ); ?></td>
 					<td>
 						<?php if ( $api_tested > 0 ) : ?>
-							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'OK', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'OK', 'images-sync-for-cloudflare' ); ?></span>
 						<?php elseif ( $has_token && $id_valid ) : ?>
-							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Not tested', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Not tested', 'images-sync-for-cloudflare' ); ?></span>
 						<?php elseif ( ! $has_token ) : ?>
-							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing token', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing token', 'images-sync-for-cloudflare' ); ?></span>
 						<?php else : ?>
-							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Invalid ID', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Invalid ID', 'images-sync-for-cloudflare' ); ?></span>
 						<?php endif; ?>
 					</td>
 				</tr>
 				<tr>
-					<td><?php esc_html_e( 'Flexible Variants', 'cfi-images-sync' ); ?></td>
+					<td><?php esc_html_e( 'Flexible Variants', 'images-sync-for-cloudflare' ); ?></td>
 					<td>
 						<?php if ( $flex_status === 'enabled' ) : ?>
-							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Enabled', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Enabled', 'images-sync-for-cloudflare' ); ?></span>
 						<?php elseif ( $flex_status === 'disabled' ) : ?>
-							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Disabled', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Disabled', 'images-sync-for-cloudflare' ); ?></span>
 						<?php else : ?>
-							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Unknown', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Unknown', 'images-sync-for-cloudflare' ); ?></span>
 						<?php endif; ?>
 					</td>
 				</tr>
 				<tr>
-					<td><?php esc_html_e( 'Account Hash', 'cfi-images-sync' ); ?></td>
+					<td><?php esc_html_e( 'Account Hash', 'images-sync-for-cloudflare' ); ?></td>
 					<td>
 						<?php if ( $hash_valid ) : ?>
-							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Configured', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--ok"><?php esc_html_e( 'Configured', 'images-sync-for-cloudflare' ); ?></span>
 						<?php elseif ( $account_hash === '' ) : ?>
-							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--error"><?php esc_html_e( 'Missing', 'images-sync-for-cloudflare' ); ?></span>
 						<?php else : ?>
-							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Check format', 'cfi-images-sync' ); ?></span>
+							<span class="cfi-status-indicator cfi-status--pending"><?php esc_html_e( 'Check format', 'images-sync-for-cloudflare' ); ?></span>
 						<?php endif; ?>
 					</td>
 				</tr>
@@ -314,7 +314,7 @@ class AdminMenu {
 					<?php
 					printf(
 						/* translators: %s: human-readable time difference */
-						esc_html__( 'Last checked: %s ago', 'cfi-images-sync' ),
+						esc_html__( 'Last checked: %s ago', 'images-sync-for-cloudflare' ),
 						esc_html( human_time_diff( $flex_checked ) )
 					);
 					?>
@@ -325,21 +325,21 @@ class AdminMenu {
 			<div class="cfi-widget-stats">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-presets' ) ); ?>">
 					<span class="dashicons dashicons-images-alt2"></span>
-					<?php echo esc_html( count( $presets ) ); ?> <?php esc_html_e( 'Presets', 'cfi-images-sync' ); ?>
+					<?php echo esc_html( count( $presets ) ); ?> <?php esc_html_e( 'Presets', 'images-sync-for-cloudflare' ); ?>
 				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-mappings' ) ); ?>">
 					<span class="dashicons dashicons-randomize"></span>
-					<?php echo esc_html( count( $mappings ) ); ?> <?php esc_html_e( 'Mappings', 'cfi-images-sync' ); ?>
+					<?php echo esc_html( count( $mappings ) ); ?> <?php esc_html_e( 'Mappings', 'images-sync-for-cloudflare' ); ?>
 				</a>
 			</div>
 
 			<!-- Actions -->
 			<div class="cfi-widget-actions">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'cfi-images-sync' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'images-sync-for-cloudflare' ); ?></a>
 				<span class="cfi-widget-sep">·</span>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview' ) ); ?>"><?php esc_html_e( 'Preview', 'cfi-images-sync' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview' ) ); ?>"><?php esc_html_e( 'Preview', 'images-sync-for-cloudflare' ); ?></a>
 				<span class="cfi-widget-sep">·</span>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-logs' ) ); ?>"><?php esc_html_e( 'Logs', 'cfi-images-sync' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-logs' ) ); ?>"><?php esc_html_e( 'Logs', 'images-sync-for-cloudflare' ); ?></a>
 			</div>
 		</div>
 		<?php

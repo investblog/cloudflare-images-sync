@@ -1,5 +1,5 @@
 {
-  "name": "cfi-images-sync-dev",
+  "name": "images-sync-for-cloudflare-dev",
   "private": true,
   "scripts": {
     "env:start": "wp-env start",
@@ -7,8 +7,8 @@
     "env:destroy": "wp-env destroy",
     "env:logs": "wp-env logs",
     "wp:cli": "wp-env run cli wp",
-    "wp:plugin:activate": "wp-env run cli wp plugin activate cfi-images-sync",
-    "wp:plugin:deactivate": "wp-env run cli wp plugin deactivate cfi-images-sync",
+    "wp:plugin:activate": "wp-env run cli wp plugin activate images-sync-for-cloudflare",
+    "wp:plugin:deactivate": "wp-env run cli wp plugin deactivate images-sync-for-cloudflare",
     "wp:db:reset": "wp-env run cli wp db reset --yes",
     "lint:php": "composer run phpcs",
     "lint:php:fix": "composer run phpcbf"

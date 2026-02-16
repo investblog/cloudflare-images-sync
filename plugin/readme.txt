@@ -4,7 +4,7 @@ Tags: cloudflare, images, cdn, acf, headless
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -135,6 +135,10 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 
 == Changelog ==
 
+= 1.0.5 =
+* Changed: Text domain renamed to `images-sync-for-cloudflare` to match WP.org slug
+* Changed: Main plugin file renamed to `images-sync-for-cloudflare.php`
+
 = 1.0.4 =
 * Fixed: readme.txt uses required == External services == section heading (WP.org review)
 * Fixed: Uninstall SQL uses $wpdb->prepare() with %i placeholder
@@ -203,6 +207,9 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+Text domain and plugin file renamed to match WP.org assigned slug `images-sync-for-cloudflare`.
 
 = 1.0.4 =
 WP.org review compliance: external services section, prepared SQL, ACF tag.

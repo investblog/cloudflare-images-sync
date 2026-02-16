@@ -55,7 +55,7 @@ class SettingsPage {
 		if ( isset( $_POST['cfi_save_settings'] ) ) {
 			check_admin_referer( 'cfi_settings_save' );
 			$this->save_from_post();
-			$this->redirect_with_notice( $redirect_url, __( 'Settings saved.', 'cfi-images-sync' ) );
+			$this->redirect_with_notice( $redirect_url, __( 'Settings saved.', 'images-sync-for-cloudflare' ) );
 		}
 
 		// Handle test connection (save first, then test).
@@ -81,7 +81,7 @@ class SettingsPage {
 				'info',
 				sprintf(
 					/* translators: %s: masked Cloudflare account ID */
-					__( 'Connection test passed for account %s.', 'cfi-images-sync' ),
+					__( 'Connection test passed for account %s.', 'images-sync-for-cloudflare' ),
 					Mask::token( $settings['account_id'] )
 				)
 			);
@@ -93,14 +93,14 @@ class SettingsPage {
 			$fv_label  = '';
 			$fv_status = $this->check_flex_status( $client );
 			if ( $fv_status === 'enabled' ) {
-				$fv_label = ' ' . __( 'Flexible Variants: enabled.', 'cfi-images-sync' );
+				$fv_label = ' ' . __( 'Flexible Variants: enabled.', 'images-sync-for-cloudflare' );
 			} elseif ( $fv_status === 'disabled' ) {
-				$fv_label = ' ' . __( 'Flexible Variants: disabled.', 'cfi-images-sync' );
+				$fv_label = ' ' . __( 'Flexible Variants: disabled.', 'images-sync-for-cloudflare' );
 			} else {
-				$fv_label = ' ' . __( 'Flexible Variants: unknown (check manually).', 'cfi-images-sync' );
+				$fv_label = ' ' . __( 'Flexible Variants: unknown (check manually).', 'images-sync-for-cloudflare' );
 			}
 
-			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'cfi-images-sync' ) . $fv_label );
+			$this->redirect_with_notice( $redirect_url, __( 'Connection successful!', 'images-sync-for-cloudflare' ) . $fv_label );
 		}
 	}
 
@@ -177,7 +177,7 @@ class SettingsPage {
 		check_ajax_referer( 'cfi_admin' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'cfi-images-sync' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'images-sync-for-cloudflare' ) ) );
 		}
 
 		$client = CloudflareImagesClient::from_settings();
@@ -189,9 +189,9 @@ class SettingsPage {
 		$status = $this->check_flex_status( $client );
 
 		$messages = array(
-			'enabled'  => __( 'Flexible Variants are enabled.', 'cfi-images-sync' ),
-			'disabled' => __( 'Flexible Variants are disabled.', 'cfi-images-sync' ),
-			'unknown'  => __( 'Could not determine status.', 'cfi-images-sync' ),
+			'enabled'  => __( 'Flexible Variants are enabled.', 'images-sync-for-cloudflare' ),
+			'disabled' => __( 'Flexible Variants are disabled.', 'images-sync-for-cloudflare' ),
+			'unknown'  => __( 'Could not determine status.', 'images-sync-for-cloudflare' ),
 		);
 
 		$settings = $this->repo->get();
@@ -214,7 +214,7 @@ class SettingsPage {
 		check_ajax_referer( 'cfi_admin' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'cfi-images-sync' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'images-sync-for-cloudflare' ) ) );
 		}
 
 		$client = CloudflareImagesClient::from_settings();
@@ -230,7 +230,7 @@ class SettingsPage {
 			$cf_code = $data['cf_code'] ?? 0;
 
 			if ( in_array( $cf_code, array( 401, 403 ), true ) ) {
-				wp_send_json_error( array( 'message' => __( 'API token lacks permission to edit Images config.', 'cfi-images-sync' ) ) );
+				wp_send_json_error( array( 'message' => __( 'API token lacks permission to edit Images config.', 'images-sync-for-cloudflare' ) ) );
 			}
 
 			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
@@ -250,7 +250,7 @@ class SettingsPage {
 		wp_send_json_success(
 			array(
 				'status'     => $status,
-				'message'    => __( 'Flexible Variants enabled!', 'cfi-images-sync' ),
+				'message'    => __( 'Flexible Variants enabled!', 'images-sync-for-cloudflare' ),
 				'checked_at' => $settings['flex_checked_at'],
 			)
 		);
@@ -263,7 +263,7 @@ class SettingsPage {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cfi-images-sync' ) );
+			wp_die( esc_html__( 'Unauthorized.', 'images-sync-for-cloudflare' ) );
 		}
 
 		$settings     = $this->repo->get();
@@ -280,7 +280,7 @@ class SettingsPage {
 
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'CF Images — Settings', 'cfi-images-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'CF Images — Settings', 'images-sync-for-cloudflare' ); ?></h1>
 
 			<?php $this->render_notice(); ?>
 
@@ -289,34 +289,34 @@ class SettingsPage {
 
 				<!-- Section A: API Access -->
 				<div class="cfi-settings-section">
-					<h2><?php esc_html_e( 'API Access', 'cfi-images-sync' ); ?></h2>
-					<p class="description"><?php esc_html_e( 'Credentials for uploading images and managing config.', 'cfi-images-sync' ); ?></p>
+					<h2><?php esc_html_e( 'API Access', 'images-sync-for-cloudflare' ); ?></h2>
+					<p class="description"><?php esc_html_e( 'Credentials for uploading images and managing config.', 'images-sync-for-cloudflare' ); ?></p>
 
 					<table class="form-table">
 						<tr>
-							<th><label for="account_id"><?php esc_html_e( 'Account ID', 'cfi-images-sync' ); ?></label></th>
+							<th><label for="account_id"><?php esc_html_e( 'Account ID', 'images-sync-for-cloudflare' ); ?></label></th>
 							<td>
 								<input type="text" id="account_id" name="account_id" value="<?php echo esc_attr( $settings['account_id'] ); ?>" class="regular-text" />
 								<p class="description">
-									<?php esc_html_e( 'Cloudflare Account ID (32-character hex string).', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Cloudflare Account ID (32-character hex string).', 'images-sync-for-cloudflare' ); ?>
 								</p>
 								<details class="cfi-help-details">
-									<summary><?php esc_html_e( 'Where do I find this?', 'cfi-images-sync' ); ?></summary>
-									<p><?php esc_html_e( 'Cloudflare Dashboard → Images (right sidebar), or Workers & Pages → Overview (right sidebar under "Account ID").', 'cfi-images-sync' ); ?></p>
+									<summary><?php esc_html_e( 'Where do I find this?', 'images-sync-for-cloudflare' ); ?></summary>
+									<p><?php esc_html_e( 'Cloudflare Dashboard → Images (right sidebar), or Workers & Pages → Overview (right sidebar under "Account ID").', 'images-sync-for-cloudflare' ); ?></p>
 								</details>
 							</td>
 						</tr>
 						<tr>
-							<th><label for="api_token"><?php esc_html_e( 'API Token', 'cfi-images-sync' ); ?></label></th>
+							<th><label for="api_token"><?php esc_html_e( 'API Token', 'images-sync-for-cloudflare' ); ?></label></th>
 							<td>
 								<input type="password" id="api_token" name="api_token" value="" placeholder="<?php echo esc_attr( $masked_token ); ?>" class="regular-text" autocomplete="new-password" />
 								<p class="description">
 									<?php
-									$tokens_link = '<a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API Tokens', 'cfi-images-sync' ) . '</a>';
+									$tokens_link = '<a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API Tokens', 'images-sync-for-cloudflare' ) . '</a>';
 									echo wp_kses(
 										sprintf(
 											/* translators: %s: link to Cloudflare API Tokens page */
-											__( 'Create at %s with "Cloudflare Images: Edit" permission.', 'cfi-images-sync' ),
+											__( 'Create at %s with "Cloudflare Images: Edit" permission.', 'images-sync-for-cloudflare' ),
 											$tokens_link
 										),
 										$allowed_link
@@ -324,16 +324,16 @@ class SettingsPage {
 									?>
 								</p>
 								<p class="description cfi-description-error">
-									<?php esc_html_e( 'Do NOT use the signature token from Images → Keys tab.', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Do NOT use the signature token from Images → Keys tab.', 'images-sync-for-cloudflare' ); ?>
 								</p>
 								<p class="description">
-									<?php esc_html_e( 'Leave blank to keep the current token.', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Leave blank to keep the current token.', 'images-sync-for-cloudflare' ); ?>
 								</p>
 								<details class="cfi-help-details">
-									<summary><?php esc_html_e( 'What permissions are needed?', 'cfi-images-sync' ); ?></summary>
+									<summary><?php esc_html_e( 'What permissions are needed?', 'images-sync-for-cloudflare' ); ?></summary>
 									<ul>
-										<li><?php esc_html_e( 'Account → Cloudflare Images → Read', 'cfi-images-sync' ); ?></li>
-										<li><?php esc_html_e( 'Account → Cloudflare Images → Edit', 'cfi-images-sync' ); ?></li>
+										<li><?php esc_html_e( 'Account → Cloudflare Images → Read', 'images-sync-for-cloudflare' ); ?></li>
+										<li><?php esc_html_e( 'Account → Cloudflare Images → Edit', 'images-sync-for-cloudflare' ); ?></li>
 									</ul>
 								</details>
 							</td>
@@ -341,36 +341,36 @@ class SettingsPage {
 					</table>
 
 					<p class="submit cfi-submit-compact">
-						<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'cfi-images-sync' ); ?>" />
+						<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'images-sync-for-cloudflare' ); ?>" />
 					</p>
 				</div>
 
 				<!-- Section B: Delivery -->
 				<div class="cfi-settings-section">
-					<h2><?php esc_html_e( 'Delivery', 'cfi-images-sync' ); ?></h2>
-					<p class="description"><?php esc_html_e( 'Settings for image delivery URLs (imagedelivery.net).', 'cfi-images-sync' ); ?></p>
+					<h2><?php esc_html_e( 'Delivery', 'images-sync-for-cloudflare' ); ?></h2>
+					<p class="description"><?php esc_html_e( 'Settings for image delivery URLs (imagedelivery.net).', 'images-sync-for-cloudflare' ); ?></p>
 
 					<table class="form-table">
 						<tr>
-							<th><label for="account_hash"><?php esc_html_e( 'Account Hash', 'cfi-images-sync' ); ?></label></th>
+							<th><label for="account_hash"><?php esc_html_e( 'Account Hash', 'images-sync-for-cloudflare' ); ?></label></th>
 							<td>
 								<input type="text" id="account_hash" name="account_hash" value="<?php echo esc_attr( $settings['account_hash'] ); ?>" class="regular-text" />
 								<p class="description">
-									<?php esc_html_e( 'Used to build delivery URLs. Copy from any Cloudflare Images URL:', 'cfi-images-sync' ); ?><br>
+									<?php esc_html_e( 'Used to build delivery URLs. Copy from any Cloudflare Images URL:', 'images-sync-for-cloudflare' ); ?><br>
 									<code>https://imagedelivery.net/<strong>&lt;hash&gt;</strong>/&lt;image_id&gt;/...</code>
 								</p>
 								<details class="cfi-help-details">
-									<summary><?php esc_html_e( 'Where do I find this?', 'cfi-images-sync' ); ?></summary>
+									<summary><?php esc_html_e( 'Where do I find this?', 'images-sync-for-cloudflare' ); ?></summary>
 									<p>
 										<?php
 										$images_url  = $settings['account_id'] !== ''
 											? 'https://dash.cloudflare.com/' . $settings['account_id'] . '/images'
 											: 'https://dash.cloudflare.com/?to=/:account/images';
-										$images_link = '<a href="' . esc_url( $images_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images page', 'cfi-images-sync' ) . '</a>';
+										$images_link = '<a href="' . esc_url( $images_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Images page', 'images-sync-for-cloudflare' ) . '</a>';
 										echo wp_kses(
 											sprintf(
 												/* translators: %s: link to Cloudflare Images dashboard */
-												__( 'Cloudflare Dashboard → Images → any image → copy the hash from the delivery URL, or check the right sidebar on the %s.', 'cfi-images-sync' ),
+												__( 'Cloudflare Dashboard → Images → any image → copy the hash from the delivery URL, or check the right sidebar on the %s.', 'images-sync-for-cloudflare' ),
 												$images_link
 											),
 											$allowed_link
@@ -381,7 +381,7 @@ class SettingsPage {
 							</td>
 						</tr>
 						<tr>
-							<th><?php esc_html_e( 'Flexible Variants', 'cfi-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Flexible Variants', 'images-sync-for-cloudflare' ); ?></th>
 							<td>
 								<?php $this->render_flex_status_row( $settings ); ?>
 							</td>
@@ -391,48 +391,48 @@ class SettingsPage {
 
 				<!-- Section C: Advanced (collapsed) -->
 				<details class="cfi-settings-section cfi-settings-advanced">
-					<summary><h2 class="cfi-heading-inline"><?php esc_html_e( 'Advanced', 'cfi-images-sync' ); ?></h2></summary>
+					<summary><h2 class="cfi-heading-inline"><?php esc_html_e( 'Advanced', 'images-sync-for-cloudflare' ); ?></h2></summary>
 
 					<table class="form-table">
 						<tr>
-							<th><?php esc_html_e( 'Debug mode', 'cfi-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Debug mode', 'images-sync-for-cloudflare' ); ?></th>
 							<td>
 								<label>
 									<input type="checkbox" name="debug" value="1" <?php checked( $settings['debug'] ); ?> />
-									<?php esc_html_e( 'Enable debug logging', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Enable debug logging', 'images-sync-for-cloudflare' ); ?>
 								</label>
-								<p class="description"><?php esc_html_e( 'Logs detailed info about sync operations. Check Logs page.', 'cfi-images-sync' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Logs detailed info about sync operations. Check Logs page.', 'images-sync-for-cloudflare' ); ?></p>
 							</td>
 						</tr>
 						<tr>
-							<th><?php esc_html_e( 'Use queue', 'cfi-images-sync' ); ?></th>
+							<th><?php esc_html_e( 'Use queue', 'images-sync-for-cloudflare' ); ?></th>
 							<td>
 								<?php $has_as = function_exists( 'as_enqueue_async_action' ); ?>
 								<label>
 									<input type="checkbox" name="use_queue" value="1" <?php checked( $settings['use_queue'] ); ?> <?php disabled( ! $has_as ); ?> />
-									<?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<?php if ( ! $has_as ) : ?>
 									<p class="description cfi-description-error">
-										<?php esc_html_e( 'Action Scheduler is not available. Install WooCommerce or Action Scheduler standalone plugin.', 'cfi-images-sync' ); ?>
+										<?php esc_html_e( 'Action Scheduler is not available. Install WooCommerce or Action Scheduler standalone plugin.', 'images-sync-for-cloudflare' ); ?>
 									</p>
 								<?php else : ?>
-									<p class="description"><?php esc_html_e( 'Offloads image uploads to background jobs, avoiding timeouts.', 'cfi-images-sync' ); ?></p>
+									<p class="description"><?php esc_html_e( 'Offloads image uploads to background jobs, avoiding timeouts.', 'images-sync-for-cloudflare' ); ?></p>
 								<?php endif; ?>
 							</td>
 						</tr>
 						<tr>
-							<th><label for="logs_max"><?php esc_html_e( 'Max log entries', 'cfi-images-sync' ); ?></label></th>
+							<th><label for="logs_max"><?php esc_html_e( 'Max log entries', 'images-sync-for-cloudflare' ); ?></label></th>
 							<td>
 								<input type="number" id="logs_max" name="logs_max" value="<?php echo esc_attr( $settings['logs_max'] ); ?>" min="50" max="1000" class="small-text" />
-								<p class="description"><?php esc_html_e( 'Ring buffer size for the Logs page (50–1000).', 'cfi-images-sync' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Ring buffer size for the Logs page (50–1000).', 'images-sync-for-cloudflare' ); ?></p>
 							</td>
 						</tr>
 					</table>
 				</details>
 
 				<p class="submit">
-					<input type="submit" name="cfi_save_settings" class="button-primary" value="<?php esc_attr_e( 'Save Settings', 'cfi-images-sync' ); ?>" />
+					<input type="submit" name="cfi_save_settings" class="button-primary" value="<?php esc_attr_e( 'Save Settings', 'images-sync-for-cloudflare' ); ?>" />
 				</p>
 			</form>
 		</div>
@@ -448,9 +448,9 @@ class SettingsPage {
 	private function render_flex_status_row( array $settings ): void {
 		$flex_status = $settings['flex_status'];
 		$flex_labels = array(
-			'enabled'  => __( 'Enabled', 'cfi-images-sync' ),
-			'disabled' => __( 'Disabled', 'cfi-images-sync' ),
-			'unknown'  => __( 'Unknown', 'cfi-images-sync' ),
+			'enabled'  => __( 'Enabled', 'images-sync-for-cloudflare' ),
+			'disabled' => __( 'Disabled', 'images-sync-for-cloudflare' ),
+			'unknown'  => __( 'Unknown', 'images-sync-for-cloudflare' ),
 		);
 		$flex_label  = $flex_labels[ $flex_status ] ?? $flex_labels['unknown'];
 
@@ -459,18 +459,18 @@ class SettingsPage {
 		<span id="cfi-flex-badge" class="cfi-flex-badge cfi-flex--<?php echo esc_attr( $flex_status ); ?>"><?php echo esc_html( $flex_label ); ?></span>
 		<p class="description">
 			<?php
-			esc_html_e( 'Required for parameter presets like w=, h=, fit=, quality=. This is an account-wide Cloudflare setting.', 'cfi-images-sync' );
+			esc_html_e( 'Required for parameter presets like w=, h=, fit=, quality=. This is an account-wide Cloudflare setting.', 'images-sync-for-cloudflare' );
 			echo ' ';
 			printf(
 				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
 				esc_url( $flex_docs_url ),
-				esc_html__( 'Learn more', 'cfi-images-sync' )
+				esc_html__( 'Learn more', 'images-sync-for-cloudflare' )
 			);
 			?>
 		</p>
 		<div class="cfi-flex-actions" id="cfi-flex-actions">
-			<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test', 'cfi-images-sync' ); ?></button>
-			<button type="button" class="button<?php echo $flex_status === 'enabled' ? ' cfi-hidden' : ''; ?>" id="cfi-flex-enable"><?php esc_html_e( 'Enable', 'cfi-images-sync' ); ?></button>
+			<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test', 'images-sync-for-cloudflare' ); ?></button>
+			<button type="button" class="button<?php echo $flex_status === 'enabled' ? ' cfi-hidden' : ''; ?>" id="cfi-flex-enable"><?php esc_html_e( 'Enable', 'images-sync-for-cloudflare' ); ?></button>
 			<span id="cfi-flex-spinner" class="spinner"></span>
 			<span id="cfi-flex-result"></span>
 		</div>

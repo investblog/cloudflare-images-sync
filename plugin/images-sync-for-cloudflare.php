@@ -3,14 +3,14 @@
  * Plugin Name:       Images Sync for Cloudflare
  * Plugin URI:        https://github.com/investblog/cloudflare-images-sync
  * Description:       Sync WordPress images to Cloudflare Images with flexible mappings, presets, and variant delivery.
- * Version:           1.0.4
+ * Version:           1.0.5
  * Requires at least: 6.2
  * Requires PHP:      8.0
  * Author:            301.st
  * Author URI:        https://301.st
  * License:           GPL-2.0+
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       cfi-images-sync
+ * Text Domain:       images-sync-for-cloudflare
  * Domain Path:       /languages
  *
  * @package CloudflareImagesSync
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin constants.
  */
-define( 'CFI_VERSION', '1.0.4' );
+define( 'CFI_VERSION', '1.0.5' );
 define( 'CFI_PLUGIN_FILE', __FILE__ );
 define( 'CFI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CFI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -171,7 +171,7 @@ function cfi_plugin_action_links( array $links ): array {
 	$settings_link = sprintf(
 		'<a href="%s">%s</a>',
 		esc_url( admin_url( 'admin.php?page=cfi-settings' ) ),
-		esc_html__( 'Settings', 'cfi-images-sync' )
+		esc_html__( 'Settings', 'images-sync-for-cloudflare' )
 	);
 	array_unshift( $links, $settings_link );
 	return $links;

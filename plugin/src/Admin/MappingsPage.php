@@ -62,7 +62,7 @@ class MappingsPage {
 		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['mapping_id'] ) ) {
 			$mapping_id = sanitize_text_field( wp_unslash( $_GET['mapping_id'] ) );
 			if ( ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
-				$this->redirect_with_notice( $redirect_url, __( 'Invalid mapping ID.', 'cfi-images-sync' ), 'error' );
+				$this->redirect_with_notice( $redirect_url, __( 'Invalid mapping ID.', 'images-sync-for-cloudflare' ), 'error' );
 			}
 			check_admin_referer( 'cfi_delete_mapping_' . $mapping_id );
 			$result = $this->repo->delete( $mapping_id );
@@ -71,7 +71,7 @@ class MappingsPage {
 				$this->redirect_with_notice( $redirect_url, $result->get_error_message(), 'error' );
 			}
 
-			$this->redirect_with_notice( $redirect_url, __( 'Mapping deleted.', 'cfi-images-sync' ) );
+			$this->redirect_with_notice( $redirect_url, __( 'Mapping deleted.', 'images-sync-for-cloudflare' ) );
 		}
 
 		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
@@ -83,7 +83,7 @@ class MappingsPage {
 			check_admin_referer( 'cfi_bulk_sync' );
 			$mapping_id = sanitize_text_field( wp_unslash( $_POST['bulk_mapping_id'] ) );
 			if ( ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
-				$this->redirect_with_notice( $redirect_url, __( 'Invalid mapping ID.', 'cfi-images-sync' ), 'error' );
+				$this->redirect_with_notice( $redirect_url, __( 'Invalid mapping ID.', 'images-sync-for-cloudflare' ), 'error' );
 			}
 			$message    = $this->enqueue_bulk_sync( $mapping_id );
 			$type       = strpos( $message, 'enqueued' ) !== false ? 'success' : 'error';
@@ -106,7 +106,7 @@ class MappingsPage {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'cfi-images-sync' ) );
+			wp_die( esc_html__( 'Unauthorized.', 'images-sync-for-cloudflare' ) );
 		}
 
 		$mappings = $this->repo->all();
@@ -123,9 +123,9 @@ class MappingsPage {
 		?>
 		<div class="wrap">
 			<h1>
-				<?php esc_html_e( 'CF Images — Mappings', 'cfi-images-sync' ); ?>
+				<?php esc_html_e( 'CF Images — Mappings', 'images-sync-for-cloudflare' ); ?>
 				<?php if ( ! $show_form ) : ?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-mappings&action=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add New', 'cfi-images-sync' ); ?></a>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-mappings&action=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add New', 'images-sync-for-cloudflare' ); ?></a>
 				<?php endif; ?>
 			</h1>
 
@@ -149,7 +149,7 @@ class MappingsPage {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified in handle_actions().
 		$edit_id = sanitize_text_field( wp_unslash( $_POST['mapping_id'] ?? '' ) );
 		if ( $edit_id !== '' && ! Validators::is_valid_id( $edit_id, 'map' ) ) {
-			return __( 'Invalid mapping ID.', 'cfi-images-sync' );
+			return __( 'Invalid mapping ID.', 'images-sync-for-cloudflare' );
 		}
 
 		$data = array(
@@ -185,7 +185,7 @@ class MappingsPage {
 			if ( $key !== '' && $this->is_reserved_meta_key( $key ) ) {
 				return sprintf(
 					/* translators: %s: meta key name */
-					__( 'The meta key "%s" is reserved by WordPress and cannot be used as a destination.', 'cfi-images-sync' ),
+					__( 'The meta key "%s" is reserved by WordPress and cannot be used as a destination.', 'images-sync-for-cloudflare' ),
 					$key
 				);
 			}
@@ -193,10 +193,10 @@ class MappingsPage {
 
 		if ( $data['preset_id'] !== '' ) {
 			if ( ! Validators::is_valid_id( $data['preset_id'], 'preset' ) ) {
-				return __( 'Invalid preset ID format.', 'cfi-images-sync' );
+				return __( 'Invalid preset ID format.', 'images-sync-for-cloudflare' );
 			}
 			if ( $this->presets->find( $data['preset_id'] ) === null ) {
-				return __( 'Selected preset does not exist.', 'cfi-images-sync' );
+				return __( 'Selected preset does not exist.', 'images-sync-for-cloudflare' );
 			}
 		}
 
@@ -210,7 +210,7 @@ class MappingsPage {
 			return $result->get_error_message();
 		}
 
-		return $edit_id ? __( 'Mapping updated.', 'cfi-images-sync' ) : __( 'Mapping created.', 'cfi-images-sync' );
+		return $edit_id ? __( 'Mapping updated.', 'images-sync-for-cloudflare' ) : __( 'Mapping created.', 'images-sync-for-cloudflare' );
 	}
 
 	/**
@@ -223,11 +223,11 @@ class MappingsPage {
 		$mapping = $this->repo->find( $mapping_id );
 
 		if ( $mapping === null ) {
-			return __( 'Mapping not found.', 'cfi-images-sync' );
+			return __( 'Mapping not found.', 'images-sync-for-cloudflare' );
 		}
 
 		if ( ! function_exists( 'as_enqueue_async_action' ) ) {
-			return __( 'Action Scheduler is not available. Install it or use WP-CLI for bulk sync.', 'cfi-images-sync' );
+			return __( 'Action Scheduler is not available. Install it or use WP-CLI for bulk sync.', 'images-sync-for-cloudflare' );
 		}
 
 		as_enqueue_async_action(
@@ -240,7 +240,7 @@ class MappingsPage {
 			'cfi'
 		);
 
-		return __( 'Bulk sync enqueued. Check Logs for progress.', 'cfi-images-sync' );
+		return __( 'Bulk sync enqueued. Check Logs for progress.', 'images-sync-for-cloudflare' );
 	}
 
 	/**
@@ -250,11 +250,11 @@ class MappingsPage {
 	 */
 	private function source_type_labels(): array {
 		return array(
-			'acf_field'                => __( 'ACF Image Field', 'cfi-images-sync' ),
-			'featured_image'           => __( 'Featured Image (Thumbnail)', 'cfi-images-sync' ),
-			'post_meta_attachment_id'  => __( 'Meta Field → Attachment ID', 'cfi-images-sync' ),
-			'post_meta_url'            => __( 'Meta Field → Image URL', 'cfi-images-sync' ),
-			'attachment_id'            => __( 'Attachment (post is the image)', 'cfi-images-sync' ),
+			'acf_field'                => __( 'ACF Image Field', 'images-sync-for-cloudflare' ),
+			'featured_image'           => __( 'Featured Image (Thumbnail)', 'images-sync-for-cloudflare' ),
+			'post_meta_attachment_id'  => __( 'Meta Field → Attachment ID', 'images-sync-for-cloudflare' ),
+			'post_meta_url'            => __( 'Meta Field → Image URL', 'images-sync-for-cloudflare' ),
+			'attachment_id'            => __( 'Attachment (post is the image)', 'images-sync-for-cloudflare' ),
 		);
 	}
 
@@ -420,13 +420,13 @@ class MappingsPage {
 		$post_id = absint( wp_unslash( $_POST['post_id'] ?? 0 ) );
 
 		if ( $post_id <= 0 ) {
-			wp_send_json_error( __( 'Please enter a valid post ID.', 'cfi-images-sync' ) );
+			wp_send_json_error( __( 'Please enter a valid post ID.', 'images-sync-for-cloudflare' ) );
 		}
 
 		$post = get_post( $post_id );
 
 		if ( ! $post ) {
-			wp_send_json_error( __( 'Post not found.', 'cfi-images-sync' ) );
+			wp_send_json_error( __( 'Post not found.', 'images-sync-for-cloudflare' ) );
 		}
 
 		$source = array(
@@ -466,7 +466,7 @@ class MappingsPage {
 
 		if ( $resolved->is_empty() ) {
 			$result['status']        = 'no_source';
-			$result['upload_reason'] = __( 'Source image not found or empty.', 'cfi-images-sync' );
+			$result['upload_reason'] = __( 'Source image not found or empty.', 'images-sync-for-cloudflare' );
 			wp_send_json_success( $result );
 		}
 
@@ -489,23 +489,23 @@ class MappingsPage {
 		// Determine upload necessity (mirrors SyncEngine logic).
 		if ( $att_cf_id !== '' && ! \CFI\Core\Signature::has_changed( $file_path, $att_sig ) ) {
 			$result['status']        = 'cached';
-			$result['upload_reason'] = __( 'Image already on Cloudflare (attachment cache hit).', 'cfi-images-sync' );
+			$result['upload_reason'] = __( 'Image already on Cloudflare (attachment cache hit).', 'images-sync-for-cloudflare' );
 		} elseif ( $stored_cfid === '' && $att_cf_id === '' && ! empty( $behavior['upload_if_missing'] ) ) {
 			$result['would_upload']  = true;
 			$result['status']        = 'new_upload';
-			$result['upload_reason'] = __( 'Image not yet on Cloudflare.', 'cfi-images-sync' );
+			$result['upload_reason'] = __( 'Image not yet on Cloudflare.', 'images-sync-for-cloudflare' );
 		} elseif ( $stored_cfid !== '' && ! empty( $behavior['reupload_if_changed'] ) ) {
 			if ( \CFI\Core\Signature::has_changed( $file_path, $stored_sig ) ) {
 				$result['would_upload']  = true;
 				$result['status']        = 'reupload';
-				$result['upload_reason'] = __( 'Local file has changed since last sync.', 'cfi-images-sync' );
+				$result['upload_reason'] = __( 'Local file has changed since last sync.', 'images-sync-for-cloudflare' );
 			} else {
 				$result['status']        = 'skip_unchanged';
-				$result['upload_reason'] = __( 'File unchanged since last sync.', 'cfi-images-sync' );
+				$result['upload_reason'] = __( 'File unchanged since last sync.', 'images-sync-for-cloudflare' );
 			}
 		} else {
 			$result['status']        = 'skip_disabled';
-			$result['upload_reason'] = __( 'Upload not needed or behavior not enabled.', 'cfi-images-sync' );
+			$result['upload_reason'] = __( 'Upload not needed or behavior not enabled.', 'images-sync-for-cloudflare' );
 		}
 
 		// Preview delivery URL.
@@ -577,17 +577,17 @@ class MappingsPage {
 				'hasAcf'          => $has_acf,
 				'sourceKeyConfig' => array(
 					'acf_field'               => array(
-						'label'       => __( 'ACF Field Name', 'cfi-images-sync' ),
+						'label'       => __( 'ACF Field Name', 'images-sync-for-cloudflare' ),
 						'placeholder' => 'hero_image',
 						'required'    => true,
 					),
 					'post_meta_attachment_id'  => array(
-						'label'       => __( 'Meta Key', 'cfi-images-sync' ),
+						'label'       => __( 'Meta Key', 'images-sync-for-cloudflare' ),
 						'placeholder' => '_thumbnail_id',
 						'required'    => true,
 					),
 					'post_meta_url'            => array(
-						'label'       => __( 'Meta Key', 'cfi-images-sync' ),
+						'label'       => __( 'Meta Key', 'images-sync-for-cloudflare' ),
 						'placeholder' => 'og_image_url',
 						'required'    => true,
 					),
@@ -595,17 +595,17 @@ class MappingsPage {
 					'attachment_id'            => array( 'hidden' => true ),
 				),
 				'i18n'            => array(
-					'required'      => __( 'This field is required.', 'cfi-images-sync' ),
-					'invalidKey'    => __( 'Only letters, numbers, underscores, hyphens, colons, and dots are allowed.', 'cfi-images-sync' ),
-					'keyTooLong'    => __( 'Maximum 191 characters.', 'cfi-images-sync' ),
-					'selectPostType' => __( 'Please select a post type.', 'cfi-images-sync' ),
+					'required'      => __( 'This field is required.', 'images-sync-for-cloudflare' ),
+					'invalidKey'    => __( 'Only letters, numbers, underscores, hyphens, colons, and dots are allowed.', 'images-sync-for-cloudflare' ),
+					'keyTooLong'    => __( 'Maximum 191 characters.', 'images-sync-for-cloudflare' ),
+					'selectPostType' => __( 'Please select a post type.', 'images-sync-for-cloudflare' ),
 				),
 			)
 		);
 
 		?>
 		<h2>
-			<?php echo $mapping ? esc_html__( 'Edit Mapping', 'cfi-images-sync' ) : esc_html__( 'New Mapping', 'cfi-images-sync' ); ?>
+			<?php echo $mapping ? esc_html__( 'Edit Mapping', 'images-sync-for-cloudflare' ) : esc_html__( 'New Mapping', 'images-sync-for-cloudflare' ); ?>
 		</h2>
 		<form method="post" id="cfi-mapping-form" novalidate>
 			<?php wp_nonce_field( 'cfi_mapping_save' ); ?>
@@ -613,21 +613,21 @@ class MappingsPage {
 
 			<?php // ── Section 1: Source ──────────────────────────────────────── ?>
 			<div class="cfi-form-section">
-				<h3><?php esc_html_e( 'Image Source', 'cfi-images-sync' ); ?></h3>
+				<h3><?php esc_html_e( 'Image Source', 'images-sync-for-cloudflare' ); ?></h3>
 				<p class="cfi-section-desc">
-					<?php esc_html_e( 'Define which posts to process and where the original image comes from.', 'cfi-images-sync' ); ?>
+					<?php esc_html_e( 'Define which posts to process and where the original image comes from.', 'images-sync-for-cloudflare' ); ?>
 				</p>
 				<table class="form-table">
 					<tr>
 						<th>
 							<label for="cfi_post_type">
-								<?php esc_html_e( 'Post Type', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Post Type', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<select id="cfi_post_type" name="cfi_post_type" required>
 								<option value="">
-									<?php esc_html_e( '— Select —', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( '— Select —', 'images-sync-for-cloudflare' ); ?>
 								</option>
 								<?php foreach ( $post_types as $pt ) : ?>
 									<option value="<?php echo esc_attr( $pt->name ); ?>" <?php selected( $m['post_type'], $pt->name ); ?>>
@@ -636,34 +636,34 @@ class MappingsPage {
 								<?php endforeach; ?>
 							</select>
 							<p class="description">
-								<?php esc_html_e( 'Choose which content type this mapping applies to.', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Choose which content type this mapping applies to.', 'images-sync-for-cloudflare' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
 						<th>
 							<label for="status">
-								<?php esc_html_e( 'Post Status', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Post Status', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<select id="status" name="status">
 								<option value="any" <?php selected( $m['status'], 'any' ); ?>>
-									<?php esc_html_e( 'Any', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Any', 'images-sync-for-cloudflare' ); ?>
 								</option>
 								<option value="publish" <?php selected( $m['status'], 'publish' ); ?>>
-									<?php esc_html_e( 'Published only', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Published only', 'images-sync-for-cloudflare' ); ?>
 								</option>
 							</select>
 							<p class="description">
-								<?php esc_html_e( 'Sync only published posts, or include drafts and other statuses.', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Sync only published posts, or include drafts and other statuses.', 'images-sync-for-cloudflare' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
 						<th>
 							<label for="source_type">
-								<?php esc_html_e( 'Source Type', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Source Type', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
@@ -676,7 +676,7 @@ class MappingsPage {
 										<option value="<?php echo esc_attr( $st ); ?>" disabled>
 											<?php
 											/* translators: %s: source type label */
-											echo esc_html( sprintf( __( '%s (ACF not active)', 'cfi-images-sync' ), $label ) );
+											echo esc_html( sprintf( __( '%s (ACF not active)', 'images-sync-for-cloudflare' ), $label ) );
 											?>
 										</option>
 									<?php else : ?>
@@ -687,20 +687,20 @@ class MappingsPage {
 								<?php endforeach; ?>
 							</select>
 							<p class="description">
-								<?php esc_html_e( 'Where does the original image come from?', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Where does the original image come from?', 'images-sync-for-cloudflare' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr id="cfi-source-key-row">
 						<th>
 							<label for="source_key" id="cfi-source-key-label">
-								<?php esc_html_e( 'Source Key', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Source Key', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<input type="text" id="source_key" name="source_key" value="<?php echo esc_attr( $m['source']['key'] ?? '' ); ?>" class="regular-text" autocomplete="off" />
 							<p class="description" id="cfi-source-key-desc">
-								<?php esc_html_e( 'The field name or meta key that holds the image. Not needed for Featured Image or Attachment source types.', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'The field name or meta key that holds the image. Not needed for Featured Image or Attachment source types.', 'images-sync-for-cloudflare' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -714,84 +714,84 @@ class MappingsPage {
 			// phpcs:enable Generic.WhiteSpace.ScopeIndent.IncorrectExact
 			?>
 			<div class="cfi-form-section">
-				<h3><?php esc_html_e( 'Destination', 'cfi-images-sync' ); ?></h3>
+				<h3><?php esc_html_e( 'Destination', 'images-sync-for-cloudflare' ); ?></h3>
 				<p class="cfi-section-desc">
-					<?php esc_html_e( 'Define where the Cloudflare delivery URL and metadata will be stored on each post. Meta keys are created automatically on first sync — no need to register them beforehand.', 'cfi-images-sync' ); ?>
+					<?php esc_html_e( 'Define where the Cloudflare delivery URL and metadata will be stored on each post. Meta keys are created automatically on first sync — no need to register them beforehand.', 'images-sync-for-cloudflare' ); ?>
 				</p>
 				<table class="form-table">
 					<tr>
 						<th>
 							<label for="target_url_meta">
-								<?php esc_html_e( 'Delivery URL Meta Key', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Delivery URL Meta Key', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<div class="cfi-input-with-copy">
 								<input type="text" id="target_url_meta" name="target_url_meta" value="<?php echo esc_attr( $m['target']['url_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_delivery_url" required />
-								<button type="button" class="cfi-copy-btn" data-copy-from="#target_url_meta" aria-label="<?php esc_attr_e( 'Copy key', 'cfi-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy key', 'cfi-images-sync' ); ?>" disabled>
+								<button type="button" class="cfi-copy-btn" data-copy-from="#target_url_meta" aria-label="<?php esc_attr_e( 'Copy key', 'images-sync-for-cloudflare' ); ?>" title="<?php esc_attr_e( 'Copy key', 'images-sync-for-cloudflare' ); ?>" disabled>
 									<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
 								</button>
 							</div>
 							<p class="description">
-								<?php esc_html_e( 'The post meta key where the Cloudflare delivery URL will be stored. Use this key in your theme to display the optimized image.', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'The post meta key where the Cloudflare delivery URL will be stored. Use this key in your theme to display the optimized image.', 'images-sync-for-cloudflare' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
 						<th>
 							<label for="target_id_meta">
-								<?php esc_html_e( 'CF Image ID Meta Key', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'CF Image ID Meta Key', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<div class="cfi-input-with-copy">
 								<input type="text" id="target_id_meta" name="target_id_meta" value="<?php echo esc_attr( $m['target']['id_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_image_id" />
-								<button type="button" class="cfi-copy-btn" data-copy-from="#target_id_meta" aria-label="<?php esc_attr_e( 'Copy key', 'cfi-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy key', 'cfi-images-sync' ); ?>" disabled>
+								<button type="button" class="cfi-copy-btn" data-copy-from="#target_id_meta" aria-label="<?php esc_attr_e( 'Copy key', 'images-sync-for-cloudflare' ); ?>" title="<?php esc_attr_e( 'Copy key', 'images-sync-for-cloudflare' ); ?>" disabled>
 									<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
 								</button>
 							</div>
 							<p class="description">
-								<?php esc_html_e( 'Optional. Stores the Cloudflare image ID for management purposes.', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Optional. Stores the Cloudflare image ID for management purposes.', 'images-sync-for-cloudflare' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
 						<th>
 							<label for="target_sig_meta">
-								<?php esc_html_e( 'Change Signature Meta Key', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Change Signature Meta Key', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<div class="cfi-input-with-copy">
 								<input type="text" id="target_sig_meta" name="target_sig_meta" value="<?php echo esc_attr( $m['target']['sig_meta'] ?? '' ); ?>" class="regular-text" placeholder="_cf_change_sig" />
-								<button type="button" class="cfi-copy-btn" data-copy-from="#target_sig_meta" aria-label="<?php esc_attr_e( 'Copy key', 'cfi-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy key', 'cfi-images-sync' ); ?>" disabled>
+								<button type="button" class="cfi-copy-btn" data-copy-from="#target_sig_meta" aria-label="<?php esc_attr_e( 'Copy key', 'images-sync-for-cloudflare' ); ?>" title="<?php esc_attr_e( 'Copy key', 'images-sync-for-cloudflare' ); ?>" disabled>
 									<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
 								</button>
 							</div>
 							<p class="description">
-								<?php esc_html_e( 'Optional. Stores a hash to detect image changes and avoid redundant uploads.', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Optional. Stores a hash to detect image changes and avoid redundant uploads.', 'images-sync-for-cloudflare' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
 						<th></th>
 						<td>
-							<button type="button" id="cfi-copy-all-targets" class="button cfi-copy-btn-all" aria-label="<?php esc_attr_e( 'Copy all target keys as JSON', 'cfi-images-sync' ); ?>" title="<?php esc_attr_e( 'Copy all target keys as JSON', 'cfi-images-sync' ); ?>" disabled>
+							<button type="button" id="cfi-copy-all-targets" class="button cfi-copy-btn-all" aria-label="<?php esc_attr_e( 'Copy all target keys as JSON', 'images-sync-for-cloudflare' ); ?>" title="<?php esc_attr_e( 'Copy all target keys as JSON', 'images-sync-for-cloudflare' ); ?>" disabled>
 								<?php echo $copy_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
-								<?php esc_html_e( 'Copy All Target Keys', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Copy All Target Keys', 'images-sync-for-cloudflare' ); ?>
 							</button>
 						</td>
 					</tr>
 					<tr>
 						<th>
 							<label for="preset_id">
-								<?php esc_html_e( 'Preset', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Preset', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<select id="preset_id" name="preset_id">
 								<option value="">
-									<?php esc_html_e( '— Default (public) —', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( '— Default (public) —', 'images-sync-for-cloudflare' ); ?>
 								</option>
 								<?php foreach ( $presets as $preset ) : ?>
 									<option value="<?php echo esc_attr( $preset['id'] ); ?>" <?php selected( $m['preset_id'] ?? '', $preset['id'] ); ?>>
@@ -801,11 +801,11 @@ class MappingsPage {
 							</select>
 							<p class="description">
 								<?php
-								$presets_link = '<a href="' . esc_url( admin_url( 'admin.php?page=cfi-presets' ) ) . '">' . esc_html__( 'CF Images → Presets', 'cfi-images-sync' ) . '</a>';
+								$presets_link = '<a href="' . esc_url( admin_url( 'admin.php?page=cfi-presets' ) ) . '">' . esc_html__( 'CF Images → Presets', 'images-sync-for-cloudflare' ) . '</a>';
 								echo wp_kses(
 									sprintf(
 										/* translators: %s: link to Presets admin page */
-										__( 'Image variant preset for the delivery URL. Manage presets under %s.', 'cfi-images-sync' ),
+										__( 'Image variant preset for the delivery URL. Manage presets under %s.', 'images-sync-for-cloudflare' ),
 										$presets_link
 									),
 									array( 'a' => array( 'href' => array() ) )
@@ -819,62 +819,62 @@ class MappingsPage {
 
 			<?php // ── Section 3: Sync Settings ──────────────────────────────── ?>
 			<div class="cfi-form-section">
-				<h3><?php esc_html_e( 'Sync Settings', 'cfi-images-sync' ); ?></h3>
+				<h3><?php esc_html_e( 'Sync Settings', 'images-sync-for-cloudflare' ); ?></h3>
 				<p class="cfi-section-desc">
-					<?php esc_html_e( 'Configure when and how the sync runs.', 'cfi-images-sync' ); ?>
+					<?php esc_html_e( 'Configure when and how the sync runs.', 'images-sync-for-cloudflare' ); ?>
 				</p>
 				<table class="form-table">
 					<tr>
-						<th><?php esc_html_e( 'Auto-Sync Triggers', 'cfi-images-sync' ); ?></th>
+						<th><?php esc_html_e( 'Auto-Sync Triggers', 'images-sync-for-cloudflare' ); ?></th>
 						<td>
 							<fieldset>
 								<label>
 									<input type="checkbox" name="trigger_save_post" value="1" <?php checked( $m['triggers']['save_post'] ?? true ); ?> />
-									<?php esc_html_e( 'When a post is saved', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'When a post is saved', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<br/>
 								<label>
 									<input type="checkbox" name="trigger_acf_save_post" value="1" <?php checked( $m['triggers']['acf_save_post'] ?? true ); ?> <?php disabled( ! $has_acf ); ?> />
-									<?php esc_html_e( 'When ACF fields are updated', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'When ACF fields are updated', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<?php if ( ! $has_acf ) : ?>
 									<p class="description">
-										<?php esc_html_e( 'ACF is not active on this site. Install Advanced Custom Fields to enable this trigger.', 'cfi-images-sync' ); ?>
+										<?php esc_html_e( 'ACF is not active on this site. Install Advanced Custom Fields to enable this trigger.', 'images-sync-for-cloudflare' ); ?>
 									</p>
 								<?php endif; ?>
 							</fieldset>
 						</td>
 					</tr>
 					<tr>
-						<th><?php esc_html_e( 'Upload Behavior', 'cfi-images-sync' ); ?></th>
+						<th><?php esc_html_e( 'Upload Behavior', 'images-sync-for-cloudflare' ); ?></th>
 						<td>
 							<fieldset>
 								<label>
 									<input type="checkbox" name="upload_if_missing" value="1" <?php checked( $m['behavior']['upload_if_missing'] ?? true ); ?> />
-									<?php esc_html_e( 'Upload image if not yet on Cloudflare', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Upload image if not yet on Cloudflare', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<br/>
 								<label>
 									<input type="checkbox" name="reupload_if_changed" value="1" <?php checked( $m['behavior']['reupload_if_changed'] ?? true ); ?> />
-									<?php esc_html_e( 'Re-upload if the local file has changed', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Re-upload if the local file has changed', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<br/>
 								<label>
 									<input type="checkbox" name="clear_on_empty" value="1" <?php checked( $m['behavior']['clear_on_empty'] ?? true ); ?> />
-									<?php esc_html_e( 'Clear delivery URL if the source image is removed', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Clear delivery URL if the source image is removed', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<br/>
 								<label>
 									<input type="checkbox" name="store_cf_id_on_post" value="1" <?php checked( $m['behavior']['store_cf_id_on_post'] ?? true ); ?> />
-									<?php esc_html_e( 'Store Cloudflare image ID on the post', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Store Cloudflare image ID on the post', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<br/>
 								<label>
 									<input type="checkbox" name="delete_cf_on_reupload" value="1" <?php checked( $m['behavior']['delete_cf_on_reupload'] ?? false ); ?> />
-									<?php esc_html_e( 'Delete old Cloudflare image when re-uploading', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Delete old Cloudflare image when re-uploading', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<p class="description">
-									<?php esc_html_e( 'Disabled by default. Enable only if you are sure no other mapping or post references the same Cloudflare image.', 'cfi-images-sync' ); ?>
+									<?php esc_html_e( 'Disabled by default. Enable only if you are sure no other mapping or post references the same Cloudflare image.', 'images-sync-for-cloudflare' ); ?>
 								</p>
 							</fieldset>
 						</td>
@@ -884,21 +884,21 @@ class MappingsPage {
 
 			<?php // ── Section 4: Test Mapping ─────────────────────────────────── ?>
 			<div class="cfi-form-section">
-				<h3><?php esc_html_e( 'Test Mapping', 'cfi-images-sync' ); ?></h3>
+				<h3><?php esc_html_e( 'Test Mapping', 'images-sync-for-cloudflare' ); ?></h3>
 				<p class="cfi-section-desc">
-					<?php esc_html_e( 'Dry-run this mapping against a single post to verify the source resolves correctly and preview the delivery URL. No upload or sync is performed.', 'cfi-images-sync' ); ?>
+					<?php esc_html_e( 'Dry-run this mapping against a single post to verify the source resolves correctly and preview the delivery URL. No upload or sync is performed.', 'images-sync-for-cloudflare' ); ?>
 				</p>
 				<table class="form-table">
 					<tr>
 						<th>
 							<label for="cfi_test_post_id">
-								<?php esc_html_e( 'Post ID', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Post ID', 'images-sync-for-cloudflare' ); ?>
 							</label>
 						</th>
 						<td>
 							<input type="number" id="cfi_test_post_id" class="small-text" min="1" placeholder="123" />
 							<button type="button" id="cfi-test-btn" class="button">
-								<?php esc_html_e( 'Test', 'cfi-images-sync' ); ?>
+								<?php esc_html_e( 'Test', 'images-sync-for-cloudflare' ); ?>
 							</button>
 							<span id="cfi-test-spinner" class="spinner"></span>
 						</td>
@@ -908,9 +908,9 @@ class MappingsPage {
 			</div>
 
 			<p class="submit">
-				<input type="submit" name="cfi_save_mapping" class="button-primary" value="<?php esc_attr_e( 'Save Mapping', 'cfi-images-sync' ); ?>" />
+				<input type="submit" name="cfi_save_mapping" class="button-primary" value="<?php esc_attr_e( 'Save Mapping', 'images-sync-for-cloudflare' ); ?>" />
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-mappings' ) ); ?>" class="button">
-					<?php esc_html_e( 'Cancel', 'cfi-images-sync' ); ?>
+					<?php esc_html_e( 'Cancel', 'images-sync-for-cloudflare' ); ?>
 				</a>
 			</p>
 		</form>
@@ -925,17 +925,17 @@ class MappingsPage {
 	 */
 	private function render_table( array $mappings ): void {
 		if ( empty( $mappings ) ) {
-			echo '<p>' . esc_html__( 'No mappings yet. Click "Add New" to create one.', 'cfi-images-sync' ) . '</p>';
+			echo '<p>' . esc_html__( 'No mappings yet. Click "Add New" to create one.', 'images-sync-for-cloudflare' ) . '</p>';
 			return;
 		}
 
 		$source_labels = $this->source_type_labels();
 
 		foreach ( $mappings as $map ) :
-			$preset_name = __( 'Default (public)', 'cfi-images-sync' );
+			$preset_name = __( 'Default (public)', 'images-sync-for-cloudflare' );
 			if ( ! empty( $map['preset_id'] ) ) {
 				$p           = $this->presets->find( $map['preset_id'] );
-				$preset_name = $p ? $p['name'] : __( '(deleted)', 'cfi-images-sync' );
+				$preset_name = $p ? $p['name'] : __( '(deleted)', 'images-sync-for-cloudflare' );
 			}
 			$source_type_label = $source_labels[ $map['source']['type'] ?? '' ] ?? ( $map['source']['type'] ?? '' );
 			$pt_obj            = get_post_type_object( $map['post_type'] );
@@ -948,7 +948,7 @@ class MappingsPage {
 				</div>
 				<div class="cfi-mapping-card__body">
 					<div class="cfi-mapping-card__field">
-						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Source', 'cfi-images-sync' ); ?></span>
+						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Source', 'images-sync-for-cloudflare' ); ?></span>
 						<?php echo esc_html( $source_type_label ); ?>
 						<?php if ( ! empty( $map['source']['key'] ) ) : ?>
 							<code><?php echo esc_html( $map['source']['key'] ); ?></code>
@@ -956,11 +956,11 @@ class MappingsPage {
 					</div>
 					<span class="cfi-mapping-card__arrow">&rarr;</span>
 					<div class="cfi-mapping-card__field">
-						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Target', 'cfi-images-sync' ); ?></span>
+						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Target', 'images-sync-for-cloudflare' ); ?></span>
 						<code><?php echo esc_html( $map['target']['url_meta'] ?? '' ); ?></code>
 					</div>
 					<div class="cfi-mapping-card__field">
-						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Preset', 'cfi-images-sync' ); ?></span>
+						<span class="cfi-mapping-card__label"><?php esc_html_e( 'Preset', 'images-sync-for-cloudflare' ); ?></span>
 						<?php if ( ! empty( $map['preset_id'] ) && $p ) : ?>
 							<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-presets&action=edit&preset_id=' . $map['preset_id'] ) ); ?>"><?php echo esc_html( $preset_name ); ?></a>
 						<?php else : ?>
@@ -970,17 +970,17 @@ class MappingsPage {
 				</div>
 				<div class="cfi-mapping-card__actions">
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-mappings&action=edit&mapping_id=' . $map['id'] ) ); ?>" class="button button-small">
-						<?php esc_html_e( 'Edit', 'cfi-images-sync' ); ?>
+						<?php esc_html_e( 'Edit', 'images-sync-for-cloudflare' ); ?>
 					</a>
 					<form method="post" class="cfi-inline-form">
 						<?php wp_nonce_field( 'cfi_bulk_sync' ); ?>
 						<input type="hidden" name="bulk_mapping_id" value="<?php echo esc_attr( $map['id'] ); ?>" />
-						<button type="submit" name="cfi_bulk_sync" class="button button-small" onclick="return confirm('<?php esc_attr_e( 'Enqueue bulk sync for this mapping?', 'cfi-images-sync' ); ?>');">
-							<?php esc_html_e( 'Bulk Sync', 'cfi-images-sync' ); ?>
+						<button type="submit" name="cfi_bulk_sync" class="button button-small" onclick="return confirm('<?php esc_attr_e( 'Enqueue bulk sync for this mapping?', 'images-sync-for-cloudflare' ); ?>');">
+							<?php esc_html_e( 'Bulk Sync', 'images-sync-for-cloudflare' ); ?>
 						</button>
 					</form>
-					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=cfi-mappings&action=delete&mapping_id=' . $map['id'] ), 'cfi_delete_mapping_' . $map['id'] ) ); ?>" class="cfi-mapping-card__delete" onclick="return confirm('<?php esc_attr_e( 'Delete this mapping?', 'cfi-images-sync' ); ?>');">
-						<?php esc_html_e( 'Delete', 'cfi-images-sync' ); ?>
+					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=cfi-mappings&action=delete&mapping_id=' . $map['id'] ), 'cfi_delete_mapping_' . $map['id'] ) ); ?>" class="cfi-mapping-card__delete" onclick="return confirm('<?php esc_attr_e( 'Delete this mapping?', 'images-sync-for-cloudflare' ); ?>');">
+						<?php esc_html_e( 'Delete', 'images-sync-for-cloudflare' ); ?>
 					</a>
 				</div>
 			</div>

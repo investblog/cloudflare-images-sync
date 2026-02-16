@@ -14,7 +14,7 @@ msgstr ""
 "Language: \n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "X-Generator: Claude Code\n"
-"X-Domain: cfi-images-sync\n"
+"X-Domain: images-sync-for-cloudflare\n"
 
 #: src/Admin/LogsPage.php:85
 msgid "%d entries"
@@ -807,7 +807,7 @@ msgstr ""
 msgid "Selected preset does not exist."
 msgstr ""
 
-#: cfi-images-sync.php:178
+#: images-sync-for-cloudflare.php:178
 #: src/Admin/AdminMenu.php:73
 #: src/Admin/AdminMenu.php:74
 #: src/Admin/AdminMenu.php:338
