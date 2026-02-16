@@ -1,6 +1,6 @@
 === Images Sync for Cloudflare ===
 Contributors: 301st
-Tags: cloudflare, images, cdn, optimization, headless
+Tags: cloudflare, images, cdn, acf, headless
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
