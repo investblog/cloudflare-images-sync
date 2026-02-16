@@ -6,7 +6,7 @@
  * Version:           1.0.3
  * Requires at least: 6.2
  * Requires PHP:      8.0
- * Author:            301st
+ * Author:            301.st
  * Author URI:        https://301.st
  * License:           GPL-2.0+
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
