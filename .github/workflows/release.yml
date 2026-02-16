@@ -44,12 +44,15 @@ jobs:
           mkdir -p build/cfi-images-sync
           cp -r plugin/* build/cfi-images-sync/
           cd build
-          zip -r ../cfi-images-sync-${{ steps.version.outputs.VERSION }}.zip cfi-images-sync -x '*.DS_Store' -x '*.git*'
+          # Remove dev files that shouldn't ship
+          rm -f cfi-images-sync/composer.json cfi-images-sync/composer.lock cfi-images-sync/phpcs.xml.dist
+          rm -rf cfi-images-sync/vendor
+          zip -r ../cfi-images-sync.zip cfi-images-sync -x '*.DS_Store' -x '*.git*'
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: cfi-images-sync-${{ steps.version.outputs.VERSION }}.zip
+          files: cfi-images-sync.zip
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref, '-beta') || contains(github.ref, '-alpha') || contains(github.ref, '-rc') }}

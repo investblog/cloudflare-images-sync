@@ -29,6 +29,12 @@ debug.log
 # Composer
 composer.lock
 
+# Dev tools inside plugin dir (should not ship)
+plugin/composer.json
+plugin/composer.lock
+plugin/phpcs.xml.dist
+plugin/vendor/
+
 # npm
 package-lock.json
 

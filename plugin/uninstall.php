@@ -25,4 +25,13 @@ delete_option( 'cfi_db_version' );
 
 // Remove plugin post meta from all posts.
 global $wpdb;
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ('cfi_preview_image_id','cfi_preview_sig','_cfi_cf_image_id','_cfi_sig')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+	$wpdb->prepare(
+		'DELETE FROM %i WHERE meta_key IN (%s, %s, %s, %s)',
+		$wpdb->postmeta,
+		'cfi_preview_image_id',
+		'cfi_preview_sig',
+		'_cfi_cf_image_id',
+		'_cfi_sig'
+	)
+);

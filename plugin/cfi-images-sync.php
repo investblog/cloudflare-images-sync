@@ -13,10 +13,6 @@
  * Text Domain:       cfi-images-sync
  * Domain Path:       /languages
  *
- * GitHub Plugin URI: investblog/cloudflare-images-sync
- * Primary Branch:    main
- * Release Asset:     true
- *
  * @package CloudflareImagesSync
  */
 

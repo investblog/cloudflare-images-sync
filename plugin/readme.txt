@@ -103,41 +103,33 @@ Your Cloudflare Images remain on Cloudflare, and the delivery URLs stay in post 
 4. Mapping configuration with source, target, and preset selection
 5. Preview Studio for testing presets with live images
 
-== Privacy & Third-Party Services ==
+== External services ==
 
-This plugin connects to external Cloudflare services to upload, manage, and deliver images. No connection is made until the user configures API credentials and explicitly triggers a sync, test, or preview action.
+This plugin optionally connects to external Cloudflare services to upload, manage, and deliver images. No connection is made until the user configures API credentials and explicitly triggers a sync, test, or preview action.
 
-= Third-Party Service: Cloudflare Images API =
+= Cloudflare Images API =
 
 This plugin sends requests to the [Cloudflare API](https://api.cloudflare.com/) (`api.cloudflare.com`).
 
-**What data is sent:**
+Data sent to Cloudflare (only when the user configures credentials and triggers actions):
 
 * API token — for authentication (sent as a Bearer token header, never logged or stored in plain text)
 * Image files — binary content of WordPress media attachments
 * Image metadata — WordPress attachment ID and a purpose label (e.g. "preview")
 * Configuration updates — Flexible Variants enable/disable flag
 
-**When data is sent:**
-
-* When the user clicks "Test Connection" on the Settings page
-* When a post is saved and auto-sync is enabled for a matching mapping
-* When the user triggers a bulk sync or WP-CLI sync command
-* When the user uploads an image for preview in Preview Studio
-* When the user checks or enables Flexible Variants status
-
-= Third-Party Service: Cloudflare Image Delivery =
+= Cloudflare Image Delivery =
 
 Delivery URLs use the [Cloudflare Image Delivery](https://imagedelivery.net/) CDN (`imagedelivery.net`). These URLs are stored in post meta and served directly to site visitors by their browsers. The plugin itself makes one request to this service to detect Flexible Variants support (canary check).
 
-**Service links:**
+No visitor data, IP addresses, cookies, or personal information is ever sent to Cloudflare by this plugin.
 
 * [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
 * [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
 * [Cloudflare Images Documentation](https://developers.cloudflare.com/images/)
 * [Cloudflare API Documentation](https://developers.cloudflare.com/api/)
 
-= Personal Data =
+== Privacy Policy ==
 
 This plugin does not collect, store, or transmit any personal user data. Only image files and technical metadata (attachment IDs, image hashes) are sent to Cloudflare.
 
@@ -201,6 +193,20 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 
 = 0.1.0-beta =
 * Initial release
+
+== Upgrade Notice ==
+
+= 1.0.3 =
+Complete uninstall cleanup — encrypted token and migration version removed.
+
+= 1.0.2 =
+New content_1200w preset, fit modes FAQ, improved settings UX.
+
+= 1.0.1 =
+WordPress.org Plugin Check compliance, %i placeholders, external services disclosure.
+
+= 1.0.0 =
+First stable release with encrypted token storage and WordPress.org assets.
 
 == Credits ==
 
