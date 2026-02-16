@@ -4,7 +4,7 @@ Tags: cloudflare, images, cdn, acf, headless
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -135,6 +135,14 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 
 == Changelog ==
 
+= 1.0.4 =
+* Fixed: readme.txt uses required == External services == section heading (WP.org review)
+* Fixed: Uninstall SQL uses $wpdb->prepare() with %i placeholder
+* Fixed: Release ZIP filename without version suffix
+* Removed: GitHub Plugin URI headers (not needed for WP.org)
+* Added: acf tag for better discoverability
+* Added: == Upgrade Notice == section
+
 = 1.0.3 =
 * Fixed: Uninstall now removes encrypted API token and migration version
 * Fixed: Uninstall cleans up all plugin post meta from database
@@ -195,6 +203,9 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+WP.org review compliance: external services section, prepared SQL, ACF tag.
 
 = 1.0.3 =
 Complete uninstall cleanup — encrypted token and migration version removed.
