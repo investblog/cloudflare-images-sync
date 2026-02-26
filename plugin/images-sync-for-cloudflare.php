@@ -3,7 +3,7 @@
  * Plugin Name:       Images Sync for Cloudflare
  * Plugin URI:        https://github.com/investblog/cloudflare-images-sync
  * Description:       Sync WordPress images to Cloudflare Images with flexible mappings, presets, and variant delivery.
- * Version:           1.0.6
+ * Version:           1.0.7
  * Requires at least: 6.2
  * Requires PHP:      8.0
  * Author:            301.st
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin constants.
  */
-define( 'CFIMG_VERSION', '1.0.6' );
+define( 'CFIMG_VERSION', '1.0.7' );
 define( 'CFIMG_PLUGIN_FILE', __FILE__ );
 define( 'CFIMG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CFIMG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

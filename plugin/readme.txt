@@ -4,7 +4,7 @@ Tags: cloudflare, images, cdn, acf, headless
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -138,11 +138,12 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 
 == Changelog ==
 
-= 1.0.6 =
+= 1.0.7 =
 * Changed: Internal prefix renamed from `cfi` to `cfimg` (4+ chars required by WP.org)
 * Changed: External services section restructured with inline ToS/Privacy links per service
 * Added: Automatic database migration from `cfi_` to `cfimg_` option/meta keys
 * Fixed: Uninstall cleans up both old (`cfi_`) and new (`cfimg_`) prefixed data
+* Fixed: Asset enqueue guard referenced stale prefix, preventing CSS/JS on subpages
 
 = 1.0.5 =
 * Changed: Text domain renamed to `images-sync-for-cloudflare` to match WP.org slug
@@ -217,7 +218,7 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 
 == Upgrade Notice ==
 
-= 1.0.6 =
+= 1.0.7 =
 Prefix renamed from `cfi` to `cfimg` per WP.org review. Database keys migrate automatically.
 
 = 1.0.5 =
