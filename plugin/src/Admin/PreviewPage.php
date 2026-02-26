@@ -5,24 +5,24 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Admin;
+namespace CFIMG\Admin;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Api\CloudflareImagesClient;
-use CFI\Core\DemoImageManager;
-use CFI\Core\Signature;
-use CFI\Core\SourceResolver;
-use CFI\Core\SyncEngine;
-use CFI\Core\UrlBuilder;
-use CFI\Repos\MappingsRepo;
-use CFI\Repos\OptionKeys;
-use CFI\Repos\PresetsRepo;
-use CFI\Repos\SettingsRepo;
-use CFI\Support\Validators;
+use CFIMG\Api\CloudflareImagesClient;
+use CFIMG\Core\DemoImageManager;
+use CFIMG\Core\Signature;
+use CFIMG\Core\SourceResolver;
+use CFIMG\Core\SyncEngine;
+use CFIMG\Core\UrlBuilder;
+use CFIMG\Repos\MappingsRepo;
+use CFIMG\Repos\OptionKeys;
+use CFIMG\Repos\PresetsRepo;
+use CFIMG\Repos\SettingsRepo;
+use CFIMG\Support\Validators;
 
 /**
  * Preview page with two modes:
@@ -44,8 +44,8 @@ class PreviewPage {
 		}
 
 		// Handle demo image upload.
-		if ( isset( $_POST['cfi_demo_upload'] ) ) {
-			check_admin_referer( 'cfi_demo_upload' );
+		if ( isset( $_POST['cfimg_demo_upload'] ) ) {
+			check_admin_referer( 'cfimg_demo_upload' );
 
 			$demo   = new DemoImageManager();
 			$result = $demo->ensure_uploaded();
@@ -56,22 +56,22 @@ class PreviewPage {
 			$type = is_wp_error( $result ) ? 'error' : 'success';
 
 			$this->redirect_with_notice(
-				admin_url( 'admin.php?page=cfi-preview&mode=attachment&use_demo=1' ),
+				admin_url( 'admin.php?page=cfimg-preview&mode=attachment&use_demo=1' ),
 				$message,
 				$type
 			);
 		}
 
 		// Handle attachment upload-on-demand.
-		if ( isset( $_POST['cfi_preview_upload'] ) ) {
-			check_admin_referer( 'cfi_preview_upload' );
+		if ( isset( $_POST['cfimg_preview_upload'] ) ) {
+			check_admin_referer( 'cfimg_preview_upload' );
 			$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			if ( $attachment_id > 0 ) {
 				$message = $this->ensure_preview_uploaded( $attachment_id );
 				$type    = strpos( $message, 'error' ) !== false || strpos( $message, 'not found' ) !== false ? 'error' : 'success';
 				$this->redirect_with_notice(
-					admin_url( 'admin.php?page=cfi-preview&mode=attachment&attachment_id=' . $attachment_id ),
+					admin_url( 'admin.php?page=cfimg-preview&mode=attachment&attachment_id=' . $attachment_id ),
 					$message,
 					$type
 				);
@@ -79,8 +79,8 @@ class PreviewPage {
 		}
 
 		// Handle sync now.
-		if ( isset( $_POST['cfi_sync_now'] ) ) {
-			check_admin_referer( 'cfi_sync_now' );
+		if ( isset( $_POST['cfimg_sync_now'] ) ) {
+			check_admin_referer( 'cfimg_sync_now' );
 
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- GET params for context.
 			$post_id    = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
@@ -89,7 +89,7 @@ class PreviewPage {
 
 			if ( $mapping_id !== '' && ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
 				$this->redirect_with_notice(
-					admin_url( 'admin.php?page=cfi-preview&mode=post' ),
+					admin_url( 'admin.php?page=cfimg-preview&mode=post' ),
 					__( 'Invalid mapping ID.', 'images-sync-for-cloudflare' ),
 					'error'
 				);
@@ -110,7 +110,7 @@ class PreviewPage {
 				}
 
 				$this->redirect_with_notice(
-					admin_url( 'admin.php?page=cfi-preview&mode=post&post_id=' . $post_id . '&mapping_id=' . $mapping_id ),
+					admin_url( 'admin.php?page=cfimg-preview&mode=post&post_id=' . $post_id . '&mapping_id=' . $mapping_id ),
 					$msg,
 					$type
 				);
@@ -137,8 +137,8 @@ class PreviewPage {
 			<h1><?php esc_html_e( 'CF Images — Preview / Variant Studio', 'images-sync-for-cloudflare' ); ?></h1>
 
 			<h2 class="nav-tab-wrapper">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=attachment' ) ); ?>" class="nav-tab <?php echo $mode === 'attachment' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Attachment Preview', 'images-sync-for-cloudflare' ); ?></a>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=post' ) ); ?>" class="nav-tab <?php echo $mode === 'post' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Post + Mapping', 'images-sync-for-cloudflare' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfimg-preview&mode=attachment' ) ); ?>" class="nav-tab <?php echo $mode === 'attachment' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Attachment Preview', 'images-sync-for-cloudflare' ); ?></a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfimg-preview&mode=post' ) ); ?>" class="nav-tab <?php echo $mode === 'post' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Post + Mapping', 'images-sync-for-cloudflare' ); ?></a>
 			</h2>
 
 			<?php $this->render_notice(); ?>
@@ -163,20 +163,20 @@ class PreviewPage {
 		$attachment_id = isset( $_GET['attachment_id'] ) ? absint( wp_unslash( $_GET['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		?>
-		<form method="get" class="cfi-loading-form" id="cfi-attachment-form">
-			<input type="hidden" name="page" value="cfi-preview" />
+		<form method="get" class="cfimg-loading-form" id="cfimg-attachment-form">
+			<input type="hidden" name="page" value="cfimg-preview" />
 			<input type="hidden" name="mode" value="attachment" />
 			<p>
 				<label for="attachment_id"><?php esc_html_e( 'Attachment ID:', 'images-sync-for-cloudflare' ); ?></label>
-				<input type="number" id="cfi-attachment-id" name="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>" min="1" class="small-text" />
-				<input type="submit" class="button" id="cfi-attachment-load" value="<?php esc_attr_e( 'Load', 'images-sync-for-cloudflare' ); ?>" />
-				<span class="spinner cfi-form-spinner"></span>
-				<span id="cfi-attachment-status"></span>
+				<input type="number" id="cfimg-attachment-id" name="attachment_id" value="<?php echo esc_attr( $attachment_id ); ?>" min="1" class="small-text" />
+				<input type="submit" class="button" id="cfimg-attachment-load" value="<?php esc_attr_e( 'Load', 'images-sync-for-cloudflare' ); ?>" />
+				<span class="spinner cfimg-form-spinner"></span>
+				<span id="cfimg-attachment-status"></span>
 			</p>
 			<p class="description">
 				<?php esc_html_e( 'Load a Media Library image to preview how it looks with each preset variant. The image will be uploaded to Cloudflare on demand.', 'images-sync-for-cloudflare' ); ?>
 			</p>
-			<p id="cfi-attachment-suggestions" class="cfi-suggestions"></p>
+			<p id="cfimg-attachment-suggestions" class="cfimg-suggestions"></p>
 		</form>
 
 		<?php
@@ -198,14 +198,14 @@ class PreviewPage {
 
 			// Empty state: offer both options.
 			?>
-			<div class="cfi-empty-state">
+			<div class="cfimg-empty-state">
 				<p><?php esc_html_e( 'Enter an attachment ID above, or use the sample image to preview presets.', 'images-sync-for-cloudflare' ); ?></p>
-				<form method="post" class="cfi-loading-form">
-					<?php wp_nonce_field( 'cfi_demo_upload' ); ?>
-					<button type="submit" name="cfi_demo_upload" class="button button-primary">
+				<form method="post" class="cfimg-loading-form">
+					<?php wp_nonce_field( 'cfimg_demo_upload' ); ?>
+					<button type="submit" name="cfimg_demo_upload" class="button button-primary">
 						<?php esc_html_e( 'Use Sample Image', 'images-sync-for-cloudflare' ); ?>
 					</button>
-					<span class="spinner cfi-form-spinner"></span>
+					<span class="spinner cfimg-form-spinner"></span>
 				</form>
 			</div>
 			<?php
@@ -217,11 +217,11 @@ class PreviewPage {
 		if ( $cf_image_id === '' ) {
 			?>
 			<p><?php esc_html_e( 'This attachment has not been uploaded to Cloudflare yet.', 'images-sync-for-cloudflare' ); ?></p>
-			<form method="post" class="cfi-loading-form">
-				<?php wp_nonce_field( 'cfi_preview_upload' ); ?>
-				<input type="hidden" name="page" value="cfi-preview" />
-				<input type="submit" name="cfi_preview_upload" class="button-primary" value="<?php esc_attr_e( 'Upload for Preview', 'images-sync-for-cloudflare' ); ?>" />
-				<span class="spinner cfi-form-spinner"></span>
+			<form method="post" class="cfimg-loading-form">
+				<?php wp_nonce_field( 'cfimg_preview_upload' ); ?>
+				<input type="hidden" name="page" value="cfimg-preview" />
+				<input type="submit" name="cfimg_preview_upload" class="button-primary" value="<?php esc_attr_e( 'Upload for Preview', 'images-sync-for-cloudflare' ); ?>" />
+				<span class="spinner cfimg-form-spinner"></span>
 			</form>
 			<?php
 			return;
@@ -246,13 +246,13 @@ class PreviewPage {
 
 		?>
 		<form method="get">
-			<input type="hidden" name="page" value="cfi-preview" />
+			<input type="hidden" name="page" value="cfimg-preview" />
 			<input type="hidden" name="mode" value="post" />
-			<p class="cfi-post-mapping-form">
+			<p class="cfimg-post-mapping-form">
 				<label for="post_id"><?php esc_html_e( 'Post ID:', 'images-sync-for-cloudflare' ); ?></label>
-				<input type="number" id="post_id" name="post_id" value="<?php echo esc_attr( $post_id ); ?>" min="1" class="small-text cfi-no-spinner" />
+				<input type="number" id="post_id" name="post_id" value="<?php echo esc_attr( $post_id ); ?>" min="1" class="small-text cfimg-no-spinner" />
 
-				<span class="cfi-form-arrow">→</span>
+				<span class="cfimg-form-arrow">→</span>
 
 				<label for="mapping_id"><?php esc_html_e( 'Mapping:', 'images-sync-for-cloudflare' ); ?></label>
 				<select id="mapping_id" name="mapping_id">
@@ -299,9 +299,9 @@ class PreviewPage {
 			echo '<p><code>' . esc_html( $stored_url ) . '</code></p>';
 
 			if ( $is_valid_cf_url ) {
-				echo '<p><img src="' . esc_url( $stored_url ) . '" class="cfi-preview-img" loading="lazy" /></p>';
+				echo '<p><img src="' . esc_url( $stored_url ) . '" class="cfimg-preview-img" loading="lazy" /></p>';
 			} else {
-				echo '<p class="notice notice-warning inline cfi-notice-inline"><strong>' . esc_html__( 'Warning:', 'images-sync-for-cloudflare' ) . '</strong> ';
+				echo '<p class="notice notice-warning inline cfimg-notice-inline"><strong>' . esc_html__( 'Warning:', 'images-sync-for-cloudflare' ) . '</strong> ';
 				echo esc_html__( 'Stored value is not a valid Cloudflare delivery URL. Click "Sync Now" to generate a proper URL.', 'images-sync-for-cloudflare' ) . '</p>';
 			}
 		} else {
@@ -309,10 +309,10 @@ class PreviewPage {
 		}
 
 		?>
-		<form method="post" class="cfi-loading-form">
-			<?php wp_nonce_field( 'cfi_sync_now' ); ?>
-			<input type="submit" name="cfi_sync_now" class="button-primary" value="<?php esc_attr_e( 'Sync Now', 'images-sync-for-cloudflare' ); ?>" />
-			<span class="spinner cfi-form-spinner"></span>
+		<form method="post" class="cfimg-loading-form">
+			<?php wp_nonce_field( 'cfimg_sync_now' ); ?>
+			<input type="submit" name="cfimg_sync_now" class="button-primary" value="<?php esc_attr_e( 'Sync Now', 'images-sync-for-cloudflare' ); ?>" />
+			<span class="spinner cfimg-form-spinner"></span>
 		</form>
 		<?php
 	}
@@ -400,7 +400,7 @@ class PreviewPage {
 	 * @return void
 	 */
 	public function ajax_validate_attachment(): void {
-		check_ajax_referer( 'cfi_admin', 'nonce' );
+		check_ajax_referer( 'cfimg_admin', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'Unauthorized', 403 );
@@ -506,7 +506,7 @@ class PreviewPage {
 
 		if ( $has_flex && $is_stale ) {
 			$ago = human_time_diff( $flex_checked );
-			echo '<p class="description cfi-description-compact">';
+			echo '<p class="description cfimg-description-compact">';
 			printf(
 				/* translators: %s: human-readable time difference */
 				esc_html__( 'Flexible Variants status last checked %s ago.', 'images-sync-for-cloudflare' ),
@@ -516,7 +516,7 @@ class PreviewPage {
 		}
 
 		echo '<h3>' . esc_html__( 'Variant Previews', 'images-sync-for-cloudflare' ) . '</h3>';
-		echo '<div class="cfi-preset-grid">';
+		echo '<div class="cfimg-preset-grid">';
 
 		foreach ( $presets as $id => $preset ) {
 			$url = $builder->url_from_preset( $cf_image_id, $preset );
@@ -526,9 +526,9 @@ class PreviewPage {
 			}
 
 			$is_flex    = Validators::is_flexible_variant( $preset['variant'] );
-			$card_class = 'cfi-preset-card';
+			$card_class = 'cfimg-preset-card';
 			if ( $id === $highlight_preset ) {
-				$card_class .= ' cfi-preset-card--highlighted';
+				$card_class .= ' cfimg-preset-card--highlighted';
 			}
 
 			echo '<div class="' . esc_attr( $card_class ) . '">';
@@ -537,15 +537,15 @@ class PreviewPage {
 			if ( $is_flex && $flex_status !== 'enabled' ) {
 				// Show placeholder instead of broken <img>.
 				if ( $flex_status === 'disabled' ) {
-					echo '<p class="cfi-flex-placeholder">' . esc_html__( 'Needs Flexible Variants', 'images-sync-for-cloudflare' ) . '</p>';
+					echo '<p class="cfimg-flex-placeholder">' . esc_html__( 'Needs Flexible Variants', 'images-sync-for-cloudflare' ) . '</p>';
 				} else {
-					echo '<p class="cfi-flex-placeholder">' . esc_html__( 'Flexible Variants status unknown', 'images-sync-for-cloudflare' ) . '</p>';
+					echo '<p class="cfimg-flex-placeholder">' . esc_html__( 'Flexible Variants status unknown', 'images-sync-for-cloudflare' ) . '</p>';
 				}
 				// Show URL but disabled (no copy).
-				echo '<p><code class="cfi-copy-url cfi-copy-url--disabled">' . esc_html( $url ) . '</code></p>';
+				echo '<p><code class="cfimg-copy-url cfimg-copy-url--disabled">' . esc_html( $url ) . '</code></p>';
 			} else {
 				echo '<img src="' . esc_url( $url ) . '" loading="lazy" />';
-				echo '<p><code class="cfi-copy-url" title="' . esc_attr__( 'Click to copy', 'images-sync-for-cloudflare' ) . '">' . esc_html( $url ) . '</code></p>';
+				echo '<p><code class="cfimg-copy-url" title="' . esc_attr__( 'Click to copy', 'images-sync-for-cloudflare' ) . '">' . esc_html( $url ) . '</code></p>';
 			}
 
 			echo '</div>';
@@ -561,33 +561,33 @@ class PreviewPage {
 	 * @return void
 	 */
 	private function render_flex_callout( string $flex_status ): void {
-		$settings_url = admin_url( 'admin.php?page=cfi-settings' );
+		$settings_url = admin_url( 'admin.php?page=cfimg-settings' );
 
 		if ( $flex_status === 'disabled' ) {
 			?>
-			<div class="cfi-fv-callout cfi-fv-callout--disabled">
-				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Disabled', 'images-sync-for-cloudflare' ); ?></p>
-				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Parameter-based presets will not render. Enable Flexible Variants to see all previews.', 'images-sync-for-cloudflare' ); ?></p>
-				<div class="cfi-fv-callout__actions">
-					<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
-					<button type="button" class="button button-primary" id="cfi-flex-enable"><?php esc_html_e( 'Enable Flexible Variants', 'images-sync-for-cloudflare' ); ?></button>
+			<div class="cfimg-fv-callout cfimg-fv-callout--disabled">
+				<p class="cfimg-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Disabled', 'images-sync-for-cloudflare' ); ?></p>
+				<p class="cfimg-fv-callout__text"><?php esc_html_e( 'Parameter-based presets will not render. Enable Flexible Variants to see all previews.', 'images-sync-for-cloudflare' ); ?></p>
+				<div class="cfimg-fv-callout__actions">
+					<button type="button" class="button" id="cfimg-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
+					<button type="button" class="button button-primary" id="cfimg-flex-enable"><?php esc_html_e( 'Enable Flexible Variants', 'images-sync-for-cloudflare' ); ?></button>
 					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'images-sync-for-cloudflare' ); ?></a>
-					<span class="spinner" id="cfi-flex-spinner"></span>
-					<span id="cfi-flex-result"></span>
+					<span class="spinner" id="cfimg-flex-spinner"></span>
+					<span id="cfimg-flex-result"></span>
 				</div>
 			</div>
 			<?php
 		} else {
 			// Unknown status.
 			?>
-			<div class="cfi-fv-callout cfi-fv-callout--unknown">
-				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Status Unknown', 'images-sync-for-cloudflare' ); ?></p>
-				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Test the connection to check if Flexible Variants are enabled.', 'images-sync-for-cloudflare' ); ?></p>
-				<div class="cfi-fv-callout__actions">
-					<button type="button" class="button button-primary" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
+			<div class="cfimg-fv-callout cfimg-fv-callout--unknown">
+				<p class="cfimg-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Status Unknown', 'images-sync-for-cloudflare' ); ?></p>
+				<p class="cfimg-fv-callout__text"><?php esc_html_e( 'Test the connection to check if Flexible Variants are enabled.', 'images-sync-for-cloudflare' ); ?></p>
+				<div class="cfimg-fv-callout__actions">
+					<button type="button" class="button button-primary" id="cfimg-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
 					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'images-sync-for-cloudflare' ); ?></a>
-					<span class="spinner" id="cfi-flex-spinner"></span>
-					<span id="cfi-flex-result"></span>
+					<span class="spinner" id="cfimg-flex-spinner"></span>
+					<span id="cfimg-flex-result"></span>
 				</div>
 			</div>
 			<?php

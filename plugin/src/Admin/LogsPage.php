@@ -5,14 +5,14 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Admin;
+namespace CFIMG\Admin;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Repos\LogsRepo;
+use CFIMG\Repos\LogsRepo;
 
 /**
  * Display and clear sync logs (ring buffer).
@@ -45,11 +45,11 @@ class LogsPage {
 			return;
 		}
 
-		if ( isset( $_POST['cfi_clear_logs'] ) ) {
-			check_admin_referer( 'cfi_clear_logs' );
+		if ( isset( $_POST['cfimg_clear_logs'] ) ) {
+			check_admin_referer( 'cfimg_clear_logs' );
 			$this->repo->clear();
 			$this->redirect_with_notice(
-				admin_url( 'admin.php?page=cfi-logs' ),
+				admin_url( 'admin.php?page=cfimg-logs' ),
 				__( 'Logs cleared.', 'images-sync-for-cloudflare' )
 			);
 		}
@@ -76,13 +76,13 @@ class LogsPage {
 			<?php if ( empty( $items ) ) : ?>
 				<p><?php esc_html_e( 'No log entries yet. Events will appear here as the plugin runs.', 'images-sync-for-cloudflare' ); ?></p>
 			<?php else : ?>
-				<div class="cfi-tablenav">
+				<div class="cfimg-tablenav">
 					<form method="post">
-						<?php wp_nonce_field( 'cfi_clear_logs' ); ?>
-						<input type="submit" name="cfi_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'images-sync-for-cloudflare' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'images-sync-for-cloudflare' ); ?>');" />
+						<?php wp_nonce_field( 'cfimg_clear_logs' ); ?>
+						<input type="submit" name="cfimg_clear_logs" class="button" value="<?php esc_attr_e( 'Clear Logs', 'images-sync-for-cloudflare' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Clear all logs?', 'images-sync-for-cloudflare' ); ?>');" />
 					</form>
 					<?php /* translators: %d: number of log entries */ ?>
-					<span class="cfi-count-badge"><?php echo esc_html( sprintf( __( '%d entries', 'images-sync-for-cloudflare' ), count( $items ) ) ); ?></span>
+					<span class="cfimg-count-badge"><?php echo esc_html( sprintf( __( '%d entries', 'images-sync-for-cloudflare' ), count( $items ) ) ); ?></span>
 				</div>
 				<table class="widefat striped">
 					<thead>
@@ -98,7 +98,7 @@ class LogsPage {
 						<?php foreach ( array_reverse( $items ) as $entry ) : ?>
 							<tr>
 								<td><?php echo esc_html( wp_date( 'Y-m-d H:i:s', $entry['t'] ?? 0 ) ); ?></td>
-								<td><span class="cfi-log-level cfi-log-level--<?php echo esc_attr( $entry['lvl'] ?? 'info' ); ?>"><?php echo esc_html( $entry['lvl'] ?? '' ); ?></span></td>
+								<td><span class="cfimg-log-level cfimg-log-level--<?php echo esc_attr( $entry['lvl'] ?? 'info' ); ?>"><?php echo esc_html( $entry['lvl'] ?? '' ); ?></span></td>
 								<td><?php echo esc_html( $entry['msg'] ?? '' ); ?></td>
 								<td><?php echo isset( $entry['post_id'] ) ? esc_html( $entry['post_id'] ) : '—'; ?></td>
 								<td><?php echo isset( $entry['mapping_id'] ) ? '<code>' . esc_html( $entry['mapping_id'] ) . '</code>' : '—'; ?></td>

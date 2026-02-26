@@ -5,14 +5,14 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Repos;
+namespace CFIMG\Repos;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Support\Validators;
+use CFIMG\Support\Validators;
 
 /**
  * Append-only ring buffer for sync log entries.

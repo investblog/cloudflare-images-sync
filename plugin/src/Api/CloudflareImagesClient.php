@@ -5,7 +5,7 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Api;
+namespace CFIMG\Api;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -53,12 +53,12 @@ class CloudflareImagesClient {
 	 * @return self|\WP_Error Client instance or error if not configured.
 	 */
 	public static function from_settings() {
-		$repo     = new \CFI\Repos\SettingsRepo();
+		$repo     = new \CFIMG\Repos\SettingsRepo();
 		$settings = $repo->get();
 
 		if ( $settings['account_id'] === '' || $settings['api_token'] === '' ) {
 			return new \WP_Error(
-				'cfi_not_configured',
+				'cfimg_not_configured',
 				'Cloudflare account_id and api_token must be configured in settings.'
 			);
 		}
@@ -75,7 +75,7 @@ class CloudflareImagesClient {
 	 */
 	public function upload( string $file_path, array $metadata = array() ) {
 		if ( ! file_exists( $file_path ) || ! is_readable( $file_path ) ) {
-			return new \WP_Error( 'cfi_file_not_found', 'Image file not found or not readable.' );
+			return new \WP_Error( 'cfimg_file_not_found', 'Image file not found or not readable.' );
 		}
 
 		$boundary = wp_generate_password( 24, false );
@@ -109,7 +109,7 @@ class CloudflareImagesClient {
 	 */
 	public function upload_from_url( string $url, array $metadata = array() ) {
 		if ( ! wp_http_validate_url( $url ) ) {
-			return new \WP_Error( 'cfi_invalid_url', 'Invalid image URL. Only http and https URLs are accepted.' );
+			return new \WP_Error( 'cfimg_invalid_url', 'Invalid image URL. Only http and https URLs are accepted.' );
 		}
 
 		$boundary = wp_generate_password( 24, false );
@@ -138,7 +138,7 @@ class CloudflareImagesClient {
 	 */
 	public function delete( string $image_id ) {
 		if ( $image_id === '' ) {
-			return new \WP_Error( 'cfi_missing_image_id', 'Image ID is required.' );
+			return new \WP_Error( 'cfimg_missing_image_id', 'Image ID is required.' );
 		}
 
 		$response = wp_remote_request(
@@ -167,7 +167,7 @@ class CloudflareImagesClient {
 	 */
 	public function get( string $image_id ) {
 		if ( $image_id === '' ) {
-			return new \WP_Error( 'cfi_missing_image_id', 'Image ID is required.' );
+			return new \WP_Error( 'cfimg_missing_image_id', 'Image ID is required.' );
 		}
 
 		$response = wp_remote_get(
@@ -233,13 +233,13 @@ class CloudflareImagesClient {
 		if ( is_wp_error( $parsed ) ) {
 			$http_code = $parsed->get_error_data()['http_code'] ?? 0;
 			if ( in_array( $http_code, array( 404, 405 ), true ) ) {
-				return new \WP_Error( 'cfi_flex_unsupported', 'Config endpoint not available for this account.' );
+				return new \WP_Error( 'cfimg_flex_unsupported', 'Config endpoint not available for this account.' );
 			}
 			return $parsed;
 		}
 
 		if ( ! array_key_exists( 'flexible_variants', $parsed ) ) {
-			return new \WP_Error( 'cfi_flex_unsupported', 'Config response does not include flexible_variants.' );
+			return new \WP_Error( 'cfimg_flex_unsupported', 'Config response does not include flexible_variants.' );
 		}
 
 		return ! empty( $parsed['flexible_variants'] );
@@ -292,7 +292,7 @@ class CloudflareImagesClient {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error( 'cfi_canary_inconclusive', 'Canary request failed: ' . $response->get_error_message() );
+			return new \WP_Error( 'cfimg_canary_inconclusive', 'Canary request failed: ' . $response->get_error_message() );
 		}
 
 		$code         = wp_remote_retrieve_response_code( $response );
@@ -309,7 +309,7 @@ class CloudflareImagesClient {
 			return false;
 		}
 
-		return new \WP_Error( 'cfi_canary_inconclusive', 'Canary returned unexpected response (HTTP ' . $code . ').' );
+		return new \WP_Error( 'cfimg_canary_inconclusive', 'Canary returned unexpected response (HTTP ' . $code . ').' );
 	}
 
 	/**
@@ -345,7 +345,7 @@ class CloudflareImagesClient {
 		$file_contents = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		if ( $file_contents === false ) {
-			return new \WP_Error( 'cfi_file_read_error', 'Could not read image file.' );
+			return new \WP_Error( 'cfimg_file_read_error', 'Could not read image file.' );
 		}
 
 		$filename = wp_basename( $file_path );
@@ -404,7 +404,7 @@ class CloudflareImagesClient {
 	private function parse_response( $response ) {
 		if ( is_wp_error( $response ) ) {
 			return new \WP_Error(
-				'cfi_http_error',
+				'cfimg_http_error',
 				'HTTP request failed: ' . $response->get_error_message()
 			);
 		}
@@ -415,7 +415,7 @@ class CloudflareImagesClient {
 
 		if ( ! is_array( $data ) ) {
 			return new \WP_Error(
-				'cfi_invalid_response',
+				'cfimg_invalid_response',
 				'Could not parse Cloudflare API response.',
 				array( 'http_code' => $code )
 			);
@@ -432,7 +432,7 @@ class CloudflareImagesClient {
 			$error_code = $errors[0]['code'] ?? $code;
 
 			return new \WP_Error(
-				'cfi_api_error',
+				'cfimg_api_error',
 				$msg,
 				array(
 					'http_code' => $code,

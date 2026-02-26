@@ -41,7 +41,7 @@
 	}
 
 	// Copy URL (preset grid cards, preview page).
-	$(document).on('click', '.cfi-copy-url', function () {
+	$(document).on('click', '.cfimg-copy-url', function () {
 		var $el = $(this);
 		var url = $.trim($el.text());
 		if (url !== '') {
@@ -50,7 +50,7 @@
 	});
 
 	// Copy button (data-copy-from attribute).
-	$(document).on('click', '.cfi-copy-btn', function () {
+	$(document).on('click', '.cfimg-copy-btn', function () {
 		var $btn = $(this);
 		var selector = $btn.data('copyFrom');
 		if (!selector) {
@@ -63,7 +63,7 @@
 	});
 
 	// Copy all targets button.
-	$(document).on('click', '#cfi-copy-all-targets', function () {
+	$(document).on('click', '#cfimg-copy-all-targets', function () {
 		var $btn = $(this);
 		var json = JSON.stringify({
 			url_meta: $.trim($('#target_url_meta').val()),
@@ -74,16 +74,16 @@
 	});
 
 	// ── Loading form spinner ───────────────────────────────────────────
-	$(document).on('submit', '.cfi-loading-form', function () {
+	$(document).on('submit', '.cfimg-loading-form', function () {
 		$(this).addClass('is-loading');
 	});
 
 	// ── Attachment ID validation ───────────────────────────────────────
 	(function () {
-		var $input = $('#cfi-attachment-id');
-		var $status = $('#cfi-attachment-status');
-		var $suggestions = $('#cfi-attachment-suggestions');
-		var $loadBtn = $('#cfi-attachment-load');
+		var $input = $('#cfimg-attachment-id');
+		var $status = $('#cfimg-attachment-status');
+		var $suggestions = $('#cfimg-attachment-suggestions');
+		var $loadBtn = $('#cfimg-attachment-load');
 		var debounceTimer;
 
 		if (!$input.length) {
@@ -94,7 +94,7 @@
 			clearTimeout(debounceTimer);
 			var val = $.trim($input.val());
 
-			$status.html('').removeClass('cfi-att-valid cfi-att-invalid');
+			$status.html('').removeClass('cfimg-att-valid cfimg-att-invalid');
 			$suggestions.hide().html('');
 
 			if (val === '' || parseInt(val, 10) <= 0) {
@@ -109,25 +109,25 @@
 		function validateAttachment(id) {
 			$status.html('<span class="spinner is-active" style="float:none;margin:0 4px;"></span>');
 
-			$.post(cfiAdmin.ajaxUrl, {
-				action: 'cfi_validate_attachment',
+			$.post(cfimgAdmin.ajaxUrl, {
+				action: 'cfimg_validate_attachment',
 				attachment_id: id,
-				_ajax_nonce: cfiAdmin.nonce
+				_ajax_nonce: cfimgAdmin.nonce
 			}, function (response) {
 				if (response.success) {
 					$status
 						.html('<span class="dashicons dashicons-yes-alt"></span> ' + escHtml(response.data.title || response.data.filename))
-						.addClass('cfi-att-valid');
+						.addClass('cfimg-att-valid');
 					$suggestions.hide();
 				} else {
 					$status
 						.html('<span class="dashicons dashicons-warning"></span> ' + escHtml(response.data.message))
-						.addClass('cfi-att-invalid');
+						.addClass('cfimg-att-invalid');
 
 					if (response.data.suggestions && response.data.suggestions.length) {
 						var html = 'Available attachments: ';
 						var links = response.data.suggestions.map(function (s) {
-							return '<a href="#" class="cfi-suggest-id" data-id="' + s.id + '">#' + s.id + '</a> (' + escHtml(s.title) + ')';
+							return '<a href="#" class="cfimg-suggest-id" data-id="' + s.id + '">#' + s.id + '</a> (' + escHtml(s.title) + ')';
 						});
 						html += links.join(', ');
 						$suggestions.html(html).show();
@@ -139,7 +139,7 @@
 		}
 
 		// Click suggestion to fill input.
-		$(document).on('click', '.cfi-suggest-id', function (e) {
+		$(document).on('click', '.cfimg-suggest-id', function (e) {
 			e.preventDefault();
 			var id = $(this).data('id');
 			$input.val(id).trigger('change');
@@ -154,7 +154,7 @@
 	// Enable/disable copy buttons based on input value.
 	function updateCopyBtnState($input) {
 		var selector = '#' + $input.attr('id');
-		var $btn = $('.cfi-copy-btn[data-copy-from="' + selector + '"]');
+		var $btn = $('.cfimg-copy-btn[data-copy-from="' + selector + '"]');
 		if ($btn.length) {
 			$btn.prop('disabled', $.trim($input.val()) === '');
 		}
@@ -165,7 +165,7 @@
 			$.trim($('#target_url_meta').val()) === '' &&
 			$.trim($('#target_id_meta').val()) === '' &&
 			$.trim($('#target_sig_meta').val()) === '';
-		$('#cfi-copy-all-targets').prop('disabled', allEmpty);
+		$('#cfimg-copy-all-targets').prop('disabled', allEmpty);
 	}
 
 	$(document).on('input change', '#target_url_meta, #target_id_meta, #target_sig_meta', function () {
@@ -183,22 +183,22 @@
 
 	// ── Flexible Variants Test / Enable ───────────────────────────────
 
-	var ajax = window.cfiAdmin || {};
+	var ajax = window.cfimgAdmin || {};
 
-	$(document).on('click', '#cfi-flex-test', function () {
-		cfiFlexAction('cfi_flex_test');
+	$(document).on('click', '#cfimg-flex-test', function () {
+		cfimgFlexAction('cfimg_flex_test');
 	});
 
-	$(document).on('click', '#cfi-flex-enable', function () {
+	$(document).on('click', '#cfimg-flex-enable', function () {
 		if (!confirm('This enables Flexible Variants account-wide on your Cloudflare account. Continue?')) {
 			return;
 		}
-		cfiFlexAction('cfi_flex_enable', true);
+		cfimgFlexAction('cfimg_flex_enable', true);
 	});
 
-	function cfiFlexAction(action, reloadOnSuccess) {
-		var $spinner = $('#cfi-flex-spinner');
-		var $result = $('#cfi-flex-result');
+	function cfimgFlexAction(action, reloadOnSuccess) {
+		var $spinner = $('#cfimg-flex-spinner');
+		var $result = $('#cfimg-flex-result');
 		$spinner.addClass('is-active');
 		$result.text('');
 
@@ -210,7 +210,7 @@
 			if (response.success) {
 				updateFlexUI(response.data.status, response.data.message, response.data.checked_at);
 				// Reload page on enable success to refresh UI state (non-settings pages).
-				if (reloadOnSuccess && response.data.status === 'enabled' && !$('#cfi-status-box').length) {
+				if (reloadOnSuccess && response.data.status === 'enabled' && !$('#cfimg-status-box').length) {
 					setTimeout(function () {
 						window.location.reload();
 					}, 1000);
@@ -225,22 +225,22 @@
 	}
 
 	function updateFlexUI(status, message, checkedAt) {
-		var $badge = $('#cfi-flex-badge');
-		var $enable = $('#cfi-flex-enable');
-		var $result = $('#cfi-flex-result');
+		var $badge = $('#cfimg-flex-badge');
+		var $enable = $('#cfimg-flex-enable');
+		var $result = $('#cfimg-flex-result');
 		var labels = ajax.flexLabels || {};
 
-		$badge.removeClass('cfi-flex--enabled cfi-flex--disabled cfi-flex--unknown');
+		$badge.removeClass('cfimg-flex--enabled cfimg-flex--disabled cfimg-flex--unknown');
 		if (status === 'enabled') {
-			$badge.addClass('cfi-flex--enabled').text(labels.enabled || 'Enabled');
+			$badge.addClass('cfimg-flex--enabled').text(labels.enabled || 'Enabled');
 			$enable.hide();
 			$result.text(message).css('color', '#00a32a');
 		} else if (status === 'disabled') {
-			$badge.addClass('cfi-flex--disabled').text(labels.disabled || 'Disabled');
+			$badge.addClass('cfimg-flex--disabled').text(labels.disabled || 'Disabled');
 			$enable.show();
 			$result.text(message).css('color', '#d63638');
 		} else {
-			$badge.addClass('cfi-flex--unknown').text(labels.unknown || 'Unknown');
+			$badge.addClass('cfimg-flex--unknown').text(labels.unknown || 'Unknown');
 			$enable.show();
 			$result.text(message).css('color', '#646970');
 		}
@@ -250,8 +250,8 @@
 	}
 
 	function updateStatusBox(flexStatus, checkedAt) {
-		var $statusFlex = $('#cfi-status-flex');
-		var $timestamp = $('#cfi-status-timestamp');
+		var $statusFlex = $('#cfimg-status-flex');
+		var $timestamp = $('#cfimg-status-timestamp');
 
 		if (!$statusFlex.length) {
 			return;
@@ -260,16 +260,16 @@
 		// Update FV status indicator.
 		var statusClass, statusText;
 		if (flexStatus === 'enabled') {
-			statusClass = 'cfi-status--ok';
+			statusClass = 'cfimg-status--ok';
 			statusText = 'Enabled';
 		} else if (flexStatus === 'disabled') {
-			statusClass = 'cfi-status--error';
+			statusClass = 'cfimg-status--error';
 			statusText = 'Disabled';
 		} else {
-			statusClass = 'cfi-status--pending';
+			statusClass = 'cfimg-status--pending';
 			statusText = 'Unknown';
 		}
-		$statusFlex.html('<span class="cfi-status-indicator ' + statusClass + '">' + statusText + '</span>');
+		$statusFlex.html('<span class="cfimg-status-indicator ' + statusClass + '">' + statusText + '</span>');
 
 		// Update timestamp.
 		if (checkedAt && $timestamp.length) {
@@ -279,7 +279,7 @@
 
 	// ── Install Recommended Presets (blocked when FV not enabled) ─────
 
-	$(document).on('click', '#cfi-install-recommended-btn', function () {
+	$(document).on('click', '#cfimg-install-recommended-btn', function () {
 		var status = $(this).data('flexStatus');
 		var msg;
 
@@ -297,10 +297,10 @@
 
 		if (confirm(msg)) {
 			// Submit the actual form.
-			$('#cfi-install-recommended-form').find('button[type="button"]')
+			$('#cfimg-install-recommended-form').find('button[type="button"]')
 				.attr('type', 'submit')
-				.attr('name', 'cfi_install_recommended');
-			$('#cfi-install-recommended-form').submit();
+				.attr('name', 'cfimg_install_recommended');
+			$('#cfimg-install-recommended-form').submit();
 		}
 	});
 
@@ -311,7 +311,7 @@
 	 *
 	 * @param {jQuery} $input The text input to attach to.
 	 */
-	function CfiAutocomplete($input) {
+	function CfimgAutocomplete($input) {
 		this.$input = $input;
 		this.items = [];
 		this.filtered = [];
@@ -326,16 +326,16 @@
 		this._init();
 	}
 
-	CfiAutocomplete.prototype._init = function () {
+	CfimgAutocomplete.prototype._init = function () {
 		var self = this;
 
 		// Wrap input in a relative container.
-		this.$wrap = $('<div class="cfi-autocomplete"></div>');
+		this.$wrap = $('<div class="cfimg-autocomplete"></div>');
 		this.$input.wrap(this.$wrap);
 		this.$wrap = this.$input.parent();
 
 		// Create dropdown panel.
-		this.$panel = $('<div class="cfi-autocomplete__panel"></div>');
+		this.$panel = $('<div class="cfimg-autocomplete__panel"></div>');
 		this.$wrap.append(this.$panel);
 
 		// Remove native autocomplete.
@@ -356,7 +356,7 @@
 			}
 		});
 
-		this.$panel.on('mousedown', '.cfi-autocomplete__item', function (e) {
+		this.$panel.on('mousedown', '.cfimg-autocomplete__item', function (e) {
 			e.preventDefault(); // Prevent blur before click.
 			self._select($(this).data('value'));
 		});
@@ -388,7 +388,7 @@
 		});
 	};
 
-	CfiAutocomplete.prototype.setItems = function (items) {
+	CfimgAutocomplete.prototype.setItems = function (items) {
 		this.items = items || [];
 		this.activeIndex = -1;
 		this._filter();
@@ -399,12 +399,12 @@
 		}
 	};
 
-	CfiAutocomplete.prototype._debounce = function (fn, delay) {
+	CfimgAutocomplete.prototype._debounce = function (fn, delay) {
 		clearTimeout(this._debounceTimer);
 		this._debounceTimer = setTimeout(fn, delay);
 	};
 
-	CfiAutocomplete.prototype._filter = function () {
+	CfimgAutocomplete.prototype._filter = function () {
 		var query = $.trim(this.$input.val()).toLowerCase();
 		if (query === '') {
 			this.filtered = this.items.slice(0, 200);
@@ -425,12 +425,12 @@
 		this._render();
 	};
 
-	CfiAutocomplete.prototype._render = function () {
+	CfimgAutocomplete.prototype._render = function () {
 		this.$panel.empty();
 
 		if (this.filtered.length === 0) {
 			this.$panel.html(
-				'<div class="cfi-autocomplete__empty">No matching fields</div>'
+				'<div class="cfimg-autocomplete__empty">No matching fields</div>'
 			);
 			return;
 		}
@@ -438,30 +438,30 @@
 		for (var i = 0; i < this.filtered.length; i++) {
 			var item = this.filtered[i];
 			var $item = $(
-				'<div class="cfi-autocomplete__item" data-index="' + i + '"></div>'
+				'<div class="cfimg-autocomplete__item" data-index="' + i + '"></div>'
 			);
 			$item.data('value', item.name);
 			$item.append(
-				'<span class="cfi-autocomplete__item-name">' +
+				'<span class="cfimg-autocomplete__item-name">' +
 					this._esc(item.name) +
 					'</span>'
 			);
 			if (item.label && item.label !== item.name) {
 				$item.append(
-					'<span class="cfi-autocomplete__item-label">' +
+					'<span class="cfimg-autocomplete__item-label">' +
 						this._esc(item.label) +
 						'</span>'
 				);
 			}
 			if (item.group) {
 				$item.append(
-					'<span class="cfi-autocomplete__item-group">' +
+					'<span class="cfimg-autocomplete__item-group">' +
 						this._esc(item.group) +
 						'</span>'
 				);
 			}
 			$item.append(
-				'<span class="cfi-autocomplete__item-type">' +
+				'<span class="cfimg-autocomplete__item-type">' +
 					this._esc(item.type === 'acf_image' ? 'image' : item.type) +
 					'</span>'
 			);
@@ -469,13 +469,13 @@
 		}
 	};
 
-	CfiAutocomplete.prototype._esc = function (str) {
+	CfimgAutocomplete.prototype._esc = function (str) {
 		var div = document.createElement('div');
 		div.appendChild(document.createTextNode(str));
 		return div.innerHTML;
 	};
 
-	CfiAutocomplete.prototype._show = function () {
+	CfimgAutocomplete.prototype._show = function () {
 		if (this.items.length === 0) {
 			this._hide();
 			return;
@@ -484,13 +484,13 @@
 		this.open = true;
 	};
 
-	CfiAutocomplete.prototype._hide = function () {
+	CfimgAutocomplete.prototype._hide = function () {
 		this.$panel.removeClass('is-open');
 		this.open = false;
 		this.activeIndex = -1;
 	};
 
-	CfiAutocomplete.prototype._move = function (direction) {
+	CfimgAutocomplete.prototype._move = function (direction) {
 		var count = this.filtered.length;
 		if (count === 0) {
 			return;
@@ -504,9 +504,9 @@
 			this.activeIndex = 0;
 		}
 
-		this.$panel.find('.cfi-autocomplete__item').removeClass('is-active');
+		this.$panel.find('.cfimg-autocomplete__item').removeClass('is-active');
 		var $active = this.$panel
-			.find('.cfi-autocomplete__item[data-index="' + this.activeIndex + '"]')
+			.find('.cfimg-autocomplete__item[data-index="' + this.activeIndex + '"]')
 			.addClass('is-active');
 
 		// Scroll into view.
@@ -521,33 +521,33 @@
 		}
 	};
 
-	CfiAutocomplete.prototype._select = function (value) {
+	CfimgAutocomplete.prototype._select = function (value) {
 		this.$input.val(value).trigger('change');
 		this._hide();
 	};
 
 	// ── Mapping form logic ─────────────────────────────────────────────
-	var $form = $('#cfi-mapping-form');
+	var $form = $('#cfimg-mapping-form');
 	if (!$form.length) {
 		return;
 	}
 
-	var config = window.cfiMapping || {};
+	var config = window.cfimgMapping || {};
 	var sourceKeyConfig = config.sourceKeyConfig || {};
 	var i18n = config.i18n || {};
 	var hasAcf = !!config.hasAcf;
 
 	var $sourceType = $('#source_type');
-	var $sourceKeyRow = $('#cfi-source-key-row');
+	var $sourceKeyRow = $('#cfimg-source-key-row');
 	var $sourceKey = $('#source_key');
-	var $sourceKeyLabel = $('#cfi-source-key-label');
-	var $postType = $('#cfi_post_type');
+	var $sourceKeyLabel = $('#cfimg-source-key-label');
+	var $postType = $('#cfimg_post_type');
 
 	// Autocomplete instances.
-	var sourceAutocomplete = new CfiAutocomplete($sourceKey);
+	var sourceAutocomplete = new CfimgAutocomplete($sourceKey);
 	var targetAutocompletes = [];
 	$('#target_url_meta, #target_id_meta, #target_sig_meta').each(function () {
-		targetAutocompletes.push(new CfiAutocomplete($(this)));
+		targetAutocompletes.push(new CfimgAutocomplete($(this)));
 	});
 
 	// Client-side AJAX cache: key = "action:post_type", value = items array.
@@ -630,7 +630,7 @@
 			return;
 		}
 
-		fetchCached('cfi_meta_keys', postType, function (items) {
+		fetchCached('cfimg_meta_keys', postType, function (items) {
 			var safe = filterSafeTargetKeys(items);
 			for (var i = 0; i < targetAutocompletes.length; i++) {
 				targetAutocompletes[i].setItems(safe);
@@ -661,9 +661,9 @@
 			if (!hasAcf) {
 				return;
 			}
-			action = 'cfi_acf_fields';
+			action = 'cfimg_acf_fields';
 		} else if (sourceType === 'post_meta_attachment_id' || sourceType === 'post_meta_url') {
-			action = 'cfi_meta_keys';
+			action = 'cfimg_meta_keys';
 		} else {
 			return; // No suggestions for featured_image, attachment_id.
 		}
@@ -714,25 +714,25 @@
 
 	// ── Test Mapping dry-run ───────────────────────────────────────────
 
-	$('#cfi-test-btn').on('click', function () {
-		var postId = $.trim($('#cfi_test_post_id').val());
+	$('#cfimg-test-btn').on('click', function () {
+		var postId = $.trim($('#cfimg_test_post_id').val());
 		if (postId === '' || parseInt(postId, 10) <= 0) {
-			$('#cfi-test-results')
-				.html('<p class="cfi-test-error">Please enter a valid post ID.</p>')
+			$('#cfimg-test-results')
+				.html('<p class="cfimg-test-error">Please enter a valid post ID.</p>')
 				.show();
 			return;
 		}
 
 		var $btn = $(this);
-		var $spinner = $('#cfi-test-spinner');
-		var $results = $('#cfi-test-results');
+		var $spinner = $('#cfimg-test-spinner');
+		var $results = $('#cfimg-test-results');
 
 		$btn.prop('disabled', true);
 		$spinner.addClass('is-active');
 		$results.hide();
 
 		$.post(ajax.ajaxUrl, {
-			action: 'cfi_test_mapping',
+			action: 'cfimg_test_mapping',
 			nonce: ajax.nonce,
 			post_id: postId,
 			source_type: $sourceType.val(),
@@ -749,7 +749,7 @@
 		}).done(function (response) {
 			if (!response.success) {
 				$results
-					.html('<p class="cfi-test-error">' + escHtml(response.data || 'Unknown error.') + '</p>')
+					.html('<p class="cfimg-test-error">' + escHtml(response.data || 'Unknown error.') + '</p>')
 					.show();
 				return;
 			}
@@ -762,7 +762,7 @@
 
 			// Source status.
 			if (d.source_found) {
-				html += '<dt>Source</dt><dd><span class="cfi-test-status cfi-test-status--found">Found</span>';
+				html += '<dt>Source</dt><dd><span class="cfimg-test-status cfimg-test-status--found">Found</span>';
 				if (d.attachment_id > 0) {
 					html += ' Attachment #' + d.attachment_id;
 				}
@@ -771,20 +771,20 @@
 				}
 				html += '</dd>';
 			} else {
-				html += '<dt>Source</dt><dd><span class="cfi-test-status cfi-test-status--missing">Not found</span></dd>';
+				html += '<dt>Source</dt><dd><span class="cfimg-test-status cfimg-test-status--missing">Not found</span></dd>';
 			}
 
 			// Upload decision with detailed status.
 			var statusMap = {
-				'new_upload':     { label: 'New upload',  css: 'cfi-test-status--new' },
-				'reupload':       { label: 'Re-upload',   css: 'cfi-test-status--reupload' },
-				'cached':         { label: 'Cached',      css: 'cfi-test-status--cached' },
-				'skip_unchanged': { label: 'Unchanged',   css: 'cfi-test-status--skip' },
-				'skip_disabled':  { label: 'Disabled',    css: 'cfi-test-status--skip' },
-				'no_source':      { label: 'No source',   css: 'cfi-test-status--missing' }
+				'new_upload':     { label: 'New upload',  css: 'cfimg-test-status--new' },
+				'reupload':       { label: 'Re-upload',   css: 'cfimg-test-status--reupload' },
+				'cached':         { label: 'Cached',      css: 'cfimg-test-status--cached' },
+				'skip_unchanged': { label: 'Unchanged',   css: 'cfimg-test-status--skip' },
+				'skip_disabled':  { label: 'Disabled',    css: 'cfimg-test-status--skip' },
+				'no_source':      { label: 'No source',   css: 'cfimg-test-status--missing' }
 			};
-			var st = statusMap[d.status] || { label: d.status, css: 'cfi-test-status--skip' };
-			html += '<dt>Sync</dt><dd><span class="cfi-test-status ' + st.css + '">' + st.label + '</span> ' + escHtml(d.upload_reason) + '</dd>';
+			var st = statusMap[d.status] || { label: d.status, css: 'cfimg-test-status--skip' };
+			html += '<dt>Sync</dt><dd><span class="cfimg-test-status ' + st.css + '">' + st.label + '</span> ' + escHtml(d.upload_reason) + '</dd>';
 
 			// URLs.
 			if (d.current_url) {
@@ -798,7 +798,7 @@
 			$results.html(html).show();
 		}).fail(function () {
 			$results
-				.html('<p class="cfi-test-error">Request failed. Check your connection.</p>')
+				.html('<p class="cfimg-test-error">Request failed. Check your connection.</p>')
 				.show();
 		});
 	});
@@ -826,7 +826,7 @@
 		var $error = $('#' + id);
 
 		if (!$error.length) {
-			$error = $('<p class="cfi-field-error" id="' + id + '"></p>');
+			$error = $('<p class="cfimg-field-error" id="' + id + '"></p>');
 			$field.after($error);
 		}
 
@@ -835,7 +835,7 @@
 	}
 
 	function clearErrors() {
-		$form.find('.cfi-field-error').removeClass('visible');
+		$form.find('.cfimg-field-error').removeClass('visible');
 		$form.find('.form-invalid').removeClass('form-invalid');
 	}
 

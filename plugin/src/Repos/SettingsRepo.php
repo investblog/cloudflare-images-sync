@@ -5,19 +5,19 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Repos;
+namespace CFIMG\Repos;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Support\Mask;
-use CFI\Support\TokenStorage;
-use CFI\Support\Validators;
+use CFIMG\Support\Mask;
+use CFIMG\Support\TokenStorage;
+use CFIMG\Support\Validators;
 
 /**
- * Read/write access to plugin settings (cfi_settings option).
+ * Read/write access to plugin settings (cfimg_settings option).
  *
  * API token is stored separately using encrypted TokenStorage.
  */

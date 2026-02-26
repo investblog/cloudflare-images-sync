@@ -5,17 +5,17 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Core;
+namespace CFIMG\Core;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Repos\LogsRepo;
-use CFI\Repos\MappingsRepo;
-use CFI\Repos\PresetsRepo;
-use CFI\Repos\SettingsRepo;
+use CFIMG\Repos\LogsRepo;
+use CFIMG\Repos\MappingsRepo;
+use CFIMG\Repos\PresetsRepo;
+use CFIMG\Repos\SettingsRepo;
 
 /**
  * Register save_post_{cpt} and acf/save_post hooks
@@ -241,12 +241,12 @@ class Hooks {
 			if ( ! empty( $settings['use_queue'] ) && $this->action_scheduler_available() ) {
 				$this->debug_log( "run_mappings — mapping '{$mapping_id}' queued via Action Scheduler" );
 				as_enqueue_async_action(
-					'cfi_sync_single',
+					'cfimg_sync_single',
 					array(
 						'post_id'    => $post_id,
 						'mapping_id' => $mapping_id,
 					),
-					'cfi'
+					'cfimg'
 				);
 			} else {
 				$this->debug_log( "run_mappings — mapping '{$mapping_id}' syncing directly" );

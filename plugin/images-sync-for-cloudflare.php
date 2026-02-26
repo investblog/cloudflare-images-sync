@@ -3,7 +3,7 @@
  * Plugin Name:       Images Sync for Cloudflare
  * Plugin URI:        https://github.com/investblog/cloudflare-images-sync
  * Description:       Sync WordPress images to Cloudflare Images with flexible mappings, presets, and variant delivery.
- * Version:           1.0.5
+ * Version:           1.0.6
  * Requires at least: 6.2
  * Requires PHP:      8.0
  * Author:            301.st
@@ -16,7 +16,7 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI;
+namespace CFIMG;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,23 +26,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin constants.
  */
-define( 'CFI_VERSION', '1.0.5' );
-define( 'CFI_PLUGIN_FILE', __FILE__ );
-define( 'CFI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'CFI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'CFI_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+define( 'CFIMG_VERSION', '1.0.6' );
+define( 'CFIMG_PLUGIN_FILE', __FILE__ );
+define( 'CFIMG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'CFIMG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'CFIMG_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
  * Autoloader for PSR-4 compliant classes.
  *
- * Maps CFI\Repos\SettingsRepo → src/Repos/SettingsRepo.php
+ * Maps CFIMG\Repos\SettingsRepo → src/Repos/SettingsRepo.php
  *
  * @param string $class The fully-qualified class name.
  */
 spl_autoload_register(
 	function ( $class ) {
-		$prefix   = 'CFI\\';
-		$base_dir = CFI_PLUGIN_DIR . 'src/';
+		$prefix   = 'CFIMG\\';
+		$base_dir = CFIMG_PLUGIN_DIR . 'src/';
 
 		$len = strlen( $prefix );
 		if ( strncmp( $prefix, $class, $len ) !== 0 ) {
@@ -61,21 +61,21 @@ spl_autoload_register(
 /**
  * Plugin activation hook.
  */
-function cfi_activate() {
+function cfimg_activate() {
 	$repos = new Repos\PresetsRepo();
 	$repos->seed_defaults();
 
 	// Migrate plain-text token to encrypted storage.
-	cfi_migrate_token();
+	cfimg_migrate_token();
 }
-register_activation_hook( __FILE__, __NAMESPACE__ . '\\cfi_activate' );
+register_activation_hook( __FILE__, __NAMESPACE__ . '\\cfimg_activate' );
 
 /**
  * Migrate plain-text API token to encrypted storage.
  *
  * @return void
  */
-function cfi_migrate_token(): void {
+function cfimg_migrate_token(): void {
 	$settings = get_option( Repos\OptionKeys::SETTINGS, array() );
 
 	// Check if there's a plain-text token in settings.
@@ -96,10 +96,10 @@ function cfi_migrate_token(): void {
 /**
  * Plugin deactivation hook.
  */
-function cfi_deactivate() {
+function cfimg_deactivate() {
 	// Nothing to clean up on deactivation for now.
 }
-register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\cfi_deactivate' );
+register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\cfimg_deactivate' );
 
 /**
  * Load plugin translations.
@@ -112,12 +112,53 @@ register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\cfi_deactivate' );
 /**
  * Initialize the plugin.
  */
-function cfi_init() {
+function cfimg_init() {
+	// TODO: Remove this cfi_ → cfimg_ migration block after acceptance into the WP.org repository.
+	// Migrate cfi_ prefixed options/meta to cfimg_ (added in 1.0.6).
+	$db_version = get_option( 'cfimg_db_version', false );
+	if ( $db_version === false ) {
+		$old_version = get_option( 'cfi_db_version', false );
+		if ( $old_version !== false ) {
+			// Rename options.
+			$old_options = array(
+				'cfi_settings',
+				'cfi_presets',
+				'cfi_mappings',
+				'cfi_logs',
+				'cfi_demo_image_id',
+				'cfi_demo_sig',
+				'cfi_demo_updated_at',
+				'cfi_api_token_encrypted',
+				'cfi_db_version',
+			);
+			foreach ( $old_options as $old_key ) {
+				$new_key = str_replace( 'cfi_', 'cfimg_', $old_key );
+				$val     = get_option( $old_key );
+				if ( $val !== false ) {
+					update_option( $new_key, $val, false );
+					delete_option( $old_key );
+				}
+			}
+			// Rename post meta.
+			global $wpdb;
+			$meta_renames = array(
+				'cfi_preview_image_id' => 'cfimg_preview_image_id',
+				'cfi_preview_sig'      => 'cfimg_preview_sig',
+				'_cfi_cf_image_id'     => '_cfimg_cf_image_id',
+				'_cfi_sig'             => '_cfimg_sig',
+			);
+			foreach ( $meta_renames as $old => $new ) {
+				$wpdb->update( $wpdb->postmeta, array( 'meta_key' => $new ), array( 'meta_key' => $old ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			}
+			update_option( 'cfimg_db_version', CFIMG_VERSION, false );
+		}
+	}
+
 	// Run migration for plugin updates (token encryption added in 1.0.0).
-	$db_version = get_option( 'cfi_db_version', '0' );
+	$db_version = get_option( 'cfimg_db_version', '0' );
 	if ( version_compare( $db_version, '1.0.0', '<' ) ) {
-		cfi_migrate_token();
-		update_option( 'cfi_db_version', CFI_VERSION, false );
+		cfimg_migrate_token();
+		update_option( 'cfimg_db_version', CFIMG_VERSION, false );
 	}
 
 	// Register save_post / acf/save_post hooks based on mappings.
@@ -127,7 +168,7 @@ function cfi_init() {
 	// Register Action Scheduler bulk sync handler.
 	Jobs\BulkEnqueuer::register();
 }
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfi_init' );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfimg_init' );
 
 /**
  * Action Scheduler callback for single-post sync.
@@ -135,7 +176,7 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfi_init' );
  * @param int    $post_id    Post ID.
  * @param string $mapping_id Mapping ID.
  */
-function cfi_sync_single_callback( int $post_id, string $mapping_id ): void {
+function cfimg_sync_single_callback( int $post_id, string $mapping_id ): void {
 	$repo    = new Repos\MappingsRepo();
 	$mapping = $repo->find( $mapping_id );
 
@@ -146,12 +187,12 @@ function cfi_sync_single_callback( int $post_id, string $mapping_id ): void {
 	$engine = new Core\SyncEngine();
 	$engine->sync( $post_id, $mapping );
 }
-add_action( 'cfi_sync_single', __NAMESPACE__ . '\\cfi_sync_single_callback', 10, 2 );
+add_action( 'cfimg_sync_single', __NAMESPACE__ . '\\cfimg_sync_single_callback', 10, 2 );
 
 /**
  * Initialize admin functionality.
  */
-function cfi_admin_init() {
+function cfimg_admin_init() {
 	if ( ! is_admin() ) {
 		return;
 	}
@@ -159,7 +200,7 @@ function cfi_admin_init() {
 	$admin_menu = new Admin\AdminMenu();
 	$admin_menu->init();
 }
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfi_admin_init' );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfimg_admin_init' );
 
 /**
  * Add Settings link to plugin action links.
@@ -167,33 +208,33 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfi_admin_init' );
  * @param array $links Existing plugin action links.
  * @return array Modified plugin action links.
  */
-function cfi_plugin_action_links( array $links ): array {
+function cfimg_plugin_action_links( array $links ): array {
 	$settings_link = sprintf(
 		'<a href="%s">%s</a>',
-		esc_url( admin_url( 'admin.php?page=cfi-settings' ) ),
+		esc_url( admin_url( 'admin.php?page=cfimg-settings' ) ),
 		esc_html__( 'Settings', 'images-sync-for-cloudflare' )
 	);
 	array_unshift( $links, $settings_link );
 	return $links;
 }
-add_filter( 'plugin_action_links_' . CFI_PLUGIN_BASENAME, __NAMESPACE__ . '\\cfi_plugin_action_links' );
+add_filter( 'plugin_action_links_' . CFIMG_PLUGIN_BASENAME, __NAMESPACE__ . '\\cfimg_plugin_action_links' );
 
 /**
  * Initialize REST API.
  */
-function cfi_rest_init() {
+function cfimg_rest_init() {
 	// REST controllers will be registered here.
 }
-add_action( 'rest_api_init', __NAMESPACE__ . '\\cfi_rest_init' );
+add_action( 'rest_api_init', __NAMESPACE__ . '\\cfimg_rest_init' );
 
 /**
  * Register WP-CLI commands.
  */
-function cfi_cli_init() {
+function cfimg_cli_init() {
 	if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 		return;
 	}
 
-	\WP_CLI::add_command( 'cfi', CLI\Commands::class );
+	\WP_CLI::add_command( 'cfimg', CLI\Commands::class );
 }
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfi_cli_init' );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\cfimg_cli_init' );

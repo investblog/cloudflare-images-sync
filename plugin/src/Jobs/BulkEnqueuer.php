@@ -5,18 +5,18 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Jobs;
+namespace CFIMG\Jobs;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Core\Guard;
-use CFI\Core\SyncEngine;
-use CFI\Repos\LogsRepo;
-use CFI\Repos\MappingsRepo;
-use CFI\Support\Validators;
+use CFIMG\Core\Guard;
+use CFIMG\Core\SyncEngine;
+use CFIMG\Repos\LogsRepo;
+use CFIMG\Repos\MappingsRepo;
+use CFIMG\Support\Validators;
 
 /**
  * Process a chunk of posts for a mapping, then re-enqueue for the next chunk.
@@ -29,7 +29,7 @@ class BulkEnqueuer {
 	 * @return void
 	 */
 	public static function register(): void {
-		add_action( 'cfi_bulk_sync', array( static::class, 'process' ), 10, 3 );
+		add_action( 'cfimg_bulk_sync', array( static::class, 'process' ), 10, 3 );
 	}
 
 	/**
@@ -99,13 +99,13 @@ class BulkEnqueuer {
 		// Enqueue next chunk.
 		if ( count( $post_ids ) >= $chunk_size ) {
 			as_enqueue_async_action(
-				'cfi_bulk_sync',
+				'cfimg_bulk_sync',
 				array(
 					'mapping_id' => $mapping_id,
 					'offset'     => $offset + $chunk_size,
 					'chunk_size' => $chunk_size,
 				),
-				'cfi'
+				'cfimg'
 			);
 		} else {
 			$logs->push( 'info', 'Bulk sync: all chunks processed.', array( 'mapping_id' => $mapping_id ) );

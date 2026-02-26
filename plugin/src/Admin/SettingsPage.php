@@ -5,18 +5,18 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Admin;
+namespace CFIMG\Admin;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Api\CloudflareImagesClient;
-use CFI\Repos\LogsRepo;
-use CFI\Repos\OptionKeys;
-use CFI\Repos\SettingsRepo;
-use CFI\Support\Mask;
+use CFIMG\Api\CloudflareImagesClient;
+use CFIMG\Repos\LogsRepo;
+use CFIMG\Repos\OptionKeys;
+use CFIMG\Repos\SettingsRepo;
+use CFIMG\Support\Mask;
 
 /**
  * Settings page: account_id, account_hash, api_token (masked), debug, use_queue, test connection.
@@ -49,18 +49,18 @@ class SettingsPage {
 			return;
 		}
 
-		$redirect_url = admin_url( 'admin.php?page=cfi-settings' );
+		$redirect_url = admin_url( 'admin.php?page=cfimg-settings' );
 
 		// Handle save.
-		if ( isset( $_POST['cfi_save_settings'] ) ) {
-			check_admin_referer( 'cfi_settings_save' );
+		if ( isset( $_POST['cfimg_save_settings'] ) ) {
+			check_admin_referer( 'cfimg_settings_save' );
 			$this->save_from_post();
 			$this->redirect_with_notice( $redirect_url, __( 'Settings saved.', 'images-sync-for-cloudflare' ) );
 		}
 
 		// Handle test connection (save first, then test).
-		if ( isset( $_POST['cfi_test_connection'] ) ) {
-			check_admin_referer( 'cfi_settings_save' );
+		if ( isset( $_POST['cfimg_test_connection'] ) ) {
+			check_admin_referer( 'cfimg_settings_save' );
 			$this->save_from_post();
 
 			$client = CloudflareImagesClient::from_settings();
@@ -147,7 +147,7 @@ class SettingsPage {
 		$fv_status = $client->get_flexible_variants_status();
 
 		// Fallback to canary if API config endpoint is unsupported.
-		if ( is_wp_error( $fv_status ) && $fv_status->get_error_code() === 'cfi_flex_unsupported' ) {
+		if ( is_wp_error( $fv_status ) && $fv_status->get_error_code() === 'cfimg_flex_unsupported' ) {
 			$settings  = $this->repo->get();
 			$demo_id   = get_option( OptionKeys::DEMO_IMAGE_ID, '' );
 
@@ -174,7 +174,7 @@ class SettingsPage {
 	 * @return void
 	 */
 	public function ajax_flex_test(): void {
-		check_ajax_referer( 'cfi_admin' );
+		check_ajax_referer( 'cfimg_admin' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'images-sync-for-cloudflare' ) ) );
@@ -211,7 +211,7 @@ class SettingsPage {
 	 * @return void
 	 */
 	public function ajax_flex_enable(): void {
-		check_ajax_referer( 'cfi_admin' );
+		check_ajax_referer( 'cfimg_admin' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized.', 'images-sync-for-cloudflare' ) ) );
@@ -285,10 +285,10 @@ class SettingsPage {
 			<?php $this->render_notice(); ?>
 
 			<form method="post">
-				<?php wp_nonce_field( 'cfi_settings_save' ); ?>
+				<?php wp_nonce_field( 'cfimg_settings_save' ); ?>
 
 				<!-- Section A: API Access -->
-				<div class="cfi-settings-section">
+				<div class="cfimg-settings-section">
 					<h2><?php esc_html_e( 'API Access', 'images-sync-for-cloudflare' ); ?></h2>
 					<p class="description"><?php esc_html_e( 'Credentials for uploading images and managing config.', 'images-sync-for-cloudflare' ); ?></p>
 
@@ -300,7 +300,7 @@ class SettingsPage {
 								<p class="description">
 									<?php esc_html_e( 'Cloudflare Account ID (32-character hex string).', 'images-sync-for-cloudflare' ); ?>
 								</p>
-								<details class="cfi-help-details">
+								<details class="cfimg-help-details">
 									<summary><?php esc_html_e( 'Where do I find this?', 'images-sync-for-cloudflare' ); ?></summary>
 									<p><?php esc_html_e( 'Cloudflare Dashboard → Images (right sidebar), or Workers & Pages → Overview (right sidebar under "Account ID").', 'images-sync-for-cloudflare' ); ?></p>
 								</details>
@@ -323,13 +323,13 @@ class SettingsPage {
 									);
 									?>
 								</p>
-								<p class="description cfi-description-error">
+								<p class="description cfimg-description-error">
 									<?php esc_html_e( 'Do NOT use the signature token from Images → Keys tab.', 'images-sync-for-cloudflare' ); ?>
 								</p>
 								<p class="description">
 									<?php esc_html_e( 'Leave blank to keep the current token.', 'images-sync-for-cloudflare' ); ?>
 								</p>
-								<details class="cfi-help-details">
+								<details class="cfimg-help-details">
 									<summary><?php esc_html_e( 'What permissions are needed?', 'images-sync-for-cloudflare' ); ?></summary>
 									<ul>
 										<li><?php esc_html_e( 'Account → Cloudflare Images → Read', 'images-sync-for-cloudflare' ); ?></li>
@@ -340,13 +340,13 @@ class SettingsPage {
 						</tr>
 					</table>
 
-					<p class="submit cfi-submit-compact">
-						<input type="submit" name="cfi_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'images-sync-for-cloudflare' ); ?>" />
+					<p class="submit cfimg-submit-compact">
+						<input type="submit" name="cfimg_test_connection" class="button-secondary" value="<?php esc_attr_e( 'Test Connection', 'images-sync-for-cloudflare' ); ?>" />
 					</p>
 				</div>
 
 				<!-- Section B: Delivery -->
-				<div class="cfi-settings-section">
+				<div class="cfimg-settings-section">
 					<h2><?php esc_html_e( 'Delivery', 'images-sync-for-cloudflare' ); ?></h2>
 					<p class="description"><?php esc_html_e( 'Settings for image delivery URLs (imagedelivery.net).', 'images-sync-for-cloudflare' ); ?></p>
 
@@ -359,7 +359,7 @@ class SettingsPage {
 									<?php esc_html_e( 'Used to build delivery URLs. Copy from any Cloudflare Images URL:', 'images-sync-for-cloudflare' ); ?><br>
 									<code>https://imagedelivery.net/<strong>&lt;hash&gt;</strong>/&lt;image_id&gt;/...</code>
 								</p>
-								<details class="cfi-help-details">
+								<details class="cfimg-help-details">
 									<summary><?php esc_html_e( 'Where do I find this?', 'images-sync-for-cloudflare' ); ?></summary>
 									<p>
 										<?php
@@ -390,8 +390,8 @@ class SettingsPage {
 				</div>
 
 				<!-- Section C: Advanced (collapsed) -->
-				<details class="cfi-settings-section cfi-settings-advanced">
-					<summary><h2 class="cfi-heading-inline"><?php esc_html_e( 'Advanced', 'images-sync-for-cloudflare' ); ?></h2></summary>
+				<details class="cfimg-settings-section cfimg-settings-advanced">
+					<summary><h2 class="cfimg-heading-inline"><?php esc_html_e( 'Advanced', 'images-sync-for-cloudflare' ); ?></h2></summary>
 
 					<table class="form-table">
 						<tr>
@@ -413,7 +413,7 @@ class SettingsPage {
 									<?php esc_html_e( 'Process syncs via Action Scheduler (recommended)', 'images-sync-for-cloudflare' ); ?>
 								</label>
 								<?php if ( ! $has_as ) : ?>
-									<p class="description cfi-description-error">
+									<p class="description cfimg-description-error">
 										<?php esc_html_e( 'Action Scheduler is not available. Install WooCommerce or Action Scheduler standalone plugin.', 'images-sync-for-cloudflare' ); ?>
 									</p>
 								<?php else : ?>
@@ -432,7 +432,7 @@ class SettingsPage {
 				</details>
 
 				<p class="submit">
-					<input type="submit" name="cfi_save_settings" class="button-primary" value="<?php esc_attr_e( 'Save Settings', 'images-sync-for-cloudflare' ); ?>" />
+					<input type="submit" name="cfimg_save_settings" class="button-primary" value="<?php esc_attr_e( 'Save Settings', 'images-sync-for-cloudflare' ); ?>" />
 				</p>
 			</form>
 		</div>
@@ -456,7 +456,7 @@ class SettingsPage {
 
 		$flex_docs_url = 'https://developers.cloudflare.com/images/transform-images/transform-via-url/';
 		?>
-		<span id="cfi-flex-badge" class="cfi-flex-badge cfi-flex--<?php echo esc_attr( $flex_status ); ?>"><?php echo esc_html( $flex_label ); ?></span>
+		<span id="cfimg-flex-badge" class="cfimg-flex-badge cfi-flex--<?php echo esc_attr( $flex_status ); ?>"><?php echo esc_html( $flex_label ); ?></span>
 		<p class="description">
 			<?php
 			esc_html_e( 'Required for parameter presets like w=, h=, fit=, quality=. This is an account-wide Cloudflare setting.', 'images-sync-for-cloudflare' );
@@ -468,11 +468,11 @@ class SettingsPage {
 			);
 			?>
 		</p>
-		<div class="cfi-flex-actions" id="cfi-flex-actions">
-			<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test', 'images-sync-for-cloudflare' ); ?></button>
-			<button type="button" class="button<?php echo $flex_status === 'enabled' ? ' cfi-hidden' : ''; ?>" id="cfi-flex-enable"><?php esc_html_e( 'Enable', 'images-sync-for-cloudflare' ); ?></button>
-			<span id="cfi-flex-spinner" class="spinner"></span>
-			<span id="cfi-flex-result"></span>
+		<div class="cfimg-flex-actions" id="cfimg-flex-actions">
+			<button type="button" class="button" id="cfimg-flex-test"><?php esc_html_e( 'Test', 'images-sync-for-cloudflare' ); ?></button>
+			<button type="button" class="button<?php echo $flex_status === 'enabled' ? ' cfimg-hidden' : ''; ?>" id="cfimg-flex-enable"><?php esc_html_e( 'Enable', 'images-sync-for-cloudflare' ); ?></button>
+			<span id="cfimg-flex-spinner" class="spinner"></span>
+			<span id="cfimg-flex-result"></span>
 		</div>
 		<?php
 	}

@@ -4,7 +4,7 @@ Tags: cloudflare, images, cdn, acf, headless
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,7 +26,7 @@ Headless frontends need stable, cacheable CDN URLs. This plugin makes WordPress 
 * **Auto-Sync** — Images sync automatically on post save, or bulk-process existing content via Action Scheduler
 * **Flexible Variants** — Smart detection prevents broken images and 9429 errors
 * **Headless-Ready** — URLs stored in post meta, perfect for GraphQL/REST API consumption
-* **WP-CLI Support** — `wp cfi sync` commands for scripted workflows
+* **WP-CLI Support** — `wp cfimg sync` commands for scripted workflows
 * **Secure Storage** — API token encrypted with libsodium (AES-256 fallback)
 * **No Lock-in** — Your images stay in WordPress Media Library; Cloudflare URLs are plain meta values
 
@@ -118,6 +118,10 @@ Data sent to Cloudflare (only when the user configures credentials and triggers 
 * Image metadata — WordPress attachment ID and a purpose label (e.g. "preview")
 * Configuration updates — Flexible Variants enable/disable flag
 
+* [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
+* [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
+* [Cloudflare API Documentation](https://developers.cloudflare.com/api/)
+
 = Cloudflare Image Delivery =
 
 Delivery URLs use the [Cloudflare Image Delivery](https://imagedelivery.net/) CDN (`imagedelivery.net`). These URLs are stored in post meta and served directly to site visitors by their browsers. The plugin itself makes one request to this service to detect Flexible Variants support (canary check).
@@ -127,13 +131,18 @@ No visitor data, IP addresses, cookies, or personal information is ever sent to 
 * [Cloudflare Terms of Service](https://www.cloudflare.com/terms/)
 * [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
 * [Cloudflare Images Documentation](https://developers.cloudflare.com/images/)
-* [Cloudflare API Documentation](https://developers.cloudflare.com/api/)
 
 == Privacy Policy ==
 
 This plugin does not collect, store, or transmit any personal user data. Only image files and technical metadata (attachment IDs, image hashes) are sent to Cloudflare.
 
 == Changelog ==
+
+= 1.0.6 =
+* Changed: Internal prefix renamed from `cfi` to `cfimg` (4+ chars required by WP.org)
+* Changed: External services section restructured with inline ToS/Privacy links per service
+* Added: Automatic database migration from `cfi_` to `cfimg_` option/meta keys
+* Fixed: Uninstall cleans up both old (`cfi_`) and new (`cfimg_`) prefixed data
 
 = 1.0.5 =
 * Changed: Text domain renamed to `images-sync-for-cloudflare` to match WP.org slug
@@ -207,6 +216,9 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.0.6 =
+Prefix renamed from `cfi` to `cfimg` per WP.org review. Database keys migrate automatically.
 
 = 1.0.5 =
 Text domain and plugin file renamed to match WP.org assigned slug `images-sync-for-cloudflare`.

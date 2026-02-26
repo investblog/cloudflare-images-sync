@@ -5,14 +5,14 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Support;
+namespace CFIMG\Support;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Repos\Defaults;
+use CFIMG\Repos\Defaults;
 
 /**
  * Schema validators for plugin data.
@@ -59,23 +59,23 @@ final class Validators {
 	 */
 	public static function validate_preset( array $data ) {
 		if ( empty( $data['name'] ) || ! is_string( $data['name'] ) ) {
-			return new \WP_Error( 'cfi_invalid_preset', 'Preset name is required.' );
+			return new \WP_Error( 'cfimg_invalid_preset', 'Preset name is required.' );
 		}
 
 		if ( strlen( $data['name'] ) > 100 ) {
-			return new \WP_Error( 'cfi_invalid_preset', 'Preset name must be 100 characters or less.' );
+			return new \WP_Error( 'cfimg_invalid_preset', 'Preset name must be 100 characters or less.' );
 		}
 
 		if ( empty( $data['variant'] ) || ! is_string( $data['variant'] ) ) {
-			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant string is required.' );
+			return new \WP_Error( 'cfimg_invalid_preset', 'Preset variant string is required.' );
 		}
 
 		if ( strlen( $data['variant'] ) > 255 ) {
-			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant must be 255 characters or less.' );
+			return new \WP_Error( 'cfimg_invalid_preset', 'Preset variant must be 255 characters or less.' );
 		}
 
 		if ( ! preg_match( '/^[A-Za-z0-9=,_\\-.]+$/', $data['variant'] ) ) {
-			return new \WP_Error( 'cfi_invalid_preset', 'Preset variant contains invalid characters.' );
+			return new \WP_Error( 'cfimg_invalid_preset', 'Preset variant contains invalid characters.' );
 		}
 
 		return true;
@@ -89,57 +89,57 @@ final class Validators {
 	 */
 	public static function validate_mapping( array $data ) {
 		if ( empty( $data['post_type'] ) || ! is_string( $data['post_type'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Post type is required.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Post type is required.' );
 		}
 
 		if ( ! post_type_exists( $data['post_type'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Post type does not exist.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Post type does not exist.' );
 		}
 
 		// Validate source.
 		if ( empty( $data['source']['type'] ) || ! in_array( $data['source']['type'], Defaults::source_types(), true ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Invalid source type.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Invalid source type.' );
 		}
 
 		if ( $data['source']['type'] !== 'featured_image' && $data['source']['type'] !== 'attachment_id' ) {
 			if ( empty( $data['source']['key'] ) ) {
-				return new \WP_Error( 'cfi_invalid_mapping', 'Source key is required for this source type.' );
+				return new \WP_Error( 'cfimg_invalid_mapping', 'Source key is required for this source type.' );
 			}
 		}
 
 		if ( in_array( $data['source']['type'], array( 'post_meta_attachment_id', 'post_meta_url', 'acf_field' ), true ) ) {
 			if ( ! self::is_valid_key( (string) $data['source']['key'] ) ) {
-				return new \WP_Error( 'cfi_invalid_mapping', 'Source key contains invalid characters.' );
+				return new \WP_Error( 'cfimg_invalid_mapping', 'Source key contains invalid characters.' );
 			}
 		}
 
 		// Validate target — at least url_meta is required.
 		if ( empty( $data['target']['url_meta'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Target url_meta is required.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Target url_meta is required.' );
 		}
 
 		if ( ! self::is_valid_key( (string) $data['target']['url_meta'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Target url_meta contains invalid characters.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Target url_meta contains invalid characters.' );
 		}
 
 		if ( self::is_reserved_key( (string) $data['target']['url_meta'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Target url_meta uses a reserved WordPress key.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Target url_meta uses a reserved WordPress key.' );
 		}
 
 		if ( ! empty( $data['target']['id_meta'] ) && ! self::is_valid_key( (string) $data['target']['id_meta'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Target id_meta contains invalid characters.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Target id_meta contains invalid characters.' );
 		}
 
 		if ( ! empty( $data['target']['id_meta'] ) && self::is_reserved_key( (string) $data['target']['id_meta'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Target id_meta uses a reserved WordPress key.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Target id_meta uses a reserved WordPress key.' );
 		}
 
 		if ( ! empty( $data['target']['sig_meta'] ) && ! self::is_valid_key( (string) $data['target']['sig_meta'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Target sig_meta contains invalid characters.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Target sig_meta contains invalid characters.' );
 		}
 
 		if ( ! empty( $data['target']['sig_meta'] ) && self::is_reserved_key( (string) $data['target']['sig_meta'] ) ) {
-			return new \WP_Error( 'cfi_invalid_mapping', 'Target sig_meta uses a reserved WordPress key.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Target sig_meta uses a reserved WordPress key.' );
 		}
 
 		return true;

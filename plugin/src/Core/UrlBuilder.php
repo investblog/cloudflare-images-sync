@@ -5,7 +5,7 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Core;
+namespace CFIMG\Core;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -46,11 +46,11 @@ class UrlBuilder {
 	 */
 	public function url( string $image_id, string $variant = 'public' ) {
 		if ( $this->account_hash === '' ) {
-			return new \WP_Error( 'cfi_missing_account_hash', 'Account hash is not configured.' );
+			return new \WP_Error( 'cfimg_missing_account_hash', 'Account hash is not configured.' );
 		}
 
 		if ( $image_id === '' ) {
-			return new \WP_Error( 'cfi_missing_image_id', 'Image ID is required.' );
+			return new \WP_Error( 'cfimg_missing_image_id', 'Image ID is required.' );
 		}
 
 		return sprintf(

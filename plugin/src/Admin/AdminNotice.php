@@ -5,7 +5,7 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Admin;
+namespace CFIMG\Admin;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,7 +27,7 @@ trait AdminNotice {
 	 */
 	protected function redirect_with_notice( string $url, string $message, string $type = 'success' ): void {
 		set_transient(
-			'cfi_admin_notice_' . get_current_user_id(),
+			'cfimg_admin_notice_' . get_current_user_id(),
 			array(
 				'message' => $message,
 				'type'    => $type,
@@ -45,7 +45,7 @@ trait AdminNotice {
 	 * @return void
 	 */
 	protected function render_notice(): void {
-		$key    = 'cfi_admin_notice_' . get_current_user_id();
+		$key    = 'cfimg_admin_notice_' . get_current_user_id();
 		$notice = get_transient( $key );
 
 		if ( ! $notice ) {

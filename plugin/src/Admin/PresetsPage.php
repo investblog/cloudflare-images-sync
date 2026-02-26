@@ -5,17 +5,17 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Admin;
+namespace CFIMG\Admin;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Repos\Defaults;
-use CFI\Repos\PresetsRepo;
-use CFI\Repos\SettingsRepo;
-use CFI\Support\Validators;
+use CFIMG\Repos\Defaults;
+use CFIMG\Repos\PresetsRepo;
+use CFIMG\Repos\SettingsRepo;
+use CFIMG\Support\Validators;
 
 /**
  * Presets CRUD page.
@@ -48,7 +48,7 @@ class PresetsPage {
 			return;
 		}
 
-		$redirect_url = admin_url( 'admin.php?page=cfi-presets' );
+		$redirect_url = admin_url( 'admin.php?page=cfimg-presets' );
 
 		// Handle delete (GET with nonce).
 		if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && ! empty( $_GET['preset_id'] ) ) {
@@ -56,7 +56,7 @@ class PresetsPage {
 			if ( ! Validators::is_valid_id( $preset_id, 'preset' ) ) {
 				$this->redirect_with_notice( $redirect_url, __( 'Invalid preset ID.', 'images-sync-for-cloudflare' ), 'error' );
 			}
-			check_admin_referer( 'cfi_delete_preset_' . $preset_id );
+			check_admin_referer( 'cfimg_delete_preset_' . $preset_id );
 			$result = $this->repo->delete( $preset_id );
 
 			if ( is_wp_error( $result ) ) {
@@ -67,8 +67,8 @@ class PresetsPage {
 		}
 
 		// Handle install recommended presets.
-		if ( isset( $_POST['cfi_install_recommended'] ) ) {
-			check_admin_referer( 'cfi_install_recommended' );
+		if ( isset( $_POST['cfimg_install_recommended'] ) ) {
+			check_admin_referer( 'cfimg_install_recommended' );
 			$result = $this->repo->install_recommended();
 			$count  = count( $result['installed'] );
 			$skip   = count( $result['skipped'] );
@@ -94,8 +94,8 @@ class PresetsPage {
 		}
 
 		// Handle create/update (POST).
-		if ( isset( $_POST['cfi_save_preset'] ) ) {
-			check_admin_referer( 'cfi_preset_save' );
+		if ( isset( $_POST['cfimg_save_preset'] ) ) {
+			check_admin_referer( 'cfimg_preset_save' );
 
 			$data = array(
 				'name'    => sanitize_text_field( wp_unslash( $_POST['preset_name'] ?? '' ) ),
@@ -155,7 +155,7 @@ class PresetsPage {
 
 			<h2><?php echo $editing ? esc_html__( 'Edit Preset', 'images-sync-for-cloudflare' ) : esc_html__( 'Add Preset', 'images-sync-for-cloudflare' ); ?></h2>
 			<form method="post">
-				<?php wp_nonce_field( 'cfi_preset_save' ); ?>
+				<?php wp_nonce_field( 'cfimg_preset_save' ); ?>
 				<input type="hidden" name="preset_id" value="<?php echo esc_attr( $editing['id'] ?? '' ); ?>" />
 				<table class="form-table">
 					<tr>
@@ -169,23 +169,23 @@ class PresetsPage {
 					</tr>
 				</table>
 				<p class="submit">
-					<input type="submit" name="cfi_save_preset" class="button-primary" value="<?php esc_attr_e( 'Save Preset', 'images-sync-for-cloudflare' ); ?>" />
+					<input type="submit" name="cfimg_save_preset" class="button-primary" value="<?php esc_attr_e( 'Save Preset', 'images-sync-for-cloudflare' ); ?>" />
 					<?php if ( $editing ) : ?>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-presets' ) ); ?>" class="button"><?php esc_html_e( 'Cancel', 'images-sync-for-cloudflare' ); ?></a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfimg-presets' ) ); ?>" class="button"><?php esc_html_e( 'Cancel', 'images-sync-for-cloudflare' ); ?></a>
 					<?php endif; ?>
 				</p>
 			</form>
 
-			<div class="cfi-presets-header">
+			<div class="cfimg-presets-header">
 				<h2><?php esc_html_e( 'Existing Presets', 'images-sync-for-cloudflare' ); ?></h2>
-				<form method="post" class="cfi-inline-form" id="cfi-install-recommended-form">
-					<?php wp_nonce_field( 'cfi_install_recommended' ); ?>
+				<form method="post" class="cfimg-inline-form" id="cfimg-install-recommended-form">
+					<?php wp_nonce_field( 'cfimg_install_recommended' ); ?>
 					<?php if ( $flex_status === 'enabled' ) : ?>
-						<button type="submit" name="cfi_install_recommended" class="button">
+						<button type="submit" name="cfimg_install_recommended" class="button">
 							<?php esc_html_e( 'Install Recommended Presets', 'images-sync-for-cloudflare' ); ?>
 						</button>
 					<?php else : ?>
-						<button type="button" class="button" id="cfi-install-recommended-btn" data-flex-status="<?php echo esc_attr( $flex_status ); ?>">
+						<button type="button" class="button" id="cfimg-install-recommended-btn" data-flex-status="<?php echo esc_attr( $flex_status ); ?>">
 							<?php esc_html_e( 'Install Recommended Presets', 'images-sync-for-cloudflare' ); ?>
 						</button>
 					<?php endif; ?>
@@ -208,28 +208,28 @@ class PresetsPage {
 								<td>
 									<strong><?php echo esc_html( $preset['name'] ); ?></strong>
 									<?php if ( Defaults::is_recommended_name( $preset['name'] ) ) : ?>
-										<span class="cfi-badge cfi-badge--recommended"><?php esc_html_e( 'Recommended', 'images-sync-for-cloudflare' ); ?></span>
+										<span class="cfimg-badge cfimg-badge--recommended"><?php esc_html_e( 'Recommended', 'images-sync-for-cloudflare' ); ?></span>
 									<?php endif; ?>
 									<?php if ( Validators::is_flexible_variant( $preset['variant'] ) ) : ?>
 										<?php if ( $flex_status === 'enabled' ) : ?>
-											<span class="cfi-badge cfi-badge--flexible"><?php esc_html_e( 'Flexible', 'images-sync-for-cloudflare' ); ?></span>
+											<span class="cfimg-badge cfimg-badge--flexible"><?php esc_html_e( 'Flexible', 'images-sync-for-cloudflare' ); ?></span>
 										<?php elseif ( $flex_status === 'disabled' ) : ?>
-											<span class="cfi-badge cfi-badge--flex-warn"><?php esc_html_e( 'Needs Flexible Variants', 'images-sync-for-cloudflare' ); ?></span>
+											<span class="cfimg-badge cfimg-badge--flex-warn"><?php esc_html_e( 'Needs Flexible Variants', 'images-sync-for-cloudflare' ); ?></span>
 										<?php else : ?>
-											<span class="cfi-badge cfi-badge--flex-unknown"><?php esc_html_e( 'Flexible (status unknown)', 'images-sync-for-cloudflare' ); ?></span>
+											<span class="cfimg-badge cfimg-badge--flex-unknown"><?php esc_html_e( 'Flexible (status unknown)', 'images-sync-for-cloudflare' ); ?></span>
 										<?php endif; ?>
 									<?php else : ?>
-										<span class="cfi-badge cfi-badge--universal"><?php esc_html_e( 'Universal', 'images-sync-for-cloudflare' ); ?></span>
+										<span class="cfimg-badge cfimg-badge--universal"><?php esc_html_e( 'Universal', 'images-sync-for-cloudflare' ); ?></span>
 									<?php endif; ?>
 									<br/><code><?php echo esc_html( $preset['id'] ); ?></code>
 								</td>
 								<td><code><?php echo esc_html( $preset['variant'] ); ?></code></td>
 								<td>
-									<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-presets&action=edit&preset_id=' . $preset['id'] ) ); ?>"><?php esc_html_e( 'Edit', 'images-sync-for-cloudflare' ); ?></a>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfimg-presets&action=edit&preset_id=' . $preset['id'] ) ); ?>"><?php esc_html_e( 'Edit', 'images-sync-for-cloudflare' ); ?></a>
 									|
-									<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfi-preview&mode=attachment&preset_id=' . $preset['id'] ) ); ?>"><?php esc_html_e( 'Preview', 'images-sync-for-cloudflare' ); ?></a>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=cfimg-preview&mode=attachment&preset_id=' . $preset['id'] ) ); ?>"><?php esc_html_e( 'Preview', 'images-sync-for-cloudflare' ); ?></a>
 									|
-									<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=cfi-presets&action=delete&preset_id=' . $preset['id'] ), 'cfi_delete_preset_' . $preset['id'] ) ); ?>" onclick="return confirm('<?php esc_attr_e( 'Delete this preset?', 'images-sync-for-cloudflare' ); ?>');"><?php esc_html_e( 'Delete', 'images-sync-for-cloudflare' ); ?></a>
+									<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=cfimg-presets&action=delete&preset_id=' . $preset['id'] ), 'cfimg_delete_preset_' . $preset['id'] ) ); ?>" onclick="return confirm('<?php esc_attr_e( 'Delete this preset?', 'images-sync-for-cloudflare' ); ?>');"><?php esc_html_e( 'Delete', 'images-sync-for-cloudflare' ); ?></a>
 								</td>
 							</tr>
 						<?php endforeach; ?>
@@ -247,39 +247,39 @@ class PresetsPage {
 	 * @return void
 	 */
 	private function render_flex_callout( string $flex_status ): void {
-		$settings_url = admin_url( 'admin.php?page=cfi-settings' );
+		$settings_url = admin_url( 'admin.php?page=cfimg-settings' );
 
 		if ( $flex_status === 'enabled' ) {
 			?>
-			<div class="cfi-fv-callout cfi-fv-callout--enabled">
-				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Enabled', 'images-sync-for-cloudflare' ); ?></p>
-				<p class="cfi-fv-callout__text"><?php esc_html_e( 'All parameter-based presets will work correctly.', 'images-sync-for-cloudflare' ); ?></p>
+			<div class="cfimg-fv-callout cfimg-fv-callout--enabled">
+				<p class="cfimg-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Enabled', 'images-sync-for-cloudflare' ); ?></p>
+				<p class="cfimg-fv-callout__text"><?php esc_html_e( 'All parameter-based presets will work correctly.', 'images-sync-for-cloudflare' ); ?></p>
 			</div>
 			<?php
 		} elseif ( $flex_status === 'disabled' ) {
 			?>
-			<div class="cfi-fv-callout cfi-fv-callout--disabled">
-				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Disabled', 'images-sync-for-cloudflare' ); ?></p>
-				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Parameter-based presets (w=, h=, fit=, etc.) require Flexible Variants to be enabled on your Cloudflare account.', 'images-sync-for-cloudflare' ); ?></p>
-				<div class="cfi-fv-callout__actions">
-					<button type="button" class="button" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
-					<button type="button" class="button button-primary" id="cfi-flex-enable"><?php esc_html_e( 'Enable Flexible Variants', 'images-sync-for-cloudflare' ); ?></button>
+			<div class="cfimg-fv-callout cfimg-fv-callout--disabled">
+				<p class="cfimg-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Disabled', 'images-sync-for-cloudflare' ); ?></p>
+				<p class="cfimg-fv-callout__text"><?php esc_html_e( 'Parameter-based presets (w=, h=, fit=, etc.) require Flexible Variants to be enabled on your Cloudflare account.', 'images-sync-for-cloudflare' ); ?></p>
+				<div class="cfimg-fv-callout__actions">
+					<button type="button" class="button" id="cfimg-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
+					<button type="button" class="button button-primary" id="cfimg-flex-enable"><?php esc_html_e( 'Enable Flexible Variants', 'images-sync-for-cloudflare' ); ?></button>
 					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'images-sync-for-cloudflare' ); ?></a>
-					<span class="spinner" id="cfi-flex-spinner"></span>
-					<span id="cfi-flex-result"></span>
+					<span class="spinner" id="cfimg-flex-spinner"></span>
+					<span id="cfimg-flex-result"></span>
 				</div>
 			</div>
 			<?php
 		} else {
 			?>
-			<div class="cfi-fv-callout cfi-fv-callout--unknown">
-				<p class="cfi-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Status Unknown', 'images-sync-for-cloudflare' ); ?></p>
-				<p class="cfi-fv-callout__text"><?php esc_html_e( 'Test the connection to check if Flexible Variants are enabled on your Cloudflare account.', 'images-sync-for-cloudflare' ); ?></p>
-				<div class="cfi-fv-callout__actions">
-					<button type="button" class="button button-primary" id="cfi-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
+			<div class="cfimg-fv-callout cfimg-fv-callout--unknown">
+				<p class="cfimg-fv-callout__title"><?php esc_html_e( 'Flexible Variants: Status Unknown', 'images-sync-for-cloudflare' ); ?></p>
+				<p class="cfimg-fv-callout__text"><?php esc_html_e( 'Test the connection to check if Flexible Variants are enabled on your Cloudflare account.', 'images-sync-for-cloudflare' ); ?></p>
+				<div class="cfimg-fv-callout__actions">
+					<button type="button" class="button button-primary" id="cfimg-flex-test"><?php esc_html_e( 'Test Status', 'images-sync-for-cloudflare' ); ?></button>
 					<a href="<?php echo esc_url( $settings_url ); ?>" class="button"><?php esc_html_e( 'Go to Settings', 'images-sync-for-cloudflare' ); ?></a>
-					<span class="spinner" id="cfi-flex-spinner"></span>
-					<span id="cfi-flex-result"></span>
+					<span class="spinner" id="cfimg-flex-spinner"></span>
+					<span id="cfimg-flex-result"></span>
 				</div>
 			</div>
 			<?php

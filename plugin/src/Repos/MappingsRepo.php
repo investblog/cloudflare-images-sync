@@ -5,18 +5,18 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Repos;
+namespace CFIMG\Repos;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Support\Ids;
-use CFI\Support\Validators;
+use CFIMG\Support\Ids;
+use CFIMG\Support\Validators;
 
 /**
- * CRUD access to sync mappings (cfi_mappings option).
+ * CRUD access to sync mappings (cfimg_mappings option).
  */
 class MappingsRepo {
 
@@ -96,7 +96,7 @@ class MappingsRepo {
 		$all = $this->all();
 
 		if ( ! isset( $all[ $id ] ) ) {
-			return new \WP_Error( 'cfi_mapping_not_found', 'Mapping not found.' );
+			return new \WP_Error( 'cfimg_mapping_not_found', 'Mapping not found.' );
 		}
 
 		// Merge with existing, then normalize.
@@ -127,7 +127,7 @@ class MappingsRepo {
 		$all = $this->all();
 
 		if ( ! isset( $all[ $id ] ) ) {
-			return new \WP_Error( 'cfi_mapping_not_found', 'Mapping not found.' );
+			return new \WP_Error( 'cfimg_mapping_not_found', 'Mapping not found.' );
 		}
 
 		unset( $all[ $id ] );

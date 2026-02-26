@@ -5,7 +5,7 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Support;
+namespace CFIMG\Support;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +22,7 @@ class TokenStorage {
 	 *
 	 * @var string
 	 */
-	private const OPTION_KEY = 'cfi_api_token_encrypted';
+	private const OPTION_KEY = 'cfimg_api_token_encrypted';
 
 	/**
 	 * Check if a token is stored.

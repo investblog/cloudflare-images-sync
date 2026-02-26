@@ -5,15 +5,15 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Core;
+namespace CFIMG\Core;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Api\CloudflareImagesClient;
-use CFI\Repos\OptionKeys;
+use CFIMG\Api\CloudflareImagesClient;
+use CFIMG\Repos\OptionKeys;
 
 /**
  * Manages the bundled demo.jpg upload to Cloudflare Images.
@@ -33,7 +33,7 @@ class DemoImageManager {
 	 * @return string
 	 */
 	public function get_file_path(): string {
-		return CFI_PLUGIN_DIR . self::DEMO_PATH;
+		return CFIMG_PLUGIN_DIR . self::DEMO_PATH;
 	}
 
 	/**
@@ -76,7 +76,7 @@ class DemoImageManager {
 		$file_path = $this->get_file_path();
 
 		if ( ! file_exists( $file_path ) ) {
-			return new \WP_Error( 'cfi_demo_not_found', 'Demo image file not found.' );
+			return new \WP_Error( 'cfimg_demo_not_found', 'Demo image file not found.' );
 		}
 
 		// Return cached if unchanged.

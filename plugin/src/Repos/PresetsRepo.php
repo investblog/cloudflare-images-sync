@@ -5,18 +5,18 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Repos;
+namespace CFIMG\Repos;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Support\Ids;
-use CFI\Support\Validators;
+use CFIMG\Support\Ids;
+use CFIMG\Support\Validators;
 
 /**
- * CRUD access to image presets (cfi_presets option).
+ * CRUD access to image presets (cfimg_presets option).
  */
 class PresetsRepo {
 
@@ -63,7 +63,7 @@ class PresetsRepo {
 
 		// Check name uniqueness (case-insensitive).
 		if ( $this->name_exists( $data['name'] ) ) {
-			return new \WP_Error( 'cfi_duplicate_preset', 'A preset with this name already exists.' );
+			return new \WP_Error( 'cfimg_duplicate_preset', 'A preset with this name already exists.' );
 		}
 
 		$id  = Ids::preset();
@@ -92,13 +92,13 @@ class PresetsRepo {
 		$all = $this->all();
 
 		if ( ! isset( $all[ $id ] ) ) {
-			return new \WP_Error( 'cfi_preset_not_found', 'Preset not found.' );
+			return new \WP_Error( 'cfimg_preset_not_found', 'Preset not found.' );
 		}
 
 		// If name is changing, check uniqueness.
 		if ( isset( $data['name'] ) && strtolower( $data['name'] ) !== strtolower( $all[ $id ]['name'] ) ) {
 			if ( $this->name_exists( $data['name'] ) ) {
-				return new \WP_Error( 'cfi_duplicate_preset', 'A preset with this name already exists.' );
+				return new \WP_Error( 'cfimg_duplicate_preset', 'A preset with this name already exists.' );
 			}
 		}
 
@@ -131,7 +131,7 @@ class PresetsRepo {
 		$all = $this->all();
 
 		if ( ! isset( $all[ $id ] ) ) {
-			return new \WP_Error( 'cfi_preset_not_found', 'Preset not found.' );
+			return new \WP_Error( 'cfimg_preset_not_found', 'Preset not found.' );
 		}
 
 		unset( $all[ $id ] );

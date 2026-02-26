@@ -5,17 +5,17 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\CLI;
+namespace CFIMG\CLI;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Api\CloudflareImagesClient;
-use CFI\Core\Guard;
-use CFI\Core\SyncEngine;
-use CFI\Repos\MappingsRepo;
+use CFIMG\Api\CloudflareImagesClient;
+use CFIMG\Core\Guard;
+use CFIMG\Core\SyncEngine;
+use CFIMG\Repos\MappingsRepo;
 
 /**
  * Manage Cloudflare Images sync operations.
@@ -27,7 +27,7 @@ class Commands {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp cfi test
+	 *     wp cfimg test
 	 *
 	 * @param array $args       Positional arguments.
 	 * @param array $assoc_args Named arguments.
@@ -79,10 +79,10 @@ class Commands {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp cfi sync --mapping=map_abc123
-	 *     wp cfi sync --mapping=map_abc123 --post_id=456
-	 *     wp cfi sync --mapping=map_abc123 --limit=50 --offset=100
-	 *     wp cfi sync --mapping=map_abc123 --dry-run
+	 *     wp cfimg sync --mapping=map_abc123
+	 *     wp cfimg sync --mapping=map_abc123 --post_id=456
+	 *     wp cfimg sync --mapping=map_abc123 --limit=50 --offset=100
+	 *     wp cfimg sync --mapping=map_abc123 --dry-run
 	 *
 	 * @param array $args       Positional arguments.
 	 * @param array $assoc_args Named arguments.

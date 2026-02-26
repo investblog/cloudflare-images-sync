@@ -5,7 +5,7 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Repos;
+namespace CFIMG\Repos;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {

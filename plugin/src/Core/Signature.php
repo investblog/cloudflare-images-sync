@@ -5,7 +5,7 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Core;
+namespace CFIMG\Core;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +28,7 @@ class Signature {
 	 */
 	public static function compute( string $file_path ) {
 		if ( ! file_exists( $file_path ) || ! is_readable( $file_path ) ) {
-			return new \WP_Error( 'cfi_sig_file_missing', 'File not found or not readable for signature.' );
+			return new \WP_Error( 'cfimg_sig_file_missing', 'File not found or not readable for signature.' );
 		}
 
 		$md5 = md5_file( $file_path ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_md5
@@ -42,7 +42,7 @@ class Signature {
 		$mtime = filemtime( $file_path );
 
 		if ( $size === false || $mtime === false ) {
-			return new \WP_Error( 'cfi_sig_stat_failed', 'Could not stat file for signature.' );
+			return new \WP_Error( 'cfimg_sig_stat_failed', 'Could not stat file for signature.' );
 		}
 
 		return $size . ':' . $mtime;

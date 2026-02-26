@@ -5,18 +5,18 @@
  * @package CloudflareImagesSync
  */
 
-namespace CFI\Core;
+namespace CFIMG\Core;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use CFI\Api\CloudflareImagesClient;
-use CFI\Repos\LogsRepo;
-use CFI\Repos\OptionKeys;
-use CFI\Repos\PresetsRepo;
-use CFI\Repos\SettingsRepo;
+use CFIMG\Api\CloudflareImagesClient;
+use CFIMG\Repos\LogsRepo;
+use CFIMG\Repos\OptionKeys;
+use CFIMG\Repos\PresetsRepo;
+use CFIMG\Repos\SettingsRepo;
 
 /**
  * Execute a sync operation for one post + one mapping.
@@ -44,12 +44,12 @@ class SyncEngine {
 		$post_type = $mapping['post_type'] ?? '';
 		if ( $post_type === '' || ! post_type_exists( $post_type ) ) {
 			$logs->push( 'error', 'Mapping has invalid post type.', $ctx );
-			return new \WP_Error( 'cfi_invalid_mapping', 'Invalid post type in mapping.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'Invalid post type in mapping.' );
 		}
 
 		if ( empty( $mapping['target']['url_meta'] ) ) {
 			$logs->push( 'error', 'Mapping has no target url_meta configured.', $ctx );
-			return new \WP_Error( 'cfi_invalid_mapping', 'No target url_meta in mapping.' );
+			return new \WP_Error( 'cfimg_invalid_mapping', 'No target url_meta in mapping.' );
 		}
 
 		// 1. Resolve source.
@@ -75,7 +75,7 @@ class SyncEngine {
 			$url = $this->build_url( $att_cf_id, $mapping );
 			if ( $url === '' ) {
 				$logs->push( 'error', 'Could not build delivery URL (check account_hash setting).', $ctx );
-				return new \WP_Error( 'cfi_url_build_failed', 'Could not build delivery URL.' );
+				return new \WP_Error( 'cfimg_url_build_failed', 'Could not build delivery URL.' );
 			}
 			$this->store_meta( $post_id, $target, $att_cf_id, $url, $att_sig );
 			$logs->push( 'info', 'Reused existing CF image from attachment cache.', $ctx );
@@ -136,7 +136,7 @@ class SyncEngine {
 
 		if ( $cf_image_id === '' ) {
 			$logs->push( 'error', 'Upload succeeded but no image ID returned.', $ctx );
-			return new \WP_Error( 'cfi_no_image_id', 'Cloudflare returned no image ID.' );
+			return new \WP_Error( 'cfimg_no_image_id', 'Cloudflare returned no image ID.' );
 		}
 
 		// 6. Compute and store signature.
@@ -156,7 +156,7 @@ class SyncEngine {
 
 		if ( $url === '' ) {
 			$logs->push( 'error', 'Could not build delivery URL (check account_hash setting).', $ctx );
-			return new \WP_Error( 'cfi_url_build_failed', 'Could not build delivery URL.' );
+			return new \WP_Error( 'cfimg_url_build_failed', 'Could not build delivery URL.' );
 		}
 
 		// 9. Store results on post.
