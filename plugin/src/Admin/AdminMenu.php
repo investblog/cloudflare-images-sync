@@ -175,7 +175,7 @@ class AdminMenu {
 	 */
 	public function enqueue_assets( string $hook_suffix ): void {
 		// Only load on our pages and the main dashboard (for widget).
-		$is_our_page   = strpos( $hook_suffix, 'cfi-' ) !== false || $hook_suffix === 'toplevel_page_cfimg-settings';
+		$is_our_page   = strpos( $hook_suffix, 'cfimg-' ) !== false || $hook_suffix === 'toplevel_page_cfimg-settings';
 		$is_dashboard  = $hook_suffix === 'index.php';
 
 		if ( ! $is_our_page && ! $is_dashboard ) {
