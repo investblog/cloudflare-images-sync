@@ -63,6 +63,7 @@ jobs:
 
       - name: Install WordPress test suite
         run: |
+          sudo apt-get update -qq && sudo apt-get install -yqq subversion
           bash <(curl -s https://raw.githubusercontent.com/wp-cli/scaffold-command/main/templates/install-wp-tests.sh) wordpress_tests root root 127.0.0.1 ${{ matrix.wp }} true
 
       - name: Run PHPUnit
