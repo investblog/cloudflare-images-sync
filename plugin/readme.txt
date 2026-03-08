@@ -2,13 +2,13 @@
 Contributors: 301st
 Tags: cloudflare, images, cdn, acf, headless
 Requires at least: 6.2
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Sync WordPress images to Cloudflare Images — store CDN URLs in post meta, ready for headless or classic themes.
+Auto-sync WordPress images to Cloudflare Images. Stores optimized CDN URLs in post meta — ready for headless, ACF, or classic themes.
 
 == Description ==
 
@@ -138,6 +138,13 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 
 == Changelog ==
 
+= 1.0.8 =
+* Added: Developer filters `cfimg_delivery_url` and `cfimg_resolve_source` for customizing sync behavior
+* Added: PHPUnit test suite — 35 tests covering admin security, sync engine, and validators
+* Added: SECURITY.md with vulnerability reporting policy
+* Improved: Plugin description updated for clarity
+* Tested: WordPress 7.0 compatibility verified
+
 = 1.0.7 =
 * Changed: Internal prefix renamed from `cfi` to `cfimg` (4+ chars required by WP.org)
 * Changed: External services section restructured with inline ToS/Privacy links per service
@@ -217,6 +224,9 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.0.8 =
+Developer filters, test suite, and WordPress 7.0 compatibility.
 
 = 1.0.7 =
 Prefix renamed from `cfi` to `cfimg` per WP.org review. Database keys migrate automatically.
