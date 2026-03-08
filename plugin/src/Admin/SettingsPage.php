@@ -425,7 +425,7 @@ class SettingsPage {
 							<th><label for="logs_max"><?php esc_html_e( 'Max log entries', 'images-sync-for-cloudflare' ); ?></label></th>
 							<td>
 								<input type="number" id="logs_max" name="logs_max" value="<?php echo esc_attr( $settings['logs_max'] ); ?>" min="50" max="1000" class="small-text" />
-								<p class="description"><?php esc_html_e( 'Ring buffer size for the Logs page (50–1000).', 'images-sync-for-cloudflare' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Ring buffer size for the Logs page (50-1000).', 'images-sync-for-cloudflare' ); ?></p>
 							</td>
 						</tr>
 					</table>
@@ -456,7 +456,7 @@ class SettingsPage {
 
 		$flex_docs_url = 'https://developers.cloudflare.com/images/transform-images/transform-via-url/';
 		?>
-		<span id="cfimg-flex-badge" class="cfimg-flex-badge cfi-flex--<?php echo esc_attr( $flex_status ); ?>"><?php echo esc_html( $flex_label ); ?></span>
+		<span id="cfimg-flex-badge" class="cfimg-flex-badge cfimg-flex--<?php echo esc_attr( $flex_status ); ?>"><?php echo esc_html( $flex_label ); ?></span>
 		<p class="description">
 			<?php
 			esc_html_e( 'Required for parameter presets like w=, h=, fit=, quality=. This is an account-wide Cloudflare setting.', 'images-sync-for-cloudflare' );

@@ -205,7 +205,21 @@ class SyncEngine {
 		$variant  = $this->resolve_variant( $mapping );
 		$url      = $builder->url( $cf_id, $variant );
 
-		return is_wp_error( $url ) ? '' : $url;
+		if ( is_wp_error( $url ) ) {
+			return '';
+		}
+
+		/**
+		 * Filter the delivery URL before it is stored in post meta.
+		 *
+		 * @since 1.0.8
+		 *
+		 * @param string $url        Delivery URL.
+		 * @param string $cf_id      Cloudflare image ID.
+		 * @param string $variant    Resolved variant string.
+		 * @param array  $mapping    Full mapping record.
+		 */
+		return (string) apply_filters( 'cfimg_delivery_url', $url, $cf_id, $variant, $mapping );
 	}
 
 	/**

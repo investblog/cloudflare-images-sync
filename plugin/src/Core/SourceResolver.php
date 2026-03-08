@@ -48,8 +48,28 @@ class SourceResolver {
 	 */
 	public static function resolve( int $post_id, array $source ): self {
 		$instance = new self();
-		$type     = $source['type'] ?? '';
-		$key      = $source['key'] ?? '';
+
+		/**
+		 * Allow short-circuiting source resolution.
+		 *
+		 * Return an attachment ID (int) to override the default resolution.
+		 * Return null to let the plugin resolve normally.
+		 *
+		 * @since 1.0.8
+		 *
+		 * @param int|null $attachment_id Null to use default resolution.
+		 * @param int      $post_id      Post being synced.
+		 * @param array    $source       Mapping source config ('type', 'key').
+		 */
+		$override = apply_filters( 'cfimg_resolve_source', null, $post_id, $source );
+
+		if ( is_int( $override ) && $override > 0 ) {
+			$instance->resolve_attachment( $override );
+			return $instance;
+		}
+
+		$type = $source['type'] ?? '';
+		$key  = $source['key'] ?? '';
 
 		switch ( $type ) {
 			case 'acf_field':

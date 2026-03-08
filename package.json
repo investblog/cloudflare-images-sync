@@ -11,9 +11,11 @@
     "wp:plugin:deactivate": "wp-env run cli wp plugin deactivate images-sync-for-cloudflare",
     "wp:db:reset": "wp-env run cli wp db reset --yes",
     "lint:php": "composer run phpcs",
-    "lint:php:fix": "composer run phpcbf"
+    "lint:php:fix": "composer run phpcbf",
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/images-sync-for-cloudflare phpunit"
   },
   "devDependencies": {
-    "@wordpress/env": "^10.0.0"
+    "@wordpress/env": "^10.0.0",
+    "puppeteer": "^24.37.5"
   }
 }

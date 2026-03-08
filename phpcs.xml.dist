@@ -6,6 +6,7 @@
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
 	<exclude-pattern>*.min.js</exclude-pattern>
 	<exclude-pattern>*.min.css</exclude-pattern>
 
@@ -60,11 +61,9 @@
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="cfi"/>
-				<element value="CFI"/>
+				<element value="cfimg"/>
+				<element value="CFIMG"/>
 			</property>
 		</properties>
-		<!-- "cfi" is unique enough for this plugin -->
-		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed"/>
 	</rule>
 </ruleset>

@@ -7,7 +7,7 @@ Sync WordPress images to Cloudflare Images — store CDN URLs in post meta, read
 [![WordPress](https://img.shields.io/badge/WordPress-6.2%2B-blue.svg)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-8.0%2B-purple.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/License-GPL%20v2-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
-[![Version](https://img.shields.io/badge/version-1.0.3-orange.svg)](https://github.com/investblog/cloudflare-images-sync/releases/tag/v1.0.3)
+[![Version](https://img.shields.io/badge/version-1.0.7-orange.svg)](https://github.com/investblog/cloudflare-images-sync/releases/tag/v1.0.7)
 
 ## Why?
 
@@ -21,7 +21,7 @@ Headless frontends need stable, cacheable CDN URLs. This plugin makes WordPress 
 - **Auto-Sync** — Images sync on post save, or bulk-process via Action Scheduler
 - **Flexible Variants** — Smart detection prevents broken images and 9429 errors
 - **Headless-Ready** — URLs in post meta, perfect for GraphQL/REST API
-- **WP-CLI Support** — `wp cfi sync` for scripted workflows
+- **WP-CLI Support** — `wp cfimg sync` for scripted workflows
 - **Secure Storage** — API token encrypted with libsodium (AES-256 fallback)
 - **No Lock-in** — Images stay in Media Library; URLs are plain meta values
 
@@ -63,7 +63,7 @@ get_post_meta($post_id, '_og_image_url', true);
 
 ## Requirements
 
-- WordPress 6.0+
+- WordPress 6.2+
 - PHP 8.0+
 - [Cloudflare Images](https://www.cloudflare.com/products/cloudflare-images/) subscription
 - API Token with `Cloudflare Images: Edit` permission
@@ -127,13 +127,16 @@ Test presets before deploying:
 
 ```bash
 # Sync single post
-wp cfi sync --post_id=123 --mapping=map_abc12345
+wp cfimg sync --post_id=123 --mapping=map_abc12345
 
 # Bulk sync all posts for a mapping
-wp cfi sync --mapping=map_abc12345
+wp cfimg sync --mapping=map_abc12345
+
+# Dry-run (preview without syncing)
+wp cfimg sync --mapping=map_abc12345 --dry-run
 
 # Test connection
-wp cfi test
+wp cfimg test
 ```
 
 ## For Developers
@@ -142,13 +145,13 @@ wp cfi test
 
 ```php
 // Modify delivery URL before storing
-add_filter('cfi_delivery_url', function($url, $cf_image_id, $preset) {
+add_filter('cfimg_delivery_url', function(string $url, string $cf_image_id, string $variant, array $mapping) {
     return $url;
-}, 10, 3);
+}, 10, 4);
 
-// Custom source resolver
-add_filter('cfi_resolve_source', function($resolved, $post_id, $source) {
-    return $resolved;
+// Override source resolution (return an attachment ID or null to skip)
+add_filter('cfimg_resolve_source', function(?int $attachment_id, int $post_id, array $source) {
+    return $attachment_id;
 }, 10, 3);
 ```
 
