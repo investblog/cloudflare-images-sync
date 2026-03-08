@@ -4,7 +4,9 @@
   "port": 8890,
   "testsPort": 8891,
   "mappings": {
-    "wp-content/plugins/images-sync-for-cloudflare": "./plugin"
+    "wp-content/plugins/images-sync-for-cloudflare": "./plugin",
+    "wp-content/plugins/images-sync-for-cloudflare/tests": "./tests",
+    "wp-content/plugins/images-sync-for-cloudflare/phpunit.xml.dist": "./phpunit.xml.dist"
   },
   "plugins": [
     "https://downloads.wordpress.org/plugin/plugin-check.latest-stable.zip",
