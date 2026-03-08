@@ -153,75 +153,13 @@ This plugin does not collect, store, or transmit any personal user data. Only im
 * Fixed: Asset enqueue guard referenced stale prefix, preventing CSS/JS on subpages
 
 = 1.0.5 =
-* Changed: Text domain renamed to `images-sync-for-cloudflare` to match WP.org slug
-* Changed: Main plugin file renamed to `images-sync-for-cloudflare.php`
+* Changed: Text domain and plugin file renamed to match WP.org slug
 
-= 1.0.4 =
-* Fixed: readme.txt uses required == External services == section heading (WP.org review)
-* Fixed: Uninstall SQL uses $wpdb->prepare() with %i placeholder
-* Fixed: Release ZIP filename without version suffix
-* Removed: GitHub Plugin URI headers (not needed for WP.org)
-* Added: acf tag for better discoverability
-* Added: == Upgrade Notice == section
+= 1.0.0 – 1.0.4 =
+First stable release. Encrypted API token storage (libsodium/AES-256), Dashboard widget, Settings link, WP.org Plugin Check compliance, uninstall cleanup, content_1200w preset, FAQ sections.
 
-= 1.0.3 =
-* Fixed: Uninstall now removes encrypted API token and migration version
-* Fixed: Uninstall cleans up all plugin post meta from database
-
-= 1.0.2 =
-* New: content_1200w recommended preset (fit=scale-down, never upscales small images)
-* New: FAQ — available fit modes (scale-down, cover, contain, crop)
-* New: FAQ — Action Scheduler as optional dependency
-* Improved: Settings page UX — API Access section moved above Delivery for logical onboarding flow
-
-= 1.0.1 =
-* Improved: WordPress.org Plugin Check compliance (inline styles → enqueued CSS)
-* Improved: SQL queries use %i placeholder for table names (WP 6.2+)
-* Improved: Third-party service disclosure per Guideline 7
-* Removed: load_plugin_textdomain (automatic since WP 4.6 for .org plugins)
-* Changed: Minimum WordPress version raised to 6.2
-
-= 1.0.0 =
-* New: Encrypted API token storage (libsodium/AES-256)
-* New: Settings link on Plugins page
-* New: Translation template (.pot file) for localization
-* New: WordPress.org assets (icons and banners)
-* Improved: Dashboard widget with connection status
-* First stable release
-
-= 0.2.5 =
-* New: Dashboard widget on main WP Dashboard with connection status
-* Improved: Plugin descriptions and documentation
-* Improved: Author info updated for WordPress.org
-
-= 0.2.4 =
-* Fixed: Dashboard widget error — added missing LogsRepo::recent() method
-
-= 0.2.3 =
-* New: Dashboard widget with Connection Status, quick stats, and links
-* New: Cloudflare icon in widget header
-
-= 0.2.2 =
-* Fixed: Auto-sync URL persistence when ACF clears target field
-* Added: wp_after_insert_post fallback for maximum compatibility
-* Improved: Hook priorities increased to 999
-
-= 0.2.1 =
-* Fixed: Auto-sync URL write on ACF save
-* Improved: Debug logging verifies meta writes
-
-= 0.2.0 =
-* New: Universal "public" preset (works without Flexible Variants)
-* New: Attachment ID validation with suggestions in Preview
-* Improved: Settings page with collapsible sections
-* Improved: Connection Status indicators
-
-= 0.1.10-beta =
-* New: Flexible Variants detection and one-click enable
-* New: Smart UI gating — no broken previews
-
-= 0.1.0-beta =
-* Initial release
+= 0.1.0-beta – 0.2.5 =
+Pre-release development. Flexible Variants detection, auto-sync engine, ACF support, Preview Studio, Universal presets, Dashboard widget.
 
 == Upgrade Notice ==
 
@@ -233,21 +171,6 @@ Prefix renamed from `cfi` to `cfimg` per WP.org review. Database keys migrate au
 
 = 1.0.5 =
 Text domain and plugin file renamed to match WP.org assigned slug `images-sync-for-cloudflare`.
-
-= 1.0.4 =
-WP.org review compliance: external services section, prepared SQL, ACF tag.
-
-= 1.0.3 =
-Complete uninstall cleanup — encrypted token and migration version removed.
-
-= 1.0.2 =
-New content_1200w preset, fit modes FAQ, improved settings UX.
-
-= 1.0.1 =
-WordPress.org Plugin Check compliance, %i placeholders, external services disclosure.
-
-= 1.0.0 =
-First stable release with encrypted token storage and WordPress.org assets.
 
 == Credits ==
 
