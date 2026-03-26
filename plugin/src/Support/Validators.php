@@ -274,14 +274,15 @@ final class Validators {
 	 * @return array<string, mixed>
 	 */
 	public static function normalize_logs( $raw, int $max = 200 ): array {
-		$defaults = Defaults::logs();
+		$defaults        = Defaults::logs();
+		$defaults['max'] = self::clamp_int( $max, 50, 1000 );
 
 		if ( ! is_array( $raw ) ) {
 			return $defaults;
 		}
 
 		$result        = array_merge( $defaults, $raw );
-		$result['max'] = self::clamp_int( (int) $result['max'], 50, 1000 );
+		$result['max'] = $defaults['max'];
 
 		if ( ! is_array( $result['items'] ) ) {
 			$result['items'] = array();

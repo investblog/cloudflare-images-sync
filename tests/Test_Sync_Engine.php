@@ -22,6 +22,8 @@ class Test_Sync_Engine extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
+		( new CFIMG\Repos\SettingsRepo() )->reset();
+
 		$this->mapping = array(
 			'id'        => 'map_aaaabbbb',
 			'post_type' => 'post',
@@ -48,6 +50,14 @@ class Test_Sync_Engine extends WP_UnitTestCase {
 			),
 			'preset_id' => '',
 		);
+	}
+
+	/**
+	 * Clean up settings after each test.
+	 */
+	public function tear_down(): void {
+		( new CFIMG\Repos\SettingsRepo() )->reset();
+		parent::tear_down();
 	}
 
 	/**
@@ -122,6 +132,77 @@ class Test_Sync_Engine extends WP_UnitTestCase {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'cfimg_invalid_mapping', $result->get_error_code() );
+	}
+
+	/**
+	 * Sync should reject posts whose type does not match the mapping.
+	 */
+	public function test_sync_rejects_post_type_mismatch(): void {
+		$post_id = self::factory()->post->create(
+			array(
+				'post_type' => 'page',
+			)
+		);
+
+		$engine = new CFIMG\Core\SyncEngine();
+		$result = $engine->sync( $post_id, $this->mapping );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'cfimg_post_type_mismatch', $result->get_error_code() );
+	}
+
+	/**
+	 * Sync should honor the store_cf_id_on_post flag when reusing attachment cache.
+	 */
+	public function test_sync_can_skip_post_cf_id_storage(): void {
+		$file = DIR_TESTDATA . '/images/canola.jpg';
+
+		if ( ! file_exists( $file ) ) {
+			$this->markTestSkipped( 'Test image canola.jpg not found in test data.' );
+		}
+
+		$att_id  = self::factory()->attachment->create_upload_object( $file );
+		$post_id = self::factory()->post->create();
+		set_post_thumbnail( $post_id, $att_id );
+
+		$file_path = get_attached_file( $att_id );
+		$sig       = CFIMG\Core\Signature::compute( $file_path );
+
+		if ( is_wp_error( $sig ) ) {
+			$this->fail( 'Could not compute test signature.' );
+		}
+
+		update_post_meta( $att_id, CFIMG\Repos\OptionKeys::META_CF_IMAGE_ID, 'cf-test-id' );
+		update_post_meta( $att_id, CFIMG\Repos\OptionKeys::META_SIG, $sig );
+		update_post_meta( $post_id, '_cf_image_id', 'legacy-cf-id' );
+
+		( new CFIMG\Repos\SettingsRepo() )->update(
+			array(
+				'account_hash' => 'account-hash-test',
+			)
+		);
+
+		$mapping = $this->mapping;
+		$mapping['behavior']['store_cf_id_on_post'] = false;
+
+		$engine = new CFIMG\Core\SyncEngine();
+		$result = $engine->sync( $post_id, $mapping );
+
+		$this->assertTrue( $result );
+		$this->assertSame(
+			'',
+			get_post_meta( $post_id, '_cf_image_id', true ),
+			'CF ID meta should be removed when storage is disabled.'
+		);
+		$this->assertSame(
+			$sig,
+			get_post_meta( $post_id, '_cf_change_sig', true ),
+			'Signature should still be stored.'
+		);
+		$this->assertStringContainsString(
+			'imagedelivery.net/account-hash-test/cf-test-id/',
+			(string) get_post_meta( $post_id, '_cf_delivery_url', true )
+		);
 	}
 
 	/**

@@ -105,6 +105,23 @@ class Test_Validators extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Logs normalization should respect the runtime max passed in by settings.
+	 */
+	public function test_normalize_logs_uses_runtime_max(): void {
+		$result = CFIMG\Support\Validators::normalize_logs(
+			array(
+				'max'   => 50,
+				'items' => array(),
+			),
+			750
+		);
+		$this->assertSame( 750, $result['max'] );
+
+		$result = CFIMG\Support\Validators::normalize_logs( null, 10 );
+		$this->assertSame( 50, $result['max'] );
+	}
+
+	/**
 	 * Preset validation should require name and variant.
 	 */
 	public function test_validate_preset_requires_name(): void {

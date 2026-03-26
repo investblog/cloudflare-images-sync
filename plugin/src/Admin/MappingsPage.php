@@ -85,17 +85,15 @@ class MappingsPage {
 			if ( ! Validators::is_valid_id( $mapping_id, 'map' ) ) {
 				$this->redirect_with_notice( $redirect_url, __( 'Invalid mapping ID.', 'images-sync-for-cloudflare' ), 'error' );
 			}
-			$message    = $this->enqueue_bulk_sync( $mapping_id );
-			$type       = strpos( $message, 'enqueued' ) !== false ? 'success' : 'error';
-			$this->redirect_with_notice( $redirect_url, $message, $type );
+			$result = $this->enqueue_bulk_sync( $mapping_id );
+			$this->redirect_with_notice( $redirect_url, $result['message'], $result['type'] );
 		}
 
 		// Handle create/update.
 		if ( isset( $_POST['cfimg_save_mapping'] ) ) {
 			check_admin_referer( 'cfimg_mapping_save' );
-			$message = $this->handle_save();
-			$type    = strpos( $message, 'error' ) !== false || strpos( $message, 'Error' ) !== false ? 'error' : 'success';
-			$this->redirect_with_notice( $redirect_url, $message, $type );
+			$result = $this->handle_save();
+			$this->redirect_with_notice( $redirect_url, $result['message'], $result['type'] );
 		}
 	}
 
@@ -143,13 +141,16 @@ class MappingsPage {
 	/**
 	 * Handle form save. Nonce already verified in handle_actions().
 	 *
-	 * @return string Status message.
+	 * @return array{message: string, type: string} Status message and notice type.
 	 */
-	private function handle_save(): string {
+	private function handle_save(): array {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified in handle_actions().
 		$edit_id = sanitize_text_field( wp_unslash( $_POST['mapping_id'] ?? '' ) );
 		if ( $edit_id !== '' && ! Validators::is_valid_id( $edit_id, 'map' ) ) {
-			return __( 'Invalid mapping ID.', 'images-sync-for-cloudflare' );
+			return array(
+				'message' => __( 'Invalid mapping ID.', 'images-sync-for-cloudflare' ),
+				'type'    => 'error',
+			);
 		}
 
 		$data = array(
@@ -183,20 +184,29 @@ class MappingsPage {
 		foreach ( array( 'url_meta', 'id_meta', 'sig_meta' ) as $target_field ) {
 			$key = $data['target'][ $target_field ];
 			if ( $key !== '' && $this->is_reserved_meta_key( $key ) ) {
-				return sprintf(
-					/* translators: %s: meta key name */
-					__( 'The meta key "%s" is reserved by WordPress and cannot be used as a destination.', 'images-sync-for-cloudflare' ),
-					$key
+				return array(
+					'message' => sprintf(
+						/* translators: %s: meta key name */
+						__( 'The meta key "%s" is reserved by WordPress and cannot be used as a destination.', 'images-sync-for-cloudflare' ),
+						$key
+					),
+					'type'    => 'error',
 				);
 			}
 		}
 
 		if ( $data['preset_id'] !== '' ) {
 			if ( ! Validators::is_valid_id( $data['preset_id'], 'preset' ) ) {
-				return __( 'Invalid preset ID format.', 'images-sync-for-cloudflare' );
+				return array(
+					'message' => __( 'Invalid preset ID format.', 'images-sync-for-cloudflare' ),
+					'type'    => 'error',
+				);
 			}
 			if ( $this->presets->find( $data['preset_id'] ) === null ) {
-				return __( 'Selected preset does not exist.', 'images-sync-for-cloudflare' );
+				return array(
+					'message' => __( 'Selected preset does not exist.', 'images-sync-for-cloudflare' ),
+					'type'    => 'error',
+				);
 			}
 		}
 
@@ -207,27 +217,39 @@ class MappingsPage {
 		}
 
 		if ( is_wp_error( $result ) ) {
-			return $result->get_error_message();
+			return array(
+				'message' => $result->get_error_message(),
+				'type'    => 'error',
+			);
 		}
 
-		return $edit_id ? __( 'Mapping updated.', 'images-sync-for-cloudflare' ) : __( 'Mapping created.', 'images-sync-for-cloudflare' );
+		return array(
+			'message' => $edit_id ? __( 'Mapping updated.', 'images-sync-for-cloudflare' ) : __( 'Mapping created.', 'images-sync-for-cloudflare' ),
+			'type'    => 'success',
+		);
 	}
 
 	/**
 	 * Enqueue a bulk sync for a mapping.
 	 *
 	 * @param string $mapping_id Mapping ID.
-	 * @return string Status message.
+	 * @return array{message: string, type: string} Status message and notice type.
 	 */
-	private function enqueue_bulk_sync( string $mapping_id ): string {
+	private function enqueue_bulk_sync( string $mapping_id ): array {
 		$mapping = $this->repo->find( $mapping_id );
 
 		if ( $mapping === null ) {
-			return __( 'Mapping not found.', 'images-sync-for-cloudflare' );
+			return array(
+				'message' => __( 'Mapping not found.', 'images-sync-for-cloudflare' ),
+				'type'    => 'error',
+			);
 		}
 
 		if ( ! function_exists( 'as_enqueue_async_action' ) ) {
-			return __( 'Action Scheduler is not available. Install it or use WP-CLI for bulk sync.', 'images-sync-for-cloudflare' );
+			return array(
+				'message' => __( 'Action Scheduler is not available. Install it or use WP-CLI for bulk sync.', 'images-sync-for-cloudflare' ),
+				'type'    => 'error',
+			);
 		}
 
 		as_enqueue_async_action(
@@ -240,7 +262,10 @@ class MappingsPage {
 			'cfimg'
 		);
 
-		return __( 'Bulk sync enqueued. Check Logs for progress.', 'images-sync-for-cloudflare' );
+		return array(
+			'message' => __( 'Bulk sync enqueued. Check Logs for progress.', 'images-sync-for-cloudflare' ),
+			'type'    => 'success',
+		);
 	}
 
 	/**
@@ -716,7 +741,7 @@ class MappingsPage {
 			<div class="cfimg-form-section">
 				<h3><?php esc_html_e( 'Destination', 'images-sync-for-cloudflare' ); ?></h3>
 				<p class="cfimg-section-desc">
-					<?php esc_html_e( 'Define where the Cloudflare delivery URL and metadata will be stored on each post. Meta keys are created automatically on first sync — no need to register them beforehand.', 'images-sync-for-cloudflare' ); ?>
+					<?php esc_html_e( 'Define where the Cloudflare delivery URL and metadata will be stored on each post. These meta keys are usually created on the first successful sync, so nothing is written when the source is empty or a sync is skipped or fails.', 'images-sync-for-cloudflare' ); ?>
 				</p>
 				<table class="form-table">
 					<tr>

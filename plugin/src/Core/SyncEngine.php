@@ -52,6 +52,17 @@ class SyncEngine {
 			return new \WP_Error( 'cfimg_invalid_mapping', 'No target url_meta in mapping.' );
 		}
 
+		$post = get_post( $post_id );
+		if ( ! $post instanceof \WP_Post ) {
+			$logs->push( 'error', 'Post not found.', $ctx );
+			return new \WP_Error( 'cfimg_post_not_found', 'Post not found.' );
+		}
+
+		if ( $post->post_type !== $post_type ) {
+			$logs->push( 'error', 'Post type does not match mapping.', $ctx );
+			return new \WP_Error( 'cfimg_post_type_mismatch', 'Post type does not match mapping.' );
+		}
+
 		// 1. Resolve source.
 		$source   = $mapping['source'] ?? array();
 		$resolved = SourceResolver::resolve( $post_id, $source );
@@ -77,7 +88,7 @@ class SyncEngine {
 				$logs->push( 'error', 'Could not build delivery URL (check account_hash setting).', $ctx );
 				return new \WP_Error( 'cfimg_url_build_failed', 'Could not build delivery URL.' );
 			}
-			$this->store_meta( $post_id, $target, $att_cf_id, $url, $att_sig );
+			$this->store_meta( $post_id, $target, $behavior, $att_cf_id, $url, $att_sig );
 			$logs->push( 'info', 'Reused existing CF image from attachment cache.', $ctx );
 			return true;
 		}
@@ -101,6 +112,10 @@ class SyncEngine {
 		}
 
 		if ( ! $needs_upload ) {
+			if ( ! empty( $target['id_meta'] ) && ! $this->should_store_cf_id_on_post( $behavior ) ) {
+				delete_post_meta( $post_id, $target['id_meta'] );
+			}
+
 			// URL might still need regenerating if preset changed but image didn't.
 			$this->maybe_update_url( $post_id, $stored_cfid, $mapping );
 			return true;
@@ -160,7 +175,7 @@ class SyncEngine {
 		}
 
 		// 9. Store results on post.
-		$this->store_meta( $post_id, $target, $cf_image_id, $url, $new_sig );
+		$this->store_meta( $post_id, $target, $behavior, $cf_image_id, $url, $new_sig );
 
 		$logs->push( 'info', 'Synced successfully. CF ID: ' . $cf_image_id . ', URL written to: ' . ( $target['url_meta'] ?? 'none' ), $ctx );
 
@@ -271,14 +286,16 @@ class SyncEngine {
 	 *
 	 * @param int                  $post_id    Post ID.
 	 * @param array<string, mixed> $target     Target config from mapping.
+	 * @param array<string, mixed> $behavior   Behavior config from mapping.
 	 * @param string               $cf_id      Cloudflare image ID.
 	 * @param string               $url        Delivery URL.
 	 * @param string               $signature  File signature.
 	 */
-	private function store_meta( int $post_id, array $target, string $cf_id, string $url, string $signature ): void {
+	private function store_meta( int $post_id, array $target, array $behavior, string $cf_id, string $url, string $signature ): void {
 		$logs     = new LogsRepo();
 		$settings = ( new SettingsRepo() )->get();
 		$debug    = ! empty( $settings['debug'] );
+		$store_cf_id_on_post = $this->should_store_cf_id_on_post( $behavior );
 
 		if ( ! empty( $target['url_meta'] ) && $url !== '' ) {
 			update_post_meta( $post_id, $target['url_meta'], $url );
@@ -299,13 +316,27 @@ class SyncEngine {
 			}
 		}
 
-		if ( ! empty( $target['id_meta'] ) && $cf_id !== '' ) {
+		if ( ! empty( $target['id_meta'] ) && $cf_id !== '' && $store_cf_id_on_post ) {
 			update_post_meta( $post_id, $target['id_meta'], $cf_id );
+		} elseif ( ! empty( $target['id_meta'] ) && ! $store_cf_id_on_post ) {
+			delete_post_meta( $post_id, $target['id_meta'] );
 		}
 
 		if ( ! empty( $target['sig_meta'] ) && $signature !== '' ) {
 			update_post_meta( $post_id, $target['sig_meta'], $signature );
 		}
+	}
+
+	/**
+	 * Whether the mapping should store the Cloudflare image ID on the post.
+	 *
+	 * Defaults to true when the flag is missing for backward compatibility.
+	 *
+	 * @param array<string, mixed> $behavior Behavior config from mapping.
+	 * @return bool
+	 */
+	private function should_store_cf_id_on_post( array $behavior ): bool {
+		return ! array_key_exists( 'store_cf_id_on_post', $behavior ) || ! empty( $behavior['store_cf_id_on_post'] );
 	}
 
 	/**
