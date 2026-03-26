@@ -32,8 +32,13 @@ composer.lock
 # Dev tools inside plugin dir (should not ship)
 plugin/composer.json
 plugin/composer.lock
+plugin/composer.phar
 plugin/phpcs.xml.dist
+plugin/phpunit.xml.dist
 plugin/vendor/
+
+# PHPUnit cache
+.phpunit.result.cache
 
 # npm
 package-lock.json
