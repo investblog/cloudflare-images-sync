@@ -114,6 +114,7 @@ class SyncEngine {
 		if ( ! $needs_upload ) {
 			if ( ! empty( $target['id_meta'] ) && ! $this->should_store_cf_id_on_post( $behavior ) ) {
 				delete_post_meta( $post_id, $target['id_meta'] );
+				$logs->push( 'debug', 'Removed CF ID from post meta (store_cf_id_on_post disabled).', $ctx );
 			}
 
 			// URL might still need regenerating if preset changed but image didn't.
@@ -320,6 +321,7 @@ class SyncEngine {
 			update_post_meta( $post_id, $target['id_meta'], $cf_id );
 		} elseif ( ! empty( $target['id_meta'] ) && ! $store_cf_id_on_post ) {
 			delete_post_meta( $post_id, $target['id_meta'] );
+			$logs->push( 'debug', 'Removed CF ID from post meta (store_cf_id_on_post disabled).', array( 'post_id' => $post_id ) );
 		}
 
 		if ( ! empty( $target['sig_meta'] ) && $signature !== '' ) {
